@@ -1,0 +1,41 @@
+{% set setup_data = load_setup_py_data() %}
+package:
+  name: thaifin
+  version: {{ setup_data['version'] }}
+
+source:
+  git_rev: {{ setup_data['version'] }}
+  git_url: https://github.com/CircleOnCircles/thaifin.git
+
+build:
+  number: 0
+  skip: true  # [win and py27 or win32]
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  build:
+    - python
+    - setuptools
+    - pip
+    - poetry
+  run:
+    - python
+    - pip >=20.0.2
+    - conda-forge::ete3 >=3.1.1
+    - bioconda::pysam >=0.15.2
+    - conda-forge::rocksdb >=6.10.1
+    - conda-forge::python-rocksdb >=0.7.0
+    - conda-forge::xopen >=0.9.0
+    - tqdm>=4.45.0
+
+test:
+  imports:
+    - sam2lca
+
+
+about:
+  home: https://github.com/CircleOnCircles/thaifin
+  license: ISC
+  summary: 'A Python library for access thai stock fundamental data up to 10+ years.'
+
+# Build using: conda build -c conda-forge .
