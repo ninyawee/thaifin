@@ -1,47 +1,67 @@
-{% set version = "0.2.1" %}
+{% set name = "thaifin" %}
+{% set version = "0.2.2" %}
+
 package:
-  name: thaifin
-  version: {{ version }}
+  name: "{{ name|lower }}"
+  version: "{{ version }}"
+
+#source:
+#  path: ../
 
 source:
-  git_rev: {{ version }}
-  git_url: https://github.com/CircleOnCircles/thaifin.git
+  url: "https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz"
+  sha256: 2b384dfe3ff153a3cf62133ee742740f0eebe33ec3452a4c9026a8b0e034ce2e
 
 build:
   number: 0
-  skip: true  # [win and py27 or win32]
-  script: {{ PYTHON }} -m poetry install
+#  script: "{{ PYTHON }} -m poetry config virtualenvs.create false && {{ PYTHON }} -m poetry install --no-root --no-dev"
+  script: "{{ PYTHON }} -m pip install --no-deps . -vv"
 
 requirements:
-  build:
-    - python
-    - setuptools
-    - pip
-    - poetry
+  host:
+    - arrow >=0.16.0,<0.17.0
+    - beautifulsoup4 >=4.9.1,<5.0.0
+    - cachetools >=4.2.1,<5.0.0
+    - furl >=2.1.0,<3.0.0
+    - fuzzywuzzy >=0.18.0,<0.19.0
+    - lxml >=4.5.1,<5.0.0
+    - numpy >=1.19.5,<2.0.0
+    - pandas >=1.0.5,<2.0.0
+    - pip >=21.0.2
+    - pydantic >=1.6.1,<2.0.0
+    - python >=3.8
+    - requests >=2.24.0,<3.0.0
+    - tenacity >=6.3.1,<7.0.0
   run:
-    - python >= 3.8
-    - pip >=20.0.2
-    - beautifulsoup4
-    - requests
-    - lxml
-    - furl
-    - pydantic
-    - arrow
-    - fuzzywuzzy
-    - python-Levenshtein
-    - pandas
-    - cachetools
-    - tenacity
+    - arrow >=0.16.0,<0.17.0
+    - beautifulsoup4 >=4.9.1,<5.0.0
+    - cachetools >=4.2.1,<5.0.0
+    - furl >=2.1.0,<3.0.0
+    - fuzzywuzzy >=0.18.0,<0.19.0
+    - lxml >=4.5.1,<5.0.0
+    - numpy >=1.19.5,<2.0.0
+    - pandas >=1.0.5,<2.0.0
+    - pydantic >=1.6.1,<2.0.0
+    - python
+    - requests >=2.24.0,<3.0.0
+    - tenacity >=6.3.1,<7.0.0
 
 test:
   imports:
     - thaifin
-
+    - thaifin.models
+    - thaifin.sources
 
 about:
   home: https://github.com/CircleOnCircles/thaifin
   license: ISC
-  license_file: LICENSE.md
-  summary: A Python library for access thai stock fundamental data up to 10+ years.
+  license_family: OTHER
+  summary: "A Python library for access thai stock fundamental data up to 10+ years."
+  doc_url: https://circleoncircles.github.io/thaifin/thaifin.html
 
-# Build using: conda build -c conda-forge .
+extra:
+  recipe-maintainers:
+    - CircleOnCircles
+
+# Example: https://github.com/conda-forge/dolang-feedstock/blob/master/recipe/meta.yaml
+# https://github.com/EconForge/dolang.py/blob/master/conda/meta.yaml
