@@ -2,8 +2,8 @@
 
 ## Changelog for v1.0 📜
 
-- **Column Naming Convention** 📛: All column names in the API have been updated to use snake_case to align with Python naming conventions.
-- **Python Compatibility** 🐍: The library is now compatible with Python versions 3.11 and above, ensuring better performance and newer features from the latest Python release.
+- **Column Naming Convention** 📛: All column names in the API have been updated to use snake_case 
+- **Python Compatibility** 🐍: The library is now compatible with Python versions 3.11 and above, ensuring better performance and newer features from the latest Python release. Google Colab user might have dificulty on 3.10.
 
 > The same author as [PythaiNAV](https://github.com/CircleOnCircles/pythainav)
 
