@@ -1,5 +1,10 @@
 # thaifin: ข้อมูลพื้นฐานหุ้น ง่ายแค่สามบรรทัด
 
+## Changelog for v1.0 📜
+
+- **Column Naming Convention** 📛: All column names in the API have been updated to use snake_case to align with Python naming conventions.
+- **Python Compatibility** 🐍: The library is now compatible with Python versions 3.11 and above, ensuring better performance and newer features from the latest Python release.
+
 > The same author as [PythaiNAV](https://github.com/CircleOnCircles/pythainav)
 
  [**Documentation**](https://circleoncircles.github.io/thaifin/thaifin.html)
