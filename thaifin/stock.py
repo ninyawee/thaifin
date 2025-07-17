@@ -1,13 +1,16 @@
 import arrow
 import pandas as pd
 from fuzzywuzzy import process
+from uuid import UUID
 
 from thaifin.sources.finnomena import get_financial_sheet
 from thaifin.sources.finnomena import get_stock_list
 
+
 class Stock:
     """
-    Represents a stock with methods to search, list, and retrieve detailed financial information.
+    Represents a stock with methods to search, list, and retrieve detailed
+    financial information.
     """
 
     @classmethod
@@ -20,10 +23,12 @@ class Stock:
             limit (int): The maximum number of results to return.
 
         Returns:
-            list[Stock]: A list of Stock objects corresponding to the top matches.
+            list[Stock]: A list of Stock objects corresponding to the top
+            matches.
         """
         list_ = get_stock_list().data
-        # since th_name and en_name are identical, we only search against th_name
+        # since th_name and en_name are identical, we only search against
+        # th_name
         search_against = {x.th_name: x for x in list_}
         search_result = process.extract(company_name, search_against, limit=limit)
         return [cls(s[0].name) for s in search_result]
@@ -48,7 +53,8 @@ class Stock:
             symbol (str): The stock symbol to search for.
 
         Returns:
-            StockData: The stock data object corresponding to the given symbol.
+            StockData: The stock data object corresponding to the given
+            symbol.
         """
         list_ = get_stock_list().data
         return next(obj for obj in list_ if obj.name == symbol)
@@ -62,7 +68,8 @@ class Stock:
         """
         symbol = symbol.upper()
         self.info = self.find_symbol(symbol)
-        self.fundamental = get_financial_sheet(self.info.security_id).data
+        self.fundamental = get_financial_sheet(
+            UUID(self.info.security_id)).data
         self.updated = arrow.utcnow()
 
     @property
@@ -83,7 +90,7 @@ class Stock:
         Returns:
             str: The English name of the company.
         """
-        return self.info.enName
+        return self.info.en_name
 
     @property
     def thai_company_name(self):
@@ -93,7 +100,7 @@ class Stock:
         Returns:
             str: The Thai name of the company.
         """
-        return self.info.thName
+        return self.info.th_name
 
     @property
     def quarter_dataframe(self):
@@ -103,7 +110,8 @@ class Stock:
         Returns:
             pd.DataFrame: The DataFrame containing quarterly financial data.
         """
-        df = pd.DataFrame([s.model_dump(exclude={"security_id"}) for s in self.fundamental])
+        df = pd.DataFrame([s.model_dump(exclude={"security_id"}) for s in
+                          self.fundamental])
         # Quarter 9 means yearly values
         df = df[df.quarter != 9]
         df["Time"] = df.fiscal.astype(str) + "Q" + df.quarter.astype(str)

@@ -16,7 +16,7 @@
 ### Core Framework
 
 - **Main API**: Single `Stock` class with intuitive methods (`Stock.search()`, `Stock.list_symbol()`)
-- **Data Sources**: Primary source is Finnomena API, with secondary sources from SET and Settrade
+- **Data Sources**: Uses Finnomena API as the single data source
 - **Data Format**: Returns pandas DataFrames for easy analysis and visualization
 - **Python Version**: Requires Python 3.11+ for modern features and performance
 
@@ -28,7 +28,7 @@
 - `pydantic>=2.7.0` - Data validation and parsing
 - `cachetools>=5.0.0` - 24-hour TTL caching to reduce server load
 - `tenacity>=8.0.0` - Robust API calls with exponential backoff retry
-- `beautifulsoup4>=4.12.0` & `lxml>=5.0.0` - Web scraping for SET/Settrade data
+- `beautifulsoup4>=4.12.0` & `lxml>=5.0.0` - HTML parsing capabilities
 - `fuzzywuzzy>=0.18.0` - Company name fuzzy search
 - `arrow>=1.3.0` - Date/time handling
 - `furl>=2.1.0` - URL manipulation
@@ -55,11 +55,9 @@ thaifin/
 │   ├── stock.py               # Main Stock API class
 │   ├── models/                # Pydantic data models
 │   └── sources/               # Data source implementations
-│       ├── finnomena/         # Primary data source
-│       │   ├── api.py        # API client with caching/retry
-│       │   └── model.py      # Response models
-│       ├── set.py            # SET (Stock Exchange) scraper
-│       └── settrade.py       # Settrade data source
+│       └── finnomena/         # Primary data source
+│           ├── api.py        # API client with caching/retry
+│           └── model.py      # Response models
 ├── tests/                     # Test suite
 │   ├── public_internet_tests/ # Integration tests requiring internet
 │   └── sample_data/          # Test data and fixtures
@@ -113,9 +111,7 @@ yearly_data = stock.yearly_dataframe      # Pandas DataFrame
 
 ### Data Sources Architecture
 
-1. **Finnomena** (Primary): Complete financial statements via REST API
-2. **SET**: Beta values via web scraping
-3. **Settrade**: Dividend information via HTML table parsing
+1. **Finnomena**: Complete financial statements via REST API (single data source)
 
 ## 🔧 Maintenance & Operations
 
