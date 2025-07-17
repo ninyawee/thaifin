@@ -8,17 +8,18 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
         with:
-          python-version: 3.9
-      - name: Install and configure Poetry
-        uses: snok/install-poetry@v1.1.1
-        with:
-          version: 1.1.4
-          virtualenvs-create: false
-          virtualenvs-in-project: false
-      - name: publish to pypi
+          version: "latest"
+      - name: Set up Python
+        run: uv python install 3.11
+      - name: Install dependencies
+        run: uv sync
+      - name: Build package
+        run: uv build
+      - name: Publish to PyPI
         env:
-          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
-        run: poetry publish --build
+          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_TOKEN }}
+        run: uv publish
