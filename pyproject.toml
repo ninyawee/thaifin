@@ -22,6 +22,7 @@ dependencies = [
     "python-levenshtein>=0.27.1",
     "types-cachetools>=6.1.0.20250717",
     "pandas-stubs>=2.3.0.250703",
+    "ruff>=0.12.4",
 ]
 
 [project.optional-dependencies]
@@ -47,3 +48,6 @@ dev = [
     "pytest>=8.4.1",
     "tqdm>=4.67.1",
 ]
+
+[tool.mypy]
+check_untyped_defs = true

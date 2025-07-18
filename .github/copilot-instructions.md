@@ -146,6 +146,9 @@ just docs    # Generate documentation with pdoc
 6. **Use bullet points** (•) for better readability
 7. **Include relevant emojis** for visual organization
 8. **Keep descriptions concise** but informative
+9. **Use proper line breaks** for readability in tools like GitHub:
+   - Separate sections with blank lines.
+   - Use `\n` for line breaks in terminal commands.
 
 ### Key Files for AI Understanding
 

@@ -95,7 +95,7 @@ class Stock:
     
 if __name__ == "__main__":
     # Example usage
-    stock = Stock("ptt")
+    stock = Stock("ptt") # Automatically converts to uppercase
     print(stock.company_name)
     print(stock.thai_company_name)
     print(stock.quarter_dataframe)
