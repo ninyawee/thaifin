@@ -1,7 +1,7 @@
 from cachetools import cached, TTLCache
 from tenacity import retry, stop_after_attempt, wait_exponential
 import httpx
-from typing import Optional, List
+from typing import List
 
 from thaifin.sources.thai_securities_data.models import MetaData, SecurityData
 # Base URL for Thai Securities Data API

@@ -15,6 +15,8 @@ from .models import (
     SecurityData,
 )
 
+from .service import ThaiSecuritiesDataService
+
 __all__ = [
     # API functions
     "get_meta_data",
@@ -23,4 +25,7 @@ __all__ = [
     # Data models
     "MetaData",
     "SecurityData",
+    
+    # Service class
+    "ThaiSecuritiesDataService",
 ]

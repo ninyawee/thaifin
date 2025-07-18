@@ -5,7 +5,9 @@ from thaifin.sources.finnomena.model import (
     ListingDatum,
     QuarterFinancialSheetDatum
 )
+from thaifin.sources.thai_securities_data.models import SecurityData, MetaData
 from thaifin.sources.finnomena import FinnomenaService
+from thaifin.sources.thai_securities_data import ThaiSecuritiesDataService
 
 class Stock:
 
@@ -18,38 +20,37 @@ class Stock:
         """
         symbol_upper: str = symbol.upper()
         self.info: ListingDatum = FinnomenaService().get_stock(symbol_upper)
+        self.info_th: SecurityData = ThaiSecuritiesDataService().get_stock(symbol_upper)
         self.fundamental: list[QuarterFinancialSheetDatum] = FinnomenaService().get_financial_sheet(symbol_upper)
         self.updated = arrow.utcnow()
-
-    @property
-    def symbol(self) -> str:
+        
+    class SafeProperty:
+        """ Descriptor for safely accessing attributes with a default value.
+        This allows for cleaner access to attributes that may not always be present.
+        Usage:
+        symbol = SafeProperty('info', 'symbol')
+        thai_company_name = SafeProperty('info_th', 'name')
         """
-        The stock symbol.
+        def __init__(self, obj_attr: str, field_attr: str, default: str = '-'):
+            self.obj_attr = obj_attr
+            self.field_attr = field_attr
+            self.default = default
+        
+        def __get__(self, instance, owner):
+            if instance is None:
+                return self
+            obj = getattr(instance, self.obj_attr)
+            value = getattr(obj, self.field_attr, None)
+            return value if value else self.default
 
-        Returns:
-            str: The symbol of the stock.
-        """
-        return self.info.name
-
-    @property
-    def company_name(self) -> str:
-        """
-        The English name of the company.
-
-        Returns:
-            str: The English name of the company.
-        """
-        return self.info.en_name
-
-    @property
-    def thai_company_name(self) -> str:
-        """
-        The Thai name of the company.
-
-        Returns:
-            str: The Thai name of the company.
-        """
-        return self.info.th_name
+    symbol = SafeProperty('info', 'symbol')
+    company_name = SafeProperty('info', 'en_name')
+    thai_company_name = SafeProperty('info_th', 'name')
+    thai_market = SafeProperty('info_th', 'market')
+    thai_industry = SafeProperty('info_th', 'industry')
+    thai_sector = SafeProperty('info_th', 'sector')
+    thai_address = SafeProperty('info_th', 'address')
+    website = SafeProperty('info_th', 'web')
 
     @property
     def quarter_dataframe(self) -> pd.DataFrame:
@@ -98,5 +99,10 @@ if __name__ == "__main__":
     stock = Stock("ptt") # Automatically converts to uppercase
     print(stock.company_name)
     print(stock.thai_company_name)
+    print(stock.thai_market)
+    print(stock.thai_industry)
+    print(stock.thai_sector)
+    print(stock.thai_address)
+    print(stock.website)
     print(stock.quarter_dataframe)
     print(stock.yearly_dataframe)
