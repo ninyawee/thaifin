@@ -100,12 +100,14 @@ stocks = Stock.search('จัสมิน', limit=5)
 symbols = Stock.list_symbol()  # ['PTT', 'KBANK', 'SCB', ...]
 
 # Create stock instance with language support
-stock_en = Stock('PTT', language='en')  # English metadata
-stock_th = Stock('PTT', language='th')  # Thai metadata
+stock_en = Stock('PTT', language='en')  # English metadata and financial data
+stock_th = Stock('PTT', language='th')  # Thai metadata and financial data
 
-# Access financial data (from Finnomena API)
-quarterly_data = stock_en.quarter_dataframe  # Pandas DataFrame
-yearly_data = stock_en.yearly_dataframe      # Pandas DataFrame
+# Access financial data (from Finnomena API) - supports both languages
+quarterly_data_en = stock_en.quarter_dataframe  # English column names
+quarterly_data_th = stock_th.quarter_dataframe  # Thai column names
+yearly_data_en = stock_en.yearly_dataframe      # English column names  
+yearly_data_th = stock_th.yearly_dataframe      # Thai column names
 
 # Access company metadata (from Thai Securities Data API)
 print(stock_en.company_name)    # "PTT PUBLIC COMPANY LIMITED"
@@ -117,24 +119,29 @@ print(stock_en.market)          # Market (SET/mai)
 
 ### Financial Data Structure
 
-**QuarterFinancialSheetDatum** contains 38+ financial metrics:
-- **Basic Info**: security_id, fiscal, quarter
-- **Profitability**: revenue, net_profit, gross_profit, gpm, npm
-- **Financial Ratios**: roe, roa, debt_to_equity, price_earning_ratio
-- **Per Share**: earning_per_share, book_value_per_share, dividend_yield
-- **Cash Flow**: operating_activities, investing_activities, financing_activities
-- **Growth**: revenue_yoy, net_profit_yoy, earning_per_share_yoy (Year-over-Year)
-- **Market Data**: close, mkt_cap, ev_per_ebit_da
+**QuarterFinancialSheetDatum** contains 38+ financial metrics with full Thai language support:
+- **Basic Info**: security_id, fiscal, quarter (English) | รหัสหลักทรัพย์, ปีการเงิน, ไตรมาส (Thai)
+- **Profitability**: revenue, net_profit, gross_profit, gpm, npm (English) | รายได้รวม, กำไรสุทธิ, กำไรขั้นต้น, อัตรากำไรขั้นต้น (%), อัตรากำไรสุทธิ (%) (Thai)
+- **Financial Ratios**: roe, roa, debt_to_equity, price_earning_ratio (English) | ROE (%), ROA (%), หนี้สิน/ทุน (เท่า), P/E (เท่า) (Thai)
+- **Per Share**: earning_per_share, book_value_per_share, dividend_yield (English) | กำไรต่อหุ้น (EPS), มูลค่าหุ้นทางบัญชีต่อหุ้น (บาท), อัตราส่วนเงินปันผลตอบแทน (%) (Thai)
+- **Cash Flow**: operating_activities, investing_activities, financing_activities (English) | กระแสเงินสด จากการดำเนินงาน, กระแสเงินสด จากการลงทุน, กระแสเงินสด จากกิจกรรมทางการเงิน (Thai)
+- **Growth**: revenue_yoy, net_profit_yoy, earning_per_share_yoy (Year-over-Year) (English) | รายได้รวม การเติบโตเทียบปีก่อนหน้า (%), กำไรสุทธิ การเติบโตเทียบปีก่อนหน้า (%), EPS การเติบโตเทียบปีก่อนหน้า (%) (Thai)
+- **Market Data**: close, mkt_cap, ev_per_ebit_da (English) | ราคาล่าสุด (บาท), มูลค่าหลักทรัพย์ตามราคาตลาด (ล้านบาท), EV / EBITDA (Thai)
 
 ### Data Sources Architecture
 
 1. **Thai Securities Data API**: Company metadata, multilingual support (English/Thai), market classification, industry/sector data via GitHub raw files
-2. **Finnomena API**: Complete financial statements, quarterly/yearly data, 38+ financial metrics via REST API
+2. **Finnomena API**: Complete financial statements, quarterly/yearly data, 38+ financial metrics with full Thai language support via REST API
 
 **Data Flow:**
-- Stock metadata (company name, industry, sector, market) → Thai Securities Data API
-- Financial data (revenue, profit, ratios, cash flow) → Finnomena API
-- Both sources combined in single `Stock` class for seamless user experience
+- Stock metadata (company name, industry, sector, market) → Thai Securities Data API (supports EN/TH)
+- Financial data (revenue, profit, ratios, cash flow) → Finnomena API (supports EN/TH field names)
+- Both sources combined in single `Stock` class for seamless bilingual user experience
+
+**Language Support:**
+- English: Returns Pydantic models with English field names
+- Thai: Returns dictionaries with authentic Thai field names from Finnomena website
+- Language parameter controls both metadata and financial data output format
 
 ## 🔧 Maintenance & Operations
 
@@ -196,11 +203,11 @@ uv remove package_name             # Remove dependency
 - **README.md**: User-facing documentation and usage examples
 - **pyproject.toml**: Dependencies and project configuration
 - **thaifin/__init__.py**: Public API exports (Stock class)
-- **thaifin/stock.py**: Main API implementation with DataFrame methods
-- **thaifin/sources/finnomena/**: Primary data source implementation
+- **thaifin/stock.py**: Main API implementation with DataFrame methods and Thai language support
+- **thaifin/sources/finnomena/**: Primary data source implementation with Thai language mapping
 - **thaifin/sources/thai_securities_data/**: Company metadata source implementation
 - **tests/public_internet_tests/**: Real-world usage patterns and integration tests
-- **samples/**: Interactive examples and usage patterns
+- **samples/**: Interactive examples and usage patterns including Thai language examples
 
 ### Code Organization Rules
 

@@ -7,9 +7,6 @@ import pandas as pd
 from fuzzywuzzy import process
 from typing import List
 
-from thaifin.sources.finnomena.model import (
-    QuarterFinancialSheetDatum
-)
 from thaifin.sources.thai_securities_data.models import SecurityData
 from thaifin.sources.finnomena import FinnomenaService
 from thaifin.sources.thai_securities_data import ThaiSecuritiesDataService
@@ -27,7 +24,7 @@ class Stock:
         symbol_upper: str = symbol.upper()
         self.language = language
         self.info: SecurityData = ThaiSecuritiesDataService().get_stock(symbol_upper, language=language)
-        self.fundamental: list[QuarterFinancialSheetDatum] = FinnomenaService().get_financial_sheet(symbol_upper)
+        self.fundamental = FinnomenaService().get_financial_sheet(symbol_upper, language=language)
         self.updated = arrow.utcnow()
         
     class SafeProperty:
@@ -102,13 +99,26 @@ class Stock:
         Returns:
             pd.DataFrame: The DataFrame containing quarterly financial data.
         """
-        df = pd.DataFrame([s.model_dump(exclude={"security_id"}) for s in self.fundamental])
-        # Quarter 9 means yearly values
-        df = df[df.quarter != 9]
-        df["Time"] = df.fiscal.astype(str) + "Q" + df.quarter.astype(str)
+        if self.language == 'th' and isinstance(self.fundamental[0], dict):
+            # Handle Thai data (list of dicts)
+            df = pd.DataFrame(self.fundamental)
+            # Remove security_id column if it exists
+            security_id_col = 'รหัสหลักทรัพย์'
+            if security_id_col in df.columns:
+                df = df.drop(columns=[security_id_col])
+        else:
+            # Handle English data (list of Pydantic models)
+            df = pd.DataFrame([s.model_dump(exclude={"security_id"}) for s in self.fundamental])
+        
+        # Quarter 9 means yearly values - filter for quarterly data only
+        quarter_col = 'ไตรมาส' if self.language == 'th' else 'quarter'
+        fiscal_col = 'ปีการเงิน' if self.language == 'th' else 'fiscal'
+        
+        df = df[df[quarter_col] != 9]
+        df["Time"] = df[fiscal_col].astype(str) + "Q" + df[quarter_col].astype(str)
         df = df.set_index("Time")
         df.index = pd.to_datetime(df.index).to_period("Q")
-        df = df.drop(columns=["fiscal", "quarter"])
+        df = df.drop(columns=[fiscal_col, quarter_col])
         return df
 
     @property
@@ -119,12 +129,25 @@ class Stock:
         Returns:
             pd.DataFrame: The DataFrame containing yearly financial data.
         """
-        df = pd.DataFrame([s.model_dump(exclude={"security_id"}) for s in self.fundamental])
-        # Quarter 9 means yearly values
-        df = df[df.quarter == 9]
-        df = df.set_index("fiscal")
+        if self.language == 'th' and isinstance(self.fundamental[0], dict):
+            # Handle Thai data (list of dicts)
+            df = pd.DataFrame(self.fundamental)
+            # Remove security_id column if it exists
+            security_id_col = 'รหัสหลักทรัพย์'
+            if security_id_col in df.columns:
+                df = df.drop(columns=[security_id_col])
+        else:
+            # Handle English data (list of Pydantic models)
+            df = pd.DataFrame([s.model_dump(exclude={"security_id"}) for s in self.fundamental])
+        
+        # Quarter 9 means yearly values - filter for yearly data only
+        quarter_col = 'ไตรมาส' if self.language == 'th' else 'quarter'
+        fiscal_col = 'ปีการเงิน' if self.language == 'th' else 'fiscal'
+        
+        df = df[df[quarter_col] == 9]
+        df = df.set_index(fiscal_col)
         df.index = pd.to_datetime(df.index, format="%Y").to_period("Y")
-        df = df.drop(columns=["quarter"])
+        df = df.drop(columns=[quarter_col])
         return df
 
     def __repr__(self) -> str:
@@ -157,8 +180,18 @@ if __name__ == "__main__":
     print("ตลาดหลักทรัพย์:", stock_th.market)
     print()
     
-    print("Quarter DataFrame:")
+    # Financial data examples
+    print("=== English Financial Data ===")
+    print("Quarter DataFrame (English):")
     print(stock_en.quarter_dataframe.head())
     print()
-    print("Yearly DataFrame:")
+    print("Yearly DataFrame (English):")
     print(stock_en.yearly_dataframe.head())
+    print()
+    
+    print("=== Thai Financial Data ===")
+    print("Quarter DataFrame (Thai):")
+    print(stock_th.quarter_dataframe.head())
+    print()
+    print("Yearly DataFrame (Thai):")
+    print(stock_th.yearly_dataframe.head())
