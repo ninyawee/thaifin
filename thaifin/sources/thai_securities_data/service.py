@@ -5,8 +5,8 @@ from thaifin.sources.thai_securities_data.models import MetaData, SecurityData
 class ThaiSecuritiesDataService:
     def __init__(self):
         pass
-    
-    def get_meta_data(self) -> MetaData:
+
+    def get_meta_data(self, language: str = "en") -> MetaData:
         """
         Fetch metadata for Thai Securities Data.
         
@@ -16,9 +16,9 @@ class ThaiSecuritiesDataService:
         Raises:
             ValueError: If there is an issue with the API response or data validation.
         """
-        return get_meta_data()
-    
-    def get_stock_list(self) -> list[SecurityData]:
+        return get_meta_data(language=language)
+
+    def get_stock_list(self, language: str = "en") -> list[SecurityData]:
         """
         Fetch the list of stocks from Thai Securities Data API.
         
@@ -28,13 +28,13 @@ class ThaiSecuritiesDataService:
         Raises:
             ValueError: If there is an issue with the API response or data validation.
         """
-        securities_data: list[SecurityData] = get_securities_data()
+        securities_data: list[SecurityData] = get_securities_data(language=language)
         if not securities_data:
             raise ValueError("No securities data available in the Thai Securities Data API response.")
         
         return securities_data
-    
-    def get_stock(self, symbol: str) -> SecurityData:
+
+    def get_stock(self, symbol: str, language: str = "en") -> SecurityData:
         """
         Get stock data for a given symbol.
         
@@ -47,7 +47,7 @@ class ThaiSecuritiesDataService:
         Raises:
             ValueError: If the stock with the given symbol is not found.
         """
-        stock_list: list[SecurityData] = self.get_stock_list()
+        stock_list: list[SecurityData] = self.get_stock_list(language=language)
         try:
             stock: SecurityData = next(s for s in stock_list if s.symbol == symbol)
         except StopIteration:
