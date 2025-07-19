@@ -1,3 +1,19 @@
+"""
+This module provides a service layer for interacting with the Finnomena API.
+
+Classes:
+- FinnomenaService: A service class that provides methods to fetch stock lists and financial sheets.
+
+Features:
+- Abstracts API calls into easy-to-use methods.
+- Handles errors and validations for API responses.
+- Provides utility methods for fetching stock data and financial sheets by symbol.
+
+Dependencies:
+- thaifin.sources.finnomena.api: For making API calls.
+- thaifin.sources.finnomena.model: For data models used in API responses.
+"""
+
 from pydantic import UUID4
 from thaifin.sources.finnomena.api import get_stock_list, get_financial_sheet
 from thaifin.sources.finnomena.model import FinancialSheetsResponse, FinnomenaListResponse, ListingDatum, QuarterFinancialSheetDatum
@@ -94,4 +110,3 @@ if __name__ == "__main__":
         print(f"Financial Sheet for {symbol}:", financial_sheet)
     except Exception as e:
         print(f"Error fetching financial sheet for {symbol}:", e)
-    

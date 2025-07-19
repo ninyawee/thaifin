@@ -1,3 +1,20 @@
+"""
+This module provides functions to interact with the Finnomena API.
+
+Functions:
+- get_financial_sheet: Fetches financial sheet data for a given security ID.
+- get_stock_list: Retrieves a list of stocks available on the Finnomena platform.
+
+Features:
+- Caching: Results are cached for 24 hours to reduce API calls.
+- Retry Logic: Automatically retries failed requests with exponential backoff.
+
+Dependencies:
+- cachetools: For caching API responses.
+- tenacity: For retrying failed API calls.
+- httpx: For making HTTP requests.
+"""
+
 from cachetools import cached, TTLCache
 from pydantic import UUID4
 from tenacity import retry, stop_after_attempt, wait_exponential

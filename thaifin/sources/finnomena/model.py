@@ -7,7 +7,9 @@ Classes:
 - QuarterFinancialSheetDatum: Represents detailed financial data for a stock for a specific quarter.
 - FinancialSheetsResponse: Represents the response structure for quarterly financial sheet data.
 
-These models ensure type safety and validation for data retrieved from the Finnomena API.
+Features:
+- Ensures type safety and validation for data retrieved from the Finnomena API.
+- Provides a structured representation of financial and stock listing data.
 """
 
 from typing import Optional

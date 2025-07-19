@@ -1,3 +1,21 @@
+"""
+This module provides functions to interact with the Thai Securities Data API.
+
+Functions:
+- get_meta_data(language: str) -> MetaData: Fetches metadata for Thai securities, including market and sector data.
+- get_securities_data(language: str) -> List[SecurityData]: Retrieves detailed securities data from the API.
+
+Features:
+- Caching: Results are cached for 24 hours to reduce API calls.
+- Retry Logic: Automatically retries failed requests with exponential backoff.
+
+Dependencies:
+- cachetools: For caching API responses.
+- tenacity: For implementing retry logic.
+- httpx: For making HTTP requests.
+- pydantic: For data validation and parsing.
+"""
+
 from cachetools import cached, TTLCache
 from tenacity import retry, stop_after_attempt, wait_exponential
 import httpx
