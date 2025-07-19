@@ -16,9 +16,11 @@
 ### Core Framework
 
 - **Main API**: Single `Stock` class with intuitive methods (`Stock.search()`, `Stock.list_symbol()`)
-- **Data Sources**: Uses Finnomena API as the single data source
+- **Data Sources**: Uses dual data sources - Thai Securities Data API for company metadata and Finnomena API for financial data
+- **Language Support**: Full multilingual support (English/Thai) for company names and metadata
 - **Data Format**: Returns pandas DataFrames for easy analysis and visualization
 - **Python Version**: Requires Python 3.11+ for modern features and performance
+- **Package Manager**: Uses `uv` for dependency management and execution
 
 ### Dependencies
 
@@ -55,9 +57,14 @@ thaifin/
 │   ├── stock.py               # Main Stock API class
 │   ├── models/                # Pydantic data models
 │   └── sources/               # Data source implementations
-│       └── finnomena/         # Primary data source
-│           ├── api.py        # API client with caching/retry
-│           └── model.py      # Response models
+│       ├── finnomena/         # Financial data source
+│       │   ├── api.py        # API client with caching/retry
+│       │   ├── model.py      # Response models
+│       │   └── service.py    # Service layer abstraction
+│       └── thai_securities_data/  # Company metadata source
+│           ├── api.py        # API client for Thai Securities Data
+│           ├── service.py    # Service layer abstraction
+│           └── models/       # SecurityData and MetaData models
 ├── tests/                     # Test suite
 │   ├── public_internet_tests/ # Integration tests requiring internet
 │   └── sample_data/          # Test data and fixtures
@@ -92,10 +99,20 @@ stocks = Stock.search('จัสมิน', limit=5)
 # Get all available stock symbols
 symbols = Stock.list_symbol()  # ['PTT', 'KBANK', 'SCB', ...]
 
-# Create stock instance and access data
-stock = Stock('PTT')
-quarterly_data = stock.quarter_dataframe  # Pandas DataFrame
-yearly_data = stock.yearly_dataframe      # Pandas DataFrame
+# Create stock instance with language support
+stock_en = Stock('PTT', language='en')  # English metadata
+stock_th = Stock('PTT', language='th')  # Thai metadata
+
+# Access financial data (from Finnomena API)
+quarterly_data = stock_en.quarter_dataframe  # Pandas DataFrame
+yearly_data = stock_en.yearly_dataframe      # Pandas DataFrame
+
+# Access company metadata (from Thai Securities Data API)
+print(stock_en.company_name)    # "PTT PUBLIC COMPANY LIMITED"
+print(stock_th.company_name)    # "บริษัท ปตท. จำกัด (มหาชน)"
+print(stock_en.industry)        # Industry classification
+print(stock_en.sector)          # Sector classification
+print(stock_en.market)          # Market (SET/mai)
 ```
 
 ### Financial Data Structure
@@ -111,7 +128,13 @@ yearly_data = stock.yearly_dataframe      # Pandas DataFrame
 
 ### Data Sources Architecture
 
-1. **Finnomena**: Complete financial statements via REST API (single data source)
+1. **Thai Securities Data API**: Company metadata, multilingual support (English/Thai), market classification, industry/sector data via GitHub raw files
+2. **Finnomena API**: Complete financial statements, quarterly/yearly data, 38+ financial metrics via REST API
+
+**Data Flow:**
+- Stock metadata (company name, industry, sector, market) → Thai Securities Data API
+- Financial data (revenue, profit, ratios, cash flow) → Finnomena API
+- Both sources combined in single `Stock` class for seamless user experience
 
 ## 🔧 Maintenance & Operations
 
@@ -128,6 +151,24 @@ yearly_data = stock.yearly_dataframe      # Pandas DataFrame
 ```bash
 just models  # Generate Pydantic models from JSON samples
 just docs    # Generate documentation with pdoc
+```
+
+### Python Execution
+
+**Always use `uv run` for Python execution:**
+```bash
+uv run python script.py           # Run Python scripts
+uv run python -c "code here"      # Execute inline Python code
+uv run pytest                     # Run tests
+uv run jupyter notebook           # Start Jupyter
+```
+
+**Development workflow:**
+```bash
+uv install                        # Install dependencies
+uv run python -m thaifin          # Run package as module
+uv add package_name                # Add new dependency
+uv remove package_name             # Remove dependency
 ```
 
 ## 🧪 Testing Strategy
@@ -157,6 +198,7 @@ just docs    # Generate documentation with pdoc
 - **thaifin/__init__.py**: Public API exports (Stock class)
 - **thaifin/stock.py**: Main API implementation with DataFrame methods
 - **thaifin/sources/finnomena/**: Primary data source implementation
+- **thaifin/sources/thai_securities_data/**: Company metadata source implementation
 - **tests/public_internet_tests/**: Real-world usage patterns and integration tests
 - **samples/**: Interactive examples and usage patterns
 

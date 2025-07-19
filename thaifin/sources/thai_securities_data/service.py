@@ -1,3 +1,20 @@
+"""
+Module: service.py
+
+This module provides the ThaiSecuritiesDataService class, which acts as a service layer for interacting with the Thai Securities Data API. 
+It includes methods to fetch metadata, retrieve a list of stocks, and get detailed stock information by symbol.
+
+Classes:
+    ThaiSecuritiesDataService: A service class for fetching and processing Thai securities data.
+
+Example Usage:
+    service = ThaiSecuritiesDataService()
+    meta_data = service.get_meta_data()
+    stock_list = service.get_stock_list()
+    stock_data = service.get_stock("AOT")
+
+"""
+
 from thaifin.sources.thai_securities_data.api import get_meta_data, get_securities_data
 from thaifin.sources.thai_securities_data.models import MetaData, SecurityData
 
