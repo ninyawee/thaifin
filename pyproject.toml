@@ -1,38 +1,53 @@
-[tool.poetry]
+[project]
 name = "thaifin"
 version = "1.0.0"
 description = "A Python library for access thai stock fundamental data up to 10+ years."
-authors = ["Nutchanon Ninyawee <me@nutchanon.org>"]
-license = "ISC"
+authors = [{name = "Nutchanon Ninyawee", email = "me@nutchanon.org"}]
+license = {text = "ISC"}
 readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "beautifulsoup4>=4.12.0",
+    "requests>=2.31.0",
+    "lxml>=5.0.0",
+    "furl>=2.1.0",
+    "arrow>=1.3.0",
+    "fuzzywuzzy>=0.18.0",
+    "pandas>=2.0.0",
+    "numpy>=1.24.0",
+    "cachetools>=5.0.0",
+    "tenacity>=8.0.0",
+    "httpx>=0.27.0",
+    "pydantic>=2.7.0",
+    "python-levenshtein>=0.27.1",
+    "types-cachetools>=6.1.0.20250717",
+    "pandas-stubs>=2.3.0.250703",
+    "ruff>=0.12.4",
+]
 
-[tool.poetry.dependencies]
-python = "^3.11"
-beautifulsoup4 = "^4.9.1"
-requests = "^2.24.0"
-lxml = "^4.5.1"
-furl = "^2.1.0"
-arrow = "^0.16.0"
-fuzzywuzzy = "^0.18.0"
-python-Levenshtein = { version = "^0.12.0", optional = true }
-pandas = "^1.0.5"
-numpy = "^1.19.5"
-cachetools = "^4.2.1"
-tenacity = "^6.3.1"
-httpx = "^0.27.0"
-pydantic = "^2.7.1"
-
-[tool.poetry.extras]
-full = ["python-levenshtein"]
-
-[tool.poetry.group.dev.dependencies]
-pytest = "^8.2.0"
-jupyter = "^1.0.0"
-tqdm = "^4.47.0"
-openpyxl = "^3.0.4"
-lxml = "^4.5.1"
-pdoc = "^3.0.1"
+[project.optional-dependencies]
+full = ["python-levenshtein>=0.25.0"]
+dev = [
+    "pytest>=8.0.0",
+    "jupyter>=1.0.0",
+    "tqdm>=4.60.0",
+    "openpyxl>=3.1.0",
+    "lxml>=5.0.0",
+    "pdoc>=14.0.0",
+]
 
 [build-system]
-requires = ["poetry>=0.12"]
-build-backend = "poetry.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "jupyter>=1.1.1",
+    "openpyxl>=3.1.5",
+    "pdoc>=15.0.4",
+    "pytest>=8.4.1",
+    "tqdm>=4.67.1",
+]
+
+[tool.mypy]
+check_untyped_defs = true
