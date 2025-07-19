@@ -5,7 +5,7 @@ from thaifin.sources.finnomena.model import (
     ListingDatum,
     QuarterFinancialSheetDatum
 )
-from thaifin.sources.thai_securities_data.models import SecurityData, MetaData
+from thaifin.sources.thai_securities_data.models import SecurityData
 from thaifin.sources.finnomena import FinnomenaService
 from thaifin.sources.thai_securities_data import ThaiSecuritiesDataService
 

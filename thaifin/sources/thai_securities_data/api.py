@@ -9,7 +9,7 @@ base_url = "https://raw.githubusercontent.com/lumduan/thai-securities-data/main"
 
 @cached(cache=TTLCache(maxsize=1000, ttl=24 * 60 * 60))  # 24 hours cache
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10), reraise=True)
-def get_meta_data() -> MetaData:
+def get_meta_data(language: str) -> MetaData:
     """
     Get metadata for Thai Securities Data.
     
@@ -19,8 +19,11 @@ def get_meta_data() -> MetaData:
     Raises:
         ValueError: If there is an issue with the API response or data validation.
     """
-    url = f"{base_url}/metadata.json"
+    if language not in ['en', 'th']:
+        raise ValueError("Language must be either 'en' or 'th'.")
     
+    url = f"{base_url}/metadata_{language}.json"
+
     try:
         with httpx.Client() as client:
             response = client.get(url)
@@ -36,7 +39,7 @@ def get_meta_data() -> MetaData:
 
 @cached(cache=TTLCache(maxsize=1000, ttl=24 * 60 * 60))  # 24 hours cache
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1  , min=4, max=10), reraise=True)
-def get_securities_data() -> List[SecurityData]:
+def get_securities_data(language: str) -> List[SecurityData]:
     """
     Get securities data from Thai Securities Data API.
     
@@ -46,7 +49,10 @@ def get_securities_data() -> List[SecurityData]:
     Raises:
         ValueError: If there is an issue with the API response or data validation.
     """
-    url = f"{base_url}/thai_securities_all.json"
+    if language not in ['en', 'th']:
+        raise ValueError("Language must be either 'en' or 'th'.")
+    
+    url = f"{base_url}/thai_securities_all_{language}.json"
     
     try:
         with httpx.Client() as client:
