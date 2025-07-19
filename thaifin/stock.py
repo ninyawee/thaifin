@@ -1,102 +1,101 @@
+"""
+This module provides the `Stock` class, which serves as the main API for accessing Thai stock fundamental data.
+"""
+
 import arrow
 import pandas as pd
 from fuzzywuzzy import process
+from typing import List
 
-from thaifin.sources.finnomena import get_financial_sheet
-from thaifin.sources.finnomena import get_stock_list
+from thaifin.sources.finnomena.model import (
+    QuarterFinancialSheetDatum
+)
+from thaifin.sources.thai_securities_data.models import SecurityData
+from thaifin.sources.finnomena import FinnomenaService
+from thaifin.sources.thai_securities_data import ThaiSecuritiesDataService
 
 class Stock:
-    """
-    Represents a stock with methods to search, list, and retrieve detailed financial information.
-    """
 
-    @classmethod
-    def search(cls, company_name: str, limit: int = 5):
+    def __init__(self, symbol: str, language: str = "en"):
         """
-        Search for stocks matching the given company name.
-
-        Args:
-            company_name (str): The name of the company to search for.
-            limit (int): The maximum number of results to return.
-
-        Returns:
-            list[Stock]: A list of Stock objects corresponding to the top matches.
-        """
-        list_ = get_stock_list().data
-        # since th_name and en_name are identical, we only search against th_name
-        search_against = {x.th_name: x for x in list_}
-        search_result = process.extract(company_name, search_against, limit=limit)
-        return [cls(s[0].name) for s in search_result]
-
-    @staticmethod
-    def list_symbol():
-        """
-        List all stock symbols.
-
-        Returns:
-            list[str]: A list of all stock symbols.
-        """
-        list_ = get_stock_list().data
-        return [s.name for s in list_]
-
-    @staticmethod
-    def find_symbol(symbol: str):
-        """
-        Find a stock by its symbol.
-
-        Args:
-            symbol (str): The stock symbol to search for.
-
-        Returns:
-            StockData: The stock data object corresponding to the given symbol.
-        """
-        list_ = get_stock_list().data
-        return next(obj for obj in list_ if obj.name == symbol)
-
-    def __init__(self, symbol: str):
-        """
-        Initialize a Stock object with the given symbol.
+        Initialize a Stock object with the given symbol and language.
 
         Args:
             symbol (str): The stock symbol.
+            language (str): Language preference ("en" or "th"). Defaults to "en".
         """
-        symbol = symbol.upper()
-        self.info = self.find_symbol(symbol)
-        self.fundamental = get_financial_sheet(self.info.security_id).data
+        symbol_upper: str = symbol.upper()
+        self.language = language
+        self.info: SecurityData = ThaiSecuritiesDataService().get_stock(symbol_upper, language=language)
+        self.fundamental: list[QuarterFinancialSheetDatum] = FinnomenaService().get_financial_sheet(symbol_upper)
         self.updated = arrow.utcnow()
-
-    @property
-    def symbol(self):
+        
+    class SafeProperty:
+        """ Descriptor for safely accessing attributes with a default value.
+        This allows for cleaner access to attributes that may not always be present.
+        Usage:
+        symbol = SafeProperty('info', 'symbol')
+        company_name = SafeProperty('info', 'name')
         """
-        The stock symbol.
+        def __init__(self, obj_attr: str, field_attr: str, default: str = '-'):
+            self.obj_attr = obj_attr
+            self.field_attr = field_attr
+            self.default = default
+        
+        def __get__(self, instance, owner):
+            if instance is None:
+                return self
+            obj = getattr(instance, self.obj_attr)
+            value = getattr(obj, self.field_attr, None)
+            return value if value else self.default
+
+    symbol = SafeProperty('info', 'symbol')
+    company_name = SafeProperty('info', 'name')
+    industry = SafeProperty('info', 'industry')
+    sector = SafeProperty('info', 'sector')
+    market = SafeProperty('info', 'market')
+    address = SafeProperty('info', 'address')
+    website = SafeProperty('info', 'web')
+
+    @classmethod
+    def search(cls, company_name: str, limit: int = 5) -> List['Stock']:
+        """
+        Search for stocks by company name using fuzzy matching.
+
+        Args:
+            company_name (str): The company name to search for.
+            limit (int): Maximum number of results to return. Defaults to 5.
 
         Returns:
-            str: The symbol of the stock.
+            List[Stock]: List of Stock objects matching the search criteria.
         """
-        return self.info.name
+        # Get stock list from Thai Securities Data API
+        thai_service = ThaiSecuritiesDataService()
+        stock_list = thai_service.get_stock_list()
+        
+        # Create search dictionary combining Thai and English names
+        search_against = {f"{stock.name}": stock for stock in stock_list}
+        
+        # Perform fuzzy search
+        search_result = process.extract(company_name, search_against.keys(), limit=limit)
+        
+        # Return Stock objects for the best matches
+        return [cls(search_against[result[0]].symbol) for result in search_result]
 
-    @property
-    def company_name(self):
+    @staticmethod
+    def list_symbol() -> List[str]:
         """
-        The English name of the company.
+        Get a list of all available stock symbols.
 
         Returns:
-            str: The English name of the company.
+            List[str]: List of stock symbols.
         """
-        return self.info.enName
+        thai_service = ThaiSecuritiesDataService()
+        stock_list = thai_service.get_stock_list()
+        return [stock.symbol for stock in stock_list]
 
     @property
-    def thai_company_name(self):
-        """
-        The Thai name of the company.
-
-        Returns:
-            str: The Thai name of the company.
-        """
-        return self.info.thName
-
-    @property
-    def quarter_dataframe(self):
+    def quarter_dataframe(self) -> pd.DataFrame:
         """
         The quarterly financial data as a pandas DataFrame.
 
@@ -113,7 +112,7 @@ class Stock:
         return df
 
     @property
-    def yearly_dataframe(self):
+    def yearly_dataframe(self) -> pd.DataFrame:
         """
         The yearly financial data as a pandas DataFrame.
 
@@ -128,7 +127,7 @@ class Stock:
         df = df.drop(columns=["quarter"])
         return df
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """
         String representation of the Stock object.
 
@@ -136,3 +135,30 @@ class Stock:
             str: A string representation showing the stock symbol and last update time.
         """
         return f'<Stock "{self.symbol}" - updated {self.updated.humanize()}>'
+    
+if __name__ == "__main__":
+    # Example usage - English (default)
+    stock_en = Stock("ptt")
+    print("=== English Version ===")
+    print("Symbol:", stock_en.symbol)
+    print("Company Name:", stock_en.company_name)
+    print("Industry:", stock_en.industry)
+    print("Sector:", stock_en.sector)
+    print("Market:", stock_en.market)
+    print()
+    
+    # Example usage - Thai
+    stock_th = Stock("ptt", language="th")
+    print("=== Thai Version ===")
+    print("ชื่อหุ้น:", stock_th.symbol)
+    print("ชื่อบริษัท:", stock_th.company_name)
+    print("อุตสาหกรรม:", stock_th.industry)
+    print("กลุ่มอุตสาหกรรม:", stock_th.sector)
+    print("ตลาดหลักทรัพย์:", stock_th.market)
+    print()
+    
+    print("Quarter DataFrame:")
+    print(stock_en.quarter_dataframe.head())
+    print()
+    print("Yearly DataFrame:")
+    print(stock_en.yearly_dataframe.head())
