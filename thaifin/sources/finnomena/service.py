@@ -70,16 +70,21 @@ class FinnomenaService:
             return stock.security_id
         raise ValueError(f"Stock with symbol {symbol} not found.")
 
-    def get_financial_sheet(self, symbol: str) -> list[QuarterFinancialSheetDatum]:
+    def get_financial_sheet(self, symbol: str, language: str = 'en') -> list[QuarterFinancialSheetDatum] | list[dict]:
         """
         Fetch financial sheet for a given stock symbol.
 
         Args:
-            security_id (str): The UUID of the security.
+            symbol (str): The stock symbol.
+            language (str): Language for field names ('en' for English, 'th' for Thai). Default is 'en'.
         
         Returns:
-            FinancialSheetsResponse: The financial sheet data for the security.
+            list[QuarterFinancialSheetDatum] | list[dict]: The financial sheet data for the security.
+            Returns Pydantic models for 'en', Thai dictionaries for 'th'.
         """
+        if language not in ['en', 'th']:
+            raise ValueError("Language must be 'en' or 'th'")
+            
         security_id: str = self._get_security_id(symbol)
         security_uuid: UUID4 = UUID4(security_id)
         result: FinancialSheetsResponse = get_financial_sheet(security_uuid)
@@ -90,6 +95,10 @@ class FinnomenaService:
         
         fundamental_data: list[QuarterFinancialSheetDatum] = result.data
 
+        if language == 'th':
+            # Convert to Thai dictionaries
+            return [item.to_thai_dict() for item in fundamental_data]
+        
         return fundamental_data
 
 if __name__ == "__main__":
@@ -106,7 +115,10 @@ if __name__ == "__main__":
     # Example for fetching financial sheet
     try:
         symbol = "AOT"  # Example stock symbol
-        financial_sheet: list[QuarterFinancialSheetDatum] = finno_service.get_financial_sheet(symbol)
-        print(f"Financial Sheet for {symbol}:", financial_sheet)
+        financial_sheet_en: list[QuarterFinancialSheetDatum] = finno_service.get_financial_sheet(symbol, language='en')
+        print(f"Financial Sheet for {symbol} (English):", financial_sheet_en)
+        
+        financial_sheet_th: list[dict] = finno_service.get_financial_sheet(symbol, language='th')
+        print(f"Financial Sheet for {symbol} (Thai):", financial_sheet_th)
     except Exception as e:
         print(f"Error fetching financial sheet for {symbol}:", e)

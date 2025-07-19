@@ -1,8 +1,6 @@
-import pytest
 from thaifin.sources.finnomena import get_financial_sheet, get_stock_list
-from thaifin.sources.finnomena.model import FinancialSheetsResponse, StockListingResponse
+from thaifin.sources.finnomena.model import FinancialSheetsResponse, FinnomenaListResponse
 import uuid
-
 
 
 def test_get_financial_sheet_real_api():
@@ -12,7 +10,7 @@ def test_get_financial_sheet_real_api():
     
     # Verify
     assert isinstance(result, FinancialSheetsResponse)
-    assert result.status == True
+    assert result.status
     assert result.statusCode == 200
     assert len(result.data) > 0
 
@@ -21,8 +19,8 @@ def test_get_stock_list_real_api():
     result = get_stock_list()
     
     # Verify
-    assert isinstance(result, StockListingResponse)
-    assert result.status == True
+    assert isinstance(result, FinnomenaListResponse)
+    assert result.status
     assert result.statusCode == 200
     assert len(result.data) > 0
     assert any(stock.name == "PTT" for stock in result.data)  # Assuming 'PTT' is a valid stock name for testing
