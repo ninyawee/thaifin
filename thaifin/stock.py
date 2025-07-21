@@ -21,10 +21,10 @@ class Stock:
             language (str): Language preference ("en" or "th"). Defaults to "en".
         """
         self.symbol_upper: str = symbol.upper()
-        self.language = language
+        self.language: str = language
         self.info: SecurityData = ThaiSecuritiesDataService().get_stock(self.symbol_upper, language=self.language)
-        self.updated = arrow.utcnow()
-        
+        self.updated: arrow.Arrow = arrow.utcnow()
+
     class SafeProperty:
         """ Descriptor for safely accessing attributes with a default value.
         This allows for cleaner access to attributes that may not always be present.
@@ -33,15 +33,15 @@ class Stock:
         company_name = SafeProperty('info', 'name')
         """
         def __init__(self, obj_attr: str, field_attr: str, default: str = '-'):
-            self.obj_attr = obj_attr
-            self.field_attr = field_attr
-            self.default = default
-        
+            self.obj_attr: str = obj_attr
+            self.field_attr: str = field_attr
+            self.default: str = default
+
         def __get__(self, instance, owner):
             if instance is None:
                 return self
-            obj = getattr(instance, self.obj_attr)
-            value = getattr(obj, self.field_attr, None)
+            obj: SecurityData = getattr(instance, self.obj_attr)
+            value: str | None = getattr(obj, self.field_attr, None)
             return value if value else self.default
 
     symbol = SafeProperty('info', 'symbol')
@@ -66,8 +66,8 @@ class Stock:
         
         if self.language == 'th' and isinstance(fundamental[0], dict):
             # Handle Thai data (list of dicts)
-            df = pd.DataFrame(fundamental)
-            
+            df: pd.DataFrame = pd.DataFrame(fundamental)
+
             # Remove security_id column if it exists
             security_id_col = 'รหัสหลักทรัพย์'
             if security_id_col in df.columns:
@@ -76,7 +76,7 @@ class Stock:
         else:
             # For English, fundamental is a list of QuarterFinancialSheetDatum
             # Convert all to dicts excluding security_id
-            dicts = []
+            dicts:list[dict] = []
             for item in fundamental:
                 if isinstance(item, QuarterFinancialSheetDatum):
                     dicts.append(item.model_dump(exclude={"security_id"}))
@@ -86,8 +86,8 @@ class Stock:
                     
         
         # Quarter 9 means yearly values - filter for quarterly data only
-        quarter_col = 'ไตรมาส' if self.language == 'th' else 'quarter'
-        fiscal_col = 'ปีการเงิน' if self.language == 'th' else 'fiscal'
+        quarter_col:str = 'ไตรมาส' if self.language == 'th' else 'quarter'
+        fiscal_col:str = 'ปีการเงิน' if self.language == 'th' else 'fiscal'
         df = df[df[quarter_col] != 9]
 
         if self.language == 'th':
@@ -109,10 +109,10 @@ class Stock:
         Returns:
             pd.DataFrame: The DataFrame containing yearly financial data.
         """
-        fundamental = FinnomenaService().get_financial_sheet(self.symbol_upper, language=self.language)
+        fundamental:list[QuarterFinancialSheetDatum] | list[dict] = FinnomenaService().get_financial_sheet(self.symbol_upper, language=self.language)
         if self.language == 'th' and isinstance(fundamental[0], dict):
             # Handle Thai data (list of dicts)
-            df = pd.DataFrame(fundamental)
+            df:pd.DataFrame = pd.DataFrame(fundamental)
             # Remove security_id column if it exists
             security_id_col = 'รหัสหลักทรัพย์'
             if security_id_col in df.columns:
@@ -120,7 +120,7 @@ class Stock:
         else:
             # For English, fundamental is a list of QuarterFinancialSheetDatum
             # Convert all to dicts excluding security_id
-            dicts = []
+            dicts:list[dict] = []
             for item in fundamental:
                 if isinstance(item, QuarterFinancialSheetDatum):
                     dicts.append(item.model_dump(exclude={"security_id"}))
@@ -128,8 +128,8 @@ class Stock:
                     dicts.append({k: v for k, v in item.items() if k != 'security_id'})
             df = pd.DataFrame(dicts)
         # Quarter 9 means yearly values - filter for yearly data only
-        quarter_col = 'ไตรมาส' if self.language == 'th' else 'quarter'
-        fiscal_col = 'ปีการเงิน' if self.language == 'th' else 'fiscal'
+        quarter_col:str = 'ไตรมาส' if self.language == 'th' else 'quarter'
+        fiscal_col:str = 'ปีการเงิน' if self.language == 'th' else 'fiscal'
         df = df[df[quarter_col] == 9]
         df = df.set_index(fiscal_col)
         df.index = pd.to_datetime(df.index, format="%Y").to_period("Y")

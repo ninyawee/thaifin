@@ -54,12 +54,18 @@ class Stocks:
             language = cls._detect_language(query)
         
         # Get stock list
-        thai_service = ThaiSecuritiesDataService()
-        stock_list = thai_service.get_stock_list(language=language)
+        thai_service: ThaiSecuritiesDataService = ThaiSecuritiesDataService()
+        stock_list: list[SecurityData] = thai_service.get_stock_list(language=language)
+
+        if not stock_list:
+            raise ValueError("No stock data available.")
+        # If query is empty, return top N stocks
+        if not query.strip():
+            return [Stock(stock.symbol, language=language) for stock in stock_list[:limit]]     
         
         # Multi-stage search with weighted scoring
-        matches = cls._smart_search(query, stock_list, limit)
-        
+        matches: list[SecurityData] = cls._smart_search(query, stock_list, limit)
+
         # Return Stock objects
         return [Stock(stock.symbol, language=language) for stock in matches]
 
@@ -78,8 +84,12 @@ class Stocks:
             >>> symbols = Stocks.list()
             >>> print(symbols[:5])  # ['AAAV', 'ABBE', 'ABC', 'ABICO', 'ABPIF']
         """
-        thai_service = ThaiSecuritiesDataService()
-        stock_list = thai_service.get_stock_list(language=language)
+        thai_service: ThaiSecuritiesDataService = ThaiSecuritiesDataService()
+        stock_list: list[SecurityData] = thai_service.get_stock_list(language=language)
+        
+        if not stock_list:
+            raise ValueError("No stock data available.")
+        
         return [stock.symbol for stock in stock_list]
 
     @classmethod
@@ -98,10 +108,13 @@ class Stocks:
             >>> print(df.head())
             >>> df_th = Stocks.list_with_names(language="th")
         """
-        thai_service = ThaiSecuritiesDataService()
-        stock_list = thai_service.get_stock_list(language=language)
+        thai_service: ThaiSecuritiesDataService = ThaiSecuritiesDataService()
+        stock_list: list[SecurityData] = thai_service.get_stock_list(language=language)
         
-        data = []
+        if not stock_list:
+            raise ValueError("No stock data available.")
+
+        data: list[dict] = []
         for stock in stock_list:
             data.append({
                 'symbol': stock.symbol,
@@ -129,10 +142,16 @@ class Stocks:
             >>> banking_stocks = Stocks.filter_by_sector('Banking')
             >>> energy_stocks = Stocks.filter_by_sector('พลังงาน', language='th')
         """
-        thai_service = ThaiSecuritiesDataService()
-        stock_list = thai_service.get_stock_list(language=language)
+        thai_service: ThaiSecuritiesDataService = ThaiSecuritiesDataService()
+        stock_list: list[SecurityData] = thai_service.get_stock_list(language=language)
+        sector = sector.strip()
         
-        return [stock.symbol for stock in stock_list 
+        if not sector:
+            raise ValueError("Sector cannot be empty.")
+        if not stock_list:
+            raise ValueError("No stock data available.")
+
+        return [stock.symbol for stock in stock_list
                 if stock.sector and sector.lower() in stock.sector.lower()]
 
     @classmethod
@@ -151,10 +170,16 @@ class Stocks:
             >>> set_stocks = Stocks.filter_by_market('SET')
             >>> mai_stocks = Stocks.filter_by_market('mai')
         """
-        thai_service = ThaiSecuritiesDataService()
-        stock_list = thai_service.get_stock_list(language=language)
-        
-        return [stock.symbol for stock in stock_list 
+        thai_service: ThaiSecuritiesDataService = ThaiSecuritiesDataService()
+        stock_list: list[SecurityData] = thai_service.get_stock_list(language=language)
+        market = market.strip()
+        if not market:
+            raise ValueError("Market cannot be empty.")
+
+        if not stock_list:
+            raise ValueError("No stock data available.")
+
+        return [stock.symbol for stock in stock_list
                 if stock.market and market.upper() == stock.market.upper()]
 
     @staticmethod
@@ -169,7 +194,7 @@ class Stocks:
             str: "th" if Thai characters detected, "en" otherwise
         """
         # Thai Unicode range: \u0E00-\u0E7F
-        thai_pattern = re.compile(r'[\u0E00-\u0E7F]')
+        thai_pattern: re.Pattern = re.compile(r'[\u0E00-\u0E7F]')
         return "th" if thai_pattern.search(text) else "en"
 
     @staticmethod
@@ -185,13 +210,13 @@ class Stocks:
         Returns:
             List[SecurityData]: Ranked list of matching stocks
         """
-        query_lower = query.lower()
-        scored_matches = []
+        query_lower:str = query.lower()
+        scored_matches:list = []
         
         for stock in stock_list:
-            score = 0
-            symbol_lower = stock.symbol.lower()
-            name_lower = stock.name.lower() if stock.name else ""
+            score:float = 0
+            symbol_lower:str = stock.symbol.lower()
+            name_lower:str = stock.name.lower() if stock.name else ""
             
             # Stage 1: Exact symbol match (highest priority)
             if symbol_lower == query_lower:
@@ -233,9 +258,9 @@ if __name__ == "__main__":
     for stock in cp_stocks:
         print(f"  {stock.symbol}: {stock.company_name}")
     
-    print("\n2. Search for 'ธนาคาร' (bank in Thai):")
-    bank_stocks = Stocks.search('ธนาคาร', limit=3)
-    for stock in bank_stocks:
+    print("\n2. Search for 'ซีพี' (CP in Thai):")
+    cp_stocks_th = Stocks.search('ซีพี', limit=3)
+    for stock in cp_stocks_th:
         print(f"  {stock.symbol}: {stock.company_name}")
     
     # List examples
@@ -244,6 +269,13 @@ if __name__ == "__main__":
     print("\n4. First 5 stocks with details:")
     df = Stocks.list_with_names()
     print(df.head())
+
+    # List examples in Thai
+    print("\n7. รายชื่อหุ้นทั้งหมด (ภาษาไทย):", Stocks.list(language='th')[:5])
+
+    print("\n8. ข้อมูลหุ้น 5 ตัวแรก (ภาษาไทย):")
+    df_th = Stocks.list_with_names(language='th')
+    print(df_th.head())
     
     # Filter examples
     print("\n5. Banking sector stocks:")

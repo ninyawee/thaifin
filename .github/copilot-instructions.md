@@ -15,7 +15,7 @@
 
 ### Core Framework
 
-- **Main API**: Single `Stock` class with intuitive methods (`Stock.search()`, `Stock.list_symbol()`)
+- **Main API**: Dual-class architecture - `Stock` class for individual operations, `Stocks` class for collection operations
 - **Data Sources**: Uses dual data sources - Thai Securities Data API for company metadata and Finnomena API for financial data
 - **Language Support**: Full multilingual support (English/Thai) for company names and metadata
 - **Data Format**: Returns pandas DataFrames for easy analysis and visualization
@@ -39,10 +39,12 @@
 - `pytest>=8.0.0` - Testing framework
 - `pdoc>=14.0.0` - Documentation generation
 - `jupyter>=1.0.0` - Interactive development
+- `rapidfuzz>=3.0.0` - Enhanced fuzzy search for Stocks class
 
 ### Design Principles
 
 - **Simplicity**: Minimal code required for common tasks
+- **Separation of Concerns**: Stock (individual) vs Stocks (collection) operations
 - **Robustness**: Auto-retry with exponential backoff, comprehensive error handling
 - **Performance**: Intelligent caching (24hr TTL) to minimize API calls
 - **Data Quality**: Pydantic models ensure type safety and validation
@@ -53,8 +55,9 @@
 ```
 thaifin/
 ├── thaifin/                    # Main package
-│   ├── __init__.py            # Exports Stock class
-│   ├── stock.py               # Main Stock API class
+│   ├── __init__.py            # Exports Stock and Stocks classes
+│   ├── stock.py               # Individual Stock API class
+│   ├── stocks.py              # Collection operations (search, list, filter)
 │   ├── models/                # Pydantic data models
 │   └── sources/               # Data source implementations
 │       ├── finnomena/         # Financial data source
@@ -67,6 +70,7 @@ thaifin/
 │           └── models/       # SecurityData and MetaData models
 ├── tests/                     # Test suite
 │   ├── public_internet_tests/ # Integration tests requiring internet
+│   ├── test_stocks_api.py    # Tests for new Stocks class
 │   └── sample_data/          # Test data and fixtures
 ├── samples/                   # Usage examples and notebooks
 ├── docs/                     # Generated documentation (pdoc)
@@ -91,14 +95,24 @@ thaifin/
 ### Core API Usage
 
 ```python
-from thaifin import Stock
+from thaifin import Stock, Stocks
 
-# Search for stocks by company name (fuzzy matching)
-stocks = Stock.search('จัสมิน', limit=5)
+# Collection operations with Stocks class
+# Search for stocks by company name with smart language detection
+stocks = Stocks.search('จัสมิน', limit=5)  # Thai search
+cp_stocks = Stocks.search('cp', limit=5)   # English search
 
 # Get all available stock symbols
-symbols = Stock.list_symbol()  # ['PTT', 'KBANK', 'SCB', ...]
+symbols = Stocks.list()  # ['PTT', 'KBANK', 'SCB', ...]
 
+# Enhanced listing with company details
+stock_df = Stocks.list_with_names()  # DataFrame with symbol, name, industry, sector, market
+
+# Filter stocks by sector or market
+banking_stocks = Stocks.filter_by_sector('Banking')
+mai_stocks = Stocks.filter_by_market('mai')
+
+# Individual stock operations with Stock class
 # Create stock instance with language support
 stock_en = Stock('PTT', language='en')  # English metadata and financial data
 stock_th = Stock('PTT', language='th')  # Thai metadata and financial data
@@ -142,6 +156,57 @@ print(stock_en.market)          # Market (SET/mai)
 - English: Returns Pydantic models with English field names
 - Thai: Returns dictionaries with authentic Thai field names from Finnomena website
 - Language parameter controls both metadata and financial data output format
+
+## 🔧 API Architecture & Usage Patterns
+
+### Class Responsibilities
+
+**Stock Class (Individual Operations)**:
+- Company information and metadata access
+- Financial data retrieval (quarter_dataframe, yearly_dataframe)
+- Individual stock properties (symbol, company_name, sector, etc.)
+- Language-specific data formatting
+
+**Stocks Class (Collection Operations)**:
+- Smart search with Thai/English auto-detection
+- Stock listing and filtering capabilities
+- Market and sector-based filtering
+- Enhanced data presentation with DataFrames
+
+### Usage Examples
+
+```python
+# Collection operations - use Stocks class
+from thaifin import Stocks
+
+# Smart search (auto-detects Thai vs English)
+results = Stocks.search('ธนาคาร')  # Thai: finds banks
+results = Stocks.search('bank')   # English: finds banks
+results = Stocks.search('cp')     # Finds CP-related stocks
+
+# Listing and filtering
+all_symbols = Stocks.list()
+detailed_df = Stocks.list_with_names()
+banking_stocks = Stocks.filter_by_sector('Banking')
+mai_stocks = Stocks.filter_by_market('mai')
+
+# Individual operations - use Stock class
+from thaifin import Stock
+
+stock = Stock('PTT', language='en')
+print(stock.company_name)  # Company info
+df = stock.quarter_dataframe  # Financial data
+```
+
+### Migration from Old API
+
+**Deprecated (Old API)**:
+- `Stock.search()` → Use `Stocks.search()`
+- `Stock.list_symbol()` → Use `Stocks.list()`
+
+**Current (New API)**:
+- Collection operations: `Stocks` class
+- Individual operations: `Stock` class
 
 ## 🔧 Maintenance & Operations
 
@@ -202,11 +267,13 @@ uv remove package_name             # Remove dependency
 
 - **README.md**: User-facing documentation and usage examples
 - **pyproject.toml**: Dependencies and project configuration
-- **thaifin/__init__.py**: Public API exports (Stock class)
-- **thaifin/stock.py**: Main API implementation with DataFrame methods and Thai language support
+- **thaifin/__init__.py**: Public API exports (Stock and Stocks classes)
+- **thaifin/stock.py**: Individual stock operations with DataFrame methods and Thai language support
+- **thaifin/stocks.py**: Collection operations (search, list, filter) with smart language detection
 - **thaifin/sources/finnomena/**: Primary data source implementation with Thai language mapping
 - **thaifin/sources/thai_securities_data/**: Company metadata source implementation
 - **tests/public_internet_tests/**: Real-world usage patterns and integration tests
+- **tests/test_stocks_api.py**: Tests for new Stocks class functionality
 - **samples/**: Interactive examples and usage patterns including Thai language examples
 
 ### Code Organization Rules
