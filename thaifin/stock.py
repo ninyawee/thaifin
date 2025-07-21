@@ -1,11 +1,9 @@
 """
-This module provides the `Stock` class, which serves as the main API for accessing Thai stock fundamental data.
+This module provides the `Stock` class, which serves as the main API for accessing individual Thai stock fundamental data.
 """
 
 import arrow
 import pandas as pd
-from rapidfuzz import process
-from typing import List
 
 from thaifin.sources.finnomena.model import QuarterFinancialSheetDatum
 from thaifin.sources.thai_securities_data.models import SecurityData
@@ -53,43 +51,6 @@ class Stock:
     market = SafeProperty('info', 'market')
     address = SafeProperty('info', 'address')
     website = SafeProperty('info', 'web')
-
-    @classmethod
-    def search(cls, company_name: str, limit: int = 5) -> List['Stock']:
-        """
-        Search for stocks by company name using fuzzy matching.
-
-        Args:
-            company_name (str): The company name to search for.
-            limit (int): Maximum number of results to return. Defaults to 5.
-
-        Returns:
-            List[Stock]: List of Stock objects matching the search criteria.
-        """
-        # Get stock list from Thai Securities Data API
-        thai_service = ThaiSecuritiesDataService()
-        stock_list = thai_service.get_stock_list()
-        
-        # Create search dictionary combining Thai and English names
-        search_against = {f"{stock.name}": stock for stock in stock_list}
-        
-        # Perform fuzzy search
-        search_result = process.extract(company_name, search_against.keys(), limit=limit)
-        
-        # Return Stock objects for the best matches
-        return [cls(search_against[result[0]].symbol) for result in search_result]
-
-    @staticmethod
-    def list_symbol() -> List[str]:
-        """
-        Get a list of all available stock symbols.
-
-        Returns:
-            List[str]: List of stock symbols.
-        """
-        thai_service = ThaiSecuritiesDataService()
-        stock_list = thai_service.get_stock_list()
-        return [stock.symbol for stock in stock_list]
 
     @property
     def quarter_dataframe(self) -> pd.DataFrame:
