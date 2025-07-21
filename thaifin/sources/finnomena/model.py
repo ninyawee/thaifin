@@ -12,7 +12,7 @@ Features:
 - Provides a structured representation of financial and stock listing data.
 """
 
-from typing import Optional
+from typing import Any, Optional
 from pydantic import BaseModel, Field
 
 # Thai field name mappings based on Finnomena website
@@ -120,7 +120,7 @@ class QuarterFinancialSheetDatum(BaseModel):
     asset: Optional[str] = Field(None, description="Total assets.")
     end_of_year_date: Optional[str] = Field(None, description="End of year date.")
 
-    def to_thai_dict(self) -> dict[str, any]:
+    def to_thai_dict(self) -> dict[str, Any]:
         """
         Convert the model to a dictionary with Thai field names.
         
