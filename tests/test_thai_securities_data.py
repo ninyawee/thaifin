@@ -7,12 +7,7 @@ and provides basic validation tests.
 
 import pytest
 from unittest.mock import Mock, patch
-from thaifin.sources.thai_securities_data import (
-    get_stock_list,
-    get_financial_data,
-    get_stock_info,
-    get_market_data
-)
+from thaifin.sources.thai_securities_data import ThaiSecuritiesDataService
 from thaifin.sources.thai_securities_data.stock import ThaiSecuritiesStock
 from thaifin.sources.thai_securities_data.model import (
     StockBasicInfo,

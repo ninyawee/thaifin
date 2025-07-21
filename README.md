@@ -1,8 +1,15 @@
 # thaifin: ข้อมูลพื้นฐานหุ้น ง่ายแค่สามบรรทัด
 
+## Changelog for v1.1 📜
+
+- **API Refactoring** 🏗️: Introduced new `Stocks` class for collection operations (search, list, filter)
+- **Enhanced Search** 🔍: Smart search with Thai/English auto-detection and improved matching algorithm
+- **Better Organization** 📁: `Stock` class now focuses on individual stock operations, `Stocks` class handles collection operations
+- **New Features** ✨: Added filtering by sector and market, enhanced listing with company details
+
 ## Changelog for v1.0 📜
 
-- **Column Naming Convention** 📛: All column names in the API have been updated to use snake_case 
+- **Column Naming Convention** 📛: All column names in the API have been updated to use snake_case
 - **Python Compatibility** 🐍: The library is now compatible with Python versions 3.11 and above, ensuring better performance and newer features from the latest Python release. Google Colab user might have dificulty on 3.10.
 
 > The same author as [PythaiNAV](https://github.com/CircleOnCircles/pythainav)
@@ -28,18 +35,41 @@ $ conda install thaifin
 ```
 
 ```python
-# get all stock symbols
-from thaifin import Stock
+# Import both classes for different use cases
+from thaifin import Stock, Stocks
 
-Stock.list_symbol() 
+# Collection operations with Stocks class
+# Get all stock symbols
+all_symbols = Stocks.list() 
 # ['T', 'A', 'U', 'J', 'W', 'B', 'D', 'S', 'M', 'K', 'EE', ...
 
-top5match = Stock.search('จัสมิน')
+# Smart search with auto language detection
+top5match = Stocks.search('จัสมิน')  # Thai search
 # [<Stock JTS - updated just now>, <Stock JAS - updated just now>, <Stock JASIF - updated just now>, ...
 
+cp_stocks = Stocks.search('cp')  # English search
+# [<Stock CPALL - updated just now>, <Stock CPANEL - updated just now>, <Stock CPAXT - updated just now>, ...
+
+# Get detailed stock list with company info
+stock_df = Stocks.list_with_names()
+#   symbol                                     name                 industry                  sector market
+# 0   24CS  Twenty-Four Con & Supply Public Company Limited  Property & Construction                       -    mai
+# 1     2S                  2S METAL PUBLIC COMPANY LIMITED              Industrials  Steel and Metal Products    SET
+
+# Filter stocks by sector or market
+banking_stocks = Stocks.filter_by_sector('Banking')
+mai_stocks = Stocks.filter_by_market('mai')
+
+# Individual stock operations with Stock class
 stock = Stock('PTT')
 # <Stock PTT - updated just now>
 
+# Access company information
+print(f"Company: {stock.company_name}")
+print(f"Sector: {stock.sector}")
+print(f"Industry: {stock.industry}")
+
+# Get financial data as pandas DataFrames
 stock.quarter_dataframe
 
 #                 Cash            DA  ...  FinancingActivities         Asset
