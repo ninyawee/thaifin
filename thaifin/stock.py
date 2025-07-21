@@ -21,10 +21,9 @@ class Stock:
             symbol (str): The stock symbol.
             language (str): Language preference ("en" or "th"). Defaults to "en".
         """
-        symbol_upper: str = symbol.upper()
+        self.symbol_upper: str = symbol.upper()
         self.language = language
-        self.info: SecurityData = ThaiSecuritiesDataService().get_stock(symbol_upper, language=language)
-        self.fundamental = FinnomenaService().get_financial_sheet(symbol_upper, language=language)
+        self.info: SecurityData = ThaiSecuritiesDataService().get_stock(self.symbol_upper, language=self.language)
         self.updated = arrow.utcnow()
         
     class SafeProperty:
@@ -99,21 +98,20 @@ class Stock:
         Returns:
             pd.DataFrame: The DataFrame containing quarterly financial data.
         """
-        if self.language == 'th' and isinstance(self.fundamental[0], dict):
+        fundamental = FinnomenaService().get_financial_sheet(self.symbol_upper, language=self.language)
+        if self.language == 'th' and isinstance(fundamental[0], dict):
             # Handle Thai data (list of dicts)
-            df = pd.DataFrame(self.fundamental)
+            df = pd.DataFrame(fundamental)
             # Remove security_id column if it exists
             security_id_col = 'รหัสหลักทรัพย์'
             if security_id_col in df.columns:
                 df = df.drop(columns=[security_id_col])
         else:
             # Handle English data (list of Pydantic models)
-            df = pd.DataFrame([s.model_dump(exclude={"security_id"}) for s in self.fundamental])
-        
+            df = pd.DataFrame([s.model_dump(exclude={"security_id"}) for s in fundamental])
         # Quarter 9 means yearly values - filter for quarterly data only
         quarter_col = 'ไตรมาส' if self.language == 'th' else 'quarter'
         fiscal_col = 'ปีการเงิน' if self.language == 'th' else 'fiscal'
-        
         df = df[df[quarter_col] != 9]
         df["Time"] = df[fiscal_col].astype(str) + "Q" + df[quarter_col].astype(str)
         df = df.set_index("Time")
@@ -129,21 +127,20 @@ class Stock:
         Returns:
             pd.DataFrame: The DataFrame containing yearly financial data.
         """
-        if self.language == 'th' and isinstance(self.fundamental[0], dict):
+        fundamental = FinnomenaService().get_financial_sheet(self.symbol_upper, language=self.language)
+        if self.language == 'th' and isinstance(fundamental[0], dict):
             # Handle Thai data (list of dicts)
-            df = pd.DataFrame(self.fundamental)
+            df = pd.DataFrame(fundamental)
             # Remove security_id column if it exists
             security_id_col = 'รหัสหลักทรัพย์'
             if security_id_col in df.columns:
                 df = df.drop(columns=[security_id_col])
         else:
             # Handle English data (list of Pydantic models)
-            df = pd.DataFrame([s.model_dump(exclude={"security_id"}) for s in self.fundamental])
-        
+            df = pd.DataFrame([s.model_dump(exclude={"security_id"}) for s in fundamental])
         # Quarter 9 means yearly values - filter for yearly data only
         quarter_col = 'ไตรมาส' if self.language == 'th' else 'quarter'
         fiscal_col = 'ปีการเงิน' if self.language == 'th' else 'fiscal'
-        
         df = df[df[quarter_col] == 9]
         df = df.set_index(fiscal_col)
         df.index = pd.to_datetime(df.index, format="%Y").to_period("Y")
