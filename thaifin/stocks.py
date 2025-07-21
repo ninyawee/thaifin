@@ -251,37 +251,19 @@ class Stocks:
 if __name__ == "__main__":
     # Example usage
     print("=== Stocks Class Demo ===")
-    
     # Search examples
     print("\n1. Search for 'cp':")
     cp_stocks = Stocks.search('cp', limit=3)
     for stock in cp_stocks:
         print(f"  {stock.symbol}: {stock.company_name}")
-    
     print("\n2. Search for 'ซีพี' (CP in Thai):")
     cp_stocks_th = Stocks.search('ซีพี', limit=3)
     for stock in cp_stocks_th:
         print(f"  {stock.symbol}: {stock.company_name}")
-    
     # List examples
     print("\n3. Total stocks available:", len(Stocks.list()))
-    
     print("\n4. First 5 stocks with details:")
     df = Stocks.list_with_names()
     print(df.head())
-
     # List examples in Thai
-    print("\n7. รายชื่อหุ้นทั้งหมด (ภาษาไทย):", Stocks.list(language='th')[:5])
-
-    print("\n8. ข้อมูลหุ้น 5 ตัวแรก (ภาษาไทย):")
-    df_th = Stocks.list_with_names(language='th')
-    print(df_th.head())
-    
-    # Filter examples
-    print("\n5. Banking sector stocks:")
-    banking = Stocks.filter_by_sector('Banking')
-    print(f"  Found {len(banking)} banking stocks: {banking[:5]}")
-    
-    print("\n6. mai market stocks:")
-    mai_stocks = Stocks.filter_by_market('mai')
-    print(f"  Found {len(mai_stocks)} mai stocks: {mai_stocks[:5]}")
+    print("\n5. รายชื่อหุ้นทั้งหมด (ภาษาไทย):", Stocks.list(language='th')[:5])
