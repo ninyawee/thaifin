@@ -100,25 +100,3 @@ class FinnomenaService:
             return [item.to_thai_dict() for item in fundamental_data]
         
         return fundamental_data
-
-if __name__ == "__main__":
-    # Example usage
-    finno_service = FinnomenaService()
-    
-    # Example for fetching stock list
-    try:
-        stock_list = finno_service.get_stock_list()
-        print("Stock List:", [stock.name for stock in stock_list])
-    except Exception as e:
-        print("Error fetching stock list:", e)
-    
-    # Example for fetching financial sheet
-    try:
-        symbol = "AOT"  # Example stock symbol
-        financial_sheet_en: list[QuarterFinancialSheetDatum] = finno_service.get_financial_sheet(symbol, language='en')
-        print(f"Financial Sheet for {symbol} (English):", financial_sheet_en)
-        
-        financial_sheet_th: list[dict] = finno_service.get_financial_sheet(symbol, language='th')
-        print(f"Financial Sheet for {symbol} (Thai):", financial_sheet_th)
-    except Exception as e:
-        print(f"Error fetching financial sheet for {symbol}:", e)

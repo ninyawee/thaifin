@@ -371,15 +371,6 @@ wheels = [
 ]
 
 [[package]]
-name = "fuzzywuzzy"
-version = "0.18.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/11/4b/0a002eea91be6048a2b5d53c5f1b4dafd57ba2e36eea961d05086d7c28ce/fuzzywuzzy-0.18.0.tar.gz", hash = "sha256:45016e92264780e58972dca1b3d939ac864b78437422beecebb3095f8efd00e8", size = 28888 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/43/ff/74f23998ad2f93b945c0309f825be92e04e0348e062026998b5eefef4c33/fuzzywuzzy-0.18.0-py2.py3-none-any.whl", hash = "sha256:928244b28db720d1e0ee7587acf660ea49d7e4c632569cad4f1cd7e68a5f0993", size = 18272 },
-]
-
-[[package]]
 name = "h11"
 version = "0.16.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1941,7 +1932,6 @@ dependencies = [
     { name = "beautifulsoup4" },
     { name = "cachetools" },
     { name = "furl" },
-    { name = "fuzzywuzzy" },
     { name = "httpx" },
     { name = "lxml" },
     { name = "numpy" },
@@ -1949,6 +1939,7 @@ dependencies = [
     { name = "pandas-stubs" },
     { name = "pydantic" },
     { name = "python-levenshtein" },
+    { name = "rapidfuzz" },
     { name = "requests" },
     { name = "ruff" },
     { name = "tenacity" },
@@ -1983,7 +1974,6 @@ requires-dist = [
     { name = "beautifulsoup4", specifier = ">=4.12.0" },
     { name = "cachetools", specifier = ">=5.0.0" },
     { name = "furl", specifier = ">=2.1.0" },
-    { name = "fuzzywuzzy", specifier = ">=0.18.0" },
     { name = "httpx", specifier = ">=0.27.0" },
     { name = "jupyter", marker = "extra == 'dev'", specifier = ">=1.0.0" },
     { name = "lxml", specifier = ">=5.0.0" },
@@ -1997,6 +1987,7 @@ requires-dist = [
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0.0" },
     { name = "python-levenshtein", specifier = ">=0.27.1" },
     { name = "python-levenshtein", marker = "extra == 'full'", specifier = ">=0.25.0" },
+    { name = "rapidfuzz", specifier = ">=3.13.0" },
     { name = "requests", specifier = ">=2.31.0" },
     { name = "ruff", specifier = ">=0.12.4" },
     { name = "tenacity", specifier = ">=8.0.0" },

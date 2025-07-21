@@ -4,9 +4,10 @@ This module provides the `Stock` class, which serves as the main API for accessi
 
 import arrow
 import pandas as pd
-from fuzzywuzzy import process
+from rapidfuzz import process
 from typing import List
 
+from thaifin.sources.finnomena.model import QuarterFinancialSheetDatum
 from thaifin.sources.thai_securities_data.models import SecurityData
 from thaifin.sources.finnomena import FinnomenaService
 from thaifin.sources.thai_securities_data import ThaiSecuritiesDataService
@@ -98,23 +99,43 @@ class Stock:
         Returns:
             pd.DataFrame: The DataFrame containing quarterly financial data.
         """
-        fundamental = FinnomenaService().get_financial_sheet(self.symbol_upper, language=self.language)
+        fundamental: list[QuarterFinancialSheetDatum] | list[dict] = FinnomenaService().get_financial_sheet(self.symbol_upper, language=self.language)
+        if not fundamental:
+            raise ValueError(f"No financial sheet data available for stock {self.symbol_upper}.")
+        
         if self.language == 'th' and isinstance(fundamental[0], dict):
             # Handle Thai data (list of dicts)
             df = pd.DataFrame(fundamental)
+            
             # Remove security_id column if it exists
             security_id_col = 'รหัสหลักทรัพย์'
             if security_id_col in df.columns:
                 df = df.drop(columns=[security_id_col])
+
         else:
-            # Handle English data (list of Pydantic models)
-            df = pd.DataFrame([s.model_dump(exclude={"security_id"}) for s in fundamental])
+            # For English, fundamental is a list of QuarterFinancialSheetDatum
+            # Convert all to dicts excluding security_id
+            dicts = []
+            for item in fundamental:
+                if isinstance(item, QuarterFinancialSheetDatum):
+                    dicts.append(item.model_dump(exclude={"security_id"}))
+                elif isinstance(item, dict):
+                    dicts.append({k: v for k, v in item.items() if k != 'security_id'})
+            df = pd.DataFrame(dicts)
+                    
+        
         # Quarter 9 means yearly values - filter for quarterly data only
         quarter_col = 'ไตรมาส' if self.language == 'th' else 'quarter'
         fiscal_col = 'ปีการเงิน' if self.language == 'th' else 'fiscal'
         df = df[df[quarter_col] != 9]
-        df["Time"] = df[fiscal_col].astype(str) + "Q" + df[quarter_col].astype(str)
-        df = df.set_index("Time")
+
+        if self.language == 'th':
+            df["ช่วงเวลา"] = df[fiscal_col].astype(str) + "Q" + df[quarter_col].astype(str)
+            df = df.set_index("ช่วงเวลา")
+        else:
+            df["time"] = df[fiscal_col].astype(str) + "Q" + df[quarter_col].astype(str)
+            df = df.set_index("time")
+            
         df.index = pd.to_datetime(df.index).to_period("Q")
         df = df.drop(columns=[fiscal_col, quarter_col])
         return df
@@ -136,8 +157,15 @@ class Stock:
             if security_id_col in df.columns:
                 df = df.drop(columns=[security_id_col])
         else:
-            # Handle English data (list of Pydantic models)
-            df = pd.DataFrame([s.model_dump(exclude={"security_id"}) for s in fundamental])
+            # For English, fundamental is a list of QuarterFinancialSheetDatum
+            # Convert all to dicts excluding security_id
+            dicts = []
+            for item in fundamental:
+                if isinstance(item, QuarterFinancialSheetDatum):
+                    dicts.append(item.model_dump(exclude={"security_id"}))
+                elif isinstance(item, dict):
+                    dicts.append({k: v for k, v in item.items() if k != 'security_id'})
+            df = pd.DataFrame(dicts)
         # Quarter 9 means yearly values - filter for yearly data only
         quarter_col = 'ไตรมาส' if self.language == 'th' else 'quarter'
         fiscal_col = 'ปีการเงิน' if self.language == 'th' else 'fiscal'
