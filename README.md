@@ -1,17 +1,5 @@
 # thaifin: ข้อมูลพื้นฐานหุ้น ง่ายแค่สามบรรทัด
 
-## Changelog for v1.1 📜
-
-- **API Refactoring** 🏗️: Introduced new `Stocks` class for collection operations (search, list, filter)
-- **Enhanced Search** 🔍: Smart search with Thai/English auto-detection and improved matching algorithm
-- **Better Organization** 📁: `Stock` class now focuses on individual stock operations, `Stocks` class handles collection operations
-- **New Features** ✨: Added filtering by sector and market, enhanced listing with company details
-
-## Changelog for v1.0 📜
-
-- **Column Naming Convention** 📛: All column names in the API have been updated to use snake_case
-- **Python Compatibility** 🐍: The library is now compatible with Python versions 3.11 and above, ensuring better performance and newer features from the latest Python release. Google Colab user might have dificulty on 3.10.
-
 > The same author as [PythaiNAV](https://github.com/CircleOnCircles/pythainav)
 
  [**Documentation**](https://circleoncircles.github.io/thaifin/thaifin.html)
