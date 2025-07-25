@@ -1,5 +1,8 @@
 name: Claude Code
 
+permissions:
+  id-token: write
+
 on:
   issue_comment:
     types: [created]
