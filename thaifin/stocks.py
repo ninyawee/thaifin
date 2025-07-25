@@ -17,29 +17,31 @@ if TYPE_CHECKING:
 class Stocks:
     """
     A utility class for working with collections of Thai stocks.
-    
+
     This class provides methods for searching, listing, and filtering stocks.
     For individual stock operations, use the Stock class.
     """
 
     @classmethod
-    def search(cls, query: str, limit: int = 5, language: str = "auto") -> List['Stock']:
+    def search(
+        cls, query: str, limit: int = 5, language: str = "auto"
+    ) -> List["Stock"]:
         """
         Smart search for stocks with Thai/English auto-detection.
-        
+
         Search priority:
         1. Exact symbol match
-        2. Fuzzy symbol matching  
+        2. Fuzzy symbol matching
         3. Company name fuzzy matching
-        
+
         Args:
             query (str): Search term (can be Thai or English)
             limit (int): Maximum number of results to return. Defaults to 5.
             language (str): Language preference ("en", "th", or "auto"). Defaults to "auto".
-            
+
         Returns:
             List[Stock]: List of Stock objects ranked by relevance.
-            
+
         Examples:
             >>> Stocks.search('cp')          # Find CP stocks
             >>> Stocks.search('ซีพี')        # Find CP stocks in Thai
@@ -48,11 +50,11 @@ class Stocks:
         """
         # Import here to avoid circular imports
         from thaifin.stock import Stock
-        
+
         # Auto-detect language if needed
         if language == "auto":
             language = cls._detect_language(query)
-        
+
         # Get stock list
         thai_service: ThaiSecuritiesDataService = ThaiSecuritiesDataService()
         stock_list: list[SecurityData] = thai_service.get_stock_list(language=language)
@@ -61,8 +63,10 @@ class Stocks:
             raise ValueError("No stock data available.")
         # If query is empty, return top N stocks
         if not query.strip():
-            return [Stock(stock.symbol, language=language) for stock in stock_list[:limit]]     
-        
+            return [
+                Stock(stock.symbol, language=language) for stock in stock_list[:limit]
+            ]
+
         # Multi-stage search with weighted scoring
         matches: list[SecurityData] = cls._smart_search(query, stock_list, limit)
 
@@ -73,36 +77,36 @@ class Stocks:
     def list(cls, language: str = "en") -> List[str]:
         """
         Get a list of all available stock symbols.
-        
+
         Args:
             language (str): Language preference ("en" or "th"). Defaults to "en".
-            
+
         Returns:
             List[str]: List of stock symbols.
-            
+
         Examples:
             >>> symbols = Stocks.list()
             >>> print(symbols[:5])  # ['AAAV', 'ABBE', 'ABC', 'ABICO', 'ABPIF']
         """
         thai_service: ThaiSecuritiesDataService = ThaiSecuritiesDataService()
         stock_list: list[SecurityData] = thai_service.get_stock_list(language=language)
-        
+
         if not stock_list:
             raise ValueError("No stock data available.")
-        
+
         return [stock.symbol for stock in stock_list]
 
     @classmethod
     def list_with_names(cls, language: str = "en") -> pd.DataFrame:
         """
         Get a DataFrame with all stocks including names and basic info.
-        
+
         Args:
             language (str): Language preference ("en" or "th"). Defaults to "en".
-            
+
         Returns:
             pd.DataFrame: DataFrame with columns: symbol, name, industry, sector, market
-            
+
         Examples:
             >>> df = Stocks.list_with_names()
             >>> print(df.head())
@@ -110,34 +114,36 @@ class Stocks:
         """
         thai_service: ThaiSecuritiesDataService = ThaiSecuritiesDataService()
         stock_list: list[SecurityData] = thai_service.get_stock_list(language=language)
-        
+
         if not stock_list:
             raise ValueError("No stock data available.")
 
         data: list[dict] = []
         for stock in stock_list:
-            data.append({
-                'symbol': stock.symbol,
-                'name': stock.name,
-                'industry': stock.industry,
-                'sector': stock.sector,
-                'market': stock.market
-            })
-        
+            data.append(
+                {
+                    "symbol": stock.symbol,
+                    "name": stock.name,
+                    "industry": stock.industry,
+                    "sector": stock.sector,
+                    "market": stock.market,
+                }
+            )
+
         return pd.DataFrame(data)
 
     @classmethod
     def filter_by_sector(cls, sector: str, language: str = "en") -> List[str]:
         """
         Filter stocks by sector.
-        
+
         Args:
             sector (str): Sector name to filter by
             language (str): Language preference ("en" or "th"). Defaults to "en".
-            
+
         Returns:
             List[str]: List of stock symbols in the specified sector.
-            
+
         Examples:
             >>> banking_stocks = Stocks.filter_by_sector('Banking')
             >>> energy_stocks = Stocks.filter_by_sector('พลังงาน', language='th')
@@ -145,27 +151,30 @@ class Stocks:
         thai_service: ThaiSecuritiesDataService = ThaiSecuritiesDataService()
         stock_list: list[SecurityData] = thai_service.get_stock_list(language=language)
         sector = sector.strip()
-        
+
         if not sector:
             raise ValueError("Sector cannot be empty.")
         if not stock_list:
             raise ValueError("No stock data available.")
 
-        return [stock.symbol for stock in stock_list
-                if stock.sector and sector.lower() in stock.sector.lower()]
+        return [
+            stock.symbol
+            for stock in stock_list
+            if stock.sector and sector.lower() in stock.sector.lower()
+        ]
 
     @classmethod
     def filter_by_market(cls, market: str, language: str = "en") -> List[str]:
         """
         Filter stocks by market.
-        
+
         Args:
             market (str): Market name ('SET' or 'mai')
             language (str): Language preference ("en" or "th"). Defaults to "en".
-            
+
         Returns:
             List[str]: List of stock symbols in the specified market.
-            
+
         Examples:
             >>> set_stocks = Stocks.filter_by_market('SET')
             >>> mai_stocks = Stocks.filter_by_market('mai')
@@ -179,45 +188,50 @@ class Stocks:
         if not stock_list:
             raise ValueError("No stock data available.")
 
-        return [stock.symbol for stock in stock_list
-                if stock.market and market.upper() == stock.market.upper()]
+        return [
+            stock.symbol
+            for stock in stock_list
+            if stock.market and market.upper() == stock.market.upper()
+        ]
 
     @staticmethod
     def _detect_language(text: str) -> str:
         """
         Auto-detect if text contains Thai characters.
-        
+
         Args:
             text (str): Text to analyze
-            
+
         Returns:
             str: "th" if Thai characters detected, "en" otherwise
         """
         # Thai Unicode range: \u0E00-\u0E7F
-        thai_pattern: re.Pattern = re.compile(r'[\u0E00-\u0E7F]')
+        thai_pattern: re.Pattern = re.compile(r"[\u0E00-\u0E7F]")
         return "th" if thai_pattern.search(text) else "en"
 
     @staticmethod
-    def _smart_search(query: str, stock_list: List[SecurityData], limit: int) -> List[SecurityData]:
+    def _smart_search(
+        query: str, stock_list: List[SecurityData], limit: int
+    ) -> List[SecurityData]:
         """
         Perform smart search with multi-stage matching and scoring.
-        
+
         Args:
             query (str): Search query
             stock_list (List[SecurityData]): List of stocks to search
             limit (int): Maximum results to return
-            
+
         Returns:
             List[SecurityData]: Ranked list of matching stocks
         """
-        query_lower:str = query.lower()
-        scored_matches:list = []
-        
+        query_lower: str = query.lower()
+        scored_matches: list = []
+
         for stock in stock_list:
-            score:float = 0
-            symbol_lower:str = stock.symbol.lower()
-            name_lower:str = stock.name.lower() if stock.name else ""
-            
+            score: float = 0
+            symbol_lower: str = stock.symbol.lower()
+            name_lower: str = stock.name.lower() if stock.name else ""
+
             # Stage 1: Exact symbol match (highest priority)
             if symbol_lower == query_lower:
                 score = 1000
@@ -232,17 +246,17 @@ class Stocks:
                 symbol_ratio = fuzz.ratio(query_lower, symbol_lower)
                 if symbol_ratio > 60:
                     score = 700 + symbol_ratio
-                
+
                 # Stage 5: Company name fuzzy matching
                 if name_lower:
                     name_ratio = fuzz.partial_ratio(query_lower, name_lower)
                     if name_ratio > 60:
                         name_score = 500 + name_ratio
                         score = max(score, name_score)
-            
+
             if score > 0:
                 scored_matches.append((score, stock))
-        
+
         # Sort by score (descending) and return top matches
         scored_matches.sort(key=lambda x: x[0], reverse=True)
         return [stock for score, stock in scored_matches[:limit]]
@@ -253,11 +267,11 @@ if __name__ == "__main__":
     print("=== Stocks Class Demo ===")
     # Search examples
     print("\n1. Search for 'cp':")
-    cp_stocks = Stocks.search('cp', limit=3)
+    cp_stocks = Stocks.search("cp", limit=3)
     for stock in cp_stocks:
         print(f"  {stock.symbol}: {stock.company_name}")
     print("\n2. Search for 'ซีพี' (CP in Thai):")
-    cp_stocks_th = Stocks.search('ซีพี', limit=3)
+    cp_stocks_th = Stocks.search("ซีพี", limit=3)
     for stock in cp_stocks_th:
         print(f"  {stock.symbol}: {stock.company_name}")
     # List examples
@@ -266,4 +280,4 @@ if __name__ == "__main__":
     df = Stocks.list_with_names()
     print(df.head())
     # List examples in Thai
-    print("\n5. รายชื่อหุ้นทั้งหมด (ภาษาไทย):", Stocks.list(language='th')[:5])
+    print("\n5. รายชื่อหุ้นทั้งหมด (ภาษาไทย):", Stocks.list(language="th")[:5])

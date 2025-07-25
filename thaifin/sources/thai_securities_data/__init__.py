@@ -21,11 +21,9 @@ __all__ = [
     # API functions
     "get_meta_data",
     "get_securities_data",
-    
     # Data models
     "MetaData",
     "SecurityData",
-    
     # Service class
     "ThaiSecuritiesDataService",
 ]
