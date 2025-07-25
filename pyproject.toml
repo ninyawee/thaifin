@@ -1,6 +1,6 @@
 [project]
 name = "thaifin"
-version = "1.0.0"
+version = "1.1.0"
 description = "A Python library for access thai stock fundamental data up to 10+ years."
 authors = [{name = "Nutchanon Ninyawee", email = "me@nutchanon.org"}]
 license = {text = "ISC"}
