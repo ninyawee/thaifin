@@ -5,7 +5,7 @@ This file demonstrates how to use the new Thai Securities Data source
 and provides basic validation tests.
 """
 
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 from thaifin.sources.thai_securities_data import (
     ThaiSecuritiesDataService,
     SecurityData,
