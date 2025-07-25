@@ -7,76 +7,9 @@ and provides basic validation tests.
 
 from unittest.mock import Mock, patch
 from thaifin.sources.thai_securities_data import (
-    get_meta_data,
-    get_securities_data,
-    MetaData,
-    SecurityData,
     ThaiSecuritiesDataService,
+    SecurityData,
 )
-
-
-class TestThaiSecuritiesDataAPI:
-    """Test cases for Thai Securities Data API functions"""
-
-    def test_get_meta_data_mock(self):
-        """Test meta data API with mocked response"""
-        # Mock response data
-        mock_meta = MetaData(
-            securities=[
-                {
-                    "symbol": "PTT",
-                    "name": "PTT Public Company Limited",
-                    "industry": "Energy",
-                    "sector": "Resources",
-                    "market": "SET",
-                }
-            ]
-        )
-
-        with patch(
-            "thaifin.sources.thai_securities_data.api.httpx.Client"
-        ) as mock_client:
-            mock_response_obj = Mock()
-            mock_response_obj.json.return_value = mock_meta.model_dump()
-            mock_response_obj.raise_for_status.return_value = None
-            mock_client.return_value.__enter__.return_value.get.return_value = (
-                mock_response_obj
-            )
-
-            result = get_meta_data()
-
-            assert result is not None
-            assert len(result.securities) == 1
-            assert result.securities[0]["symbol"] == "PTT"
-
-    def test_get_securities_data_mock(self):
-        """Test securities data API with mocked response"""
-        # Mock securities data
-        mock_security = SecurityData(
-            symbol="PTT",
-            name="PTT Public Company Limited",
-            market="SET",
-            industry="Energy",
-            sector="Resources",
-            stock_type="Common Stock",
-        )
-
-        with patch(
-            "thaifin.sources.thai_securities_data.api.httpx.Client"
-        ) as mock_client:
-            mock_response_obj = Mock()
-            mock_response_obj.json.return_value = {"PTT": mock_security.model_dump()}
-            mock_response_obj.raise_for_status.return_value = None
-            mock_client.return_value.__enter__.return_value.get.return_value = (
-                mock_response_obj
-            )
-
-            result = get_securities_data("PTT")
-
-            assert result is not None
-            assert "PTT" in result
-            assert result["PTT"]["symbol"] == "PTT"
-            assert result["PTT"]["market"] == "SET"
 
 
 class TestThaiSecuritiesDataService:
@@ -98,13 +31,17 @@ class TestThaiSecuritiesDataService:
             market="SET",
             industry="Energy",
             sector="Resources",
-            stock_type="Common Stock",
+            address="555 Vibhavadi Rangsit Road",
+            zip="10900",
+            tel="0-2537-2000",
+            fax="0-2537-2001",
+            web="https://www.pttplc.com",
         )
 
         with patch(
             "thaifin.sources.thai_securities_data.service.get_securities_data"
         ) as mock_get:
-            mock_get.return_value = {"PTT": mock_security.model_dump()}
+            mock_get.return_value = [mock_security]
 
             result = service.get_stock("PTT")
 
@@ -112,8 +49,52 @@ class TestThaiSecuritiesDataService:
             assert result.symbol == "PTT"
             assert result.market == "SET"
 
+    def test_list_stocks_mock(self):
+        """Test listing all stocks"""
+        service = ThaiSecuritiesDataService()
 
-# Functional test with actual network calls
+        # Mock the API calls
+        mock_securities = [
+            SecurityData(
+                symbol="PTT",
+                name="PTT Public Company Limited",
+                market="SET",
+                industry="Energy",
+                sector="Resources",
+                address="555 Vibhavadi Rangsit Road",
+                zip="10900",
+                tel="0-2537-2000",
+                fax="0-2537-2001",
+                web="https://www.pttplc.com",
+            ),
+            SecurityData(
+                symbol="AOT",
+                name="Airports of Thailand Public Company Limited",
+                market="SET",
+                industry="Transportation",
+                sector="Services",
+                address="222 Don Mueang",
+                zip="10210",
+                tel="0-2535-1111",
+                fax="0-2535-1112",
+                web="https://www.airportthai.co.th",
+            ),
+        ]
+
+        with patch(
+            "thaifin.sources.thai_securities_data.service.get_securities_data"
+        ) as mock_get:
+            mock_get.return_value = mock_securities
+
+            result = service.get_stock_list()
+
+            assert result is not None
+            assert len(result) == 2
+            assert result[0].symbol == "PTT"
+            assert result[1].symbol == "AOT"
+
+
+# Functional test with actual network calls (only run if explicitly needed)
 def test_thai_securities_service_real():
     """
     Test the ThaiSecuritiesDataService with actual API calls.
@@ -135,6 +116,6 @@ def test_thai_securities_service_real():
     assert ptt_stock_th.symbol == "PTT"
 
     # Test listing all stocks
-    all_stocks = service.list_stocks()
+    all_stocks = service.get_stock_list()
     assert len(all_stocks) > 0
-    assert all(isinstance(stock, str) for stock in all_stocks)
+    assert all(isinstance(stock, SecurityData) for stock in all_stocks)
