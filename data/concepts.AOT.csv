@@ -1,0 +1,111 @@
+# thaifin concept dictionary — AOT (Airports of Thailand) scout staging file
+#
+# Scope: changes/additions to data/concepts.csv discovered while inspecting AOT.
+# Two kinds of rows below:
+#   (A) ALIAS-EXTENSION: row whose `concept` already exists in canonical concepts.csv;
+#       only `aliases_th_to_append` is meant to be merged into the existing row's
+#       `aliases_th` column (pipe-separated extension).
+#   (B) NEW-CONCEPT: a row not present in canonical; reviewer should consider adding
+#       it as-is to canonical concepts.csv (these will all carry an
+#       `applicable_industries` tag of `transport` and/or `state_enterprise` so they
+#       don't pollute cross-industry coverage stats).
+#
+# Source filings (verbatim citations for every label below):
+#   - AOT FY2010 (annual, audited)  — sheet `งบกระแสเงินสด`, `income-statement(YTD)`
+#   - AOT FY2015 (annual, audited)  — sheets `income-statement(baht)`, `งบกระแสเงินสด (บาท)`
+#   - AOT FY2020 (annual, audited)  — sheets `งบแสดงฐานะการเงิน  (บาท)`, etc.
+#   - AOT FY2025 (annual, audited)  — sheets `งบฐานะการเงิน  (บาท) EY `, `งบกำไรขาดทุน  (บาท) EY`,
+#                                    `Cashflow (บาท) EY`
+#   - AOT 2026Q1 (quarterly, reviewed)
+#
+# === KEY OBSERVATIONS for AOT (industrial/transport-template, NOT bank/insurer) ===
+# 1. AOT has NO COGS line and NO `กำไรขั้นต้น` (gross_profit). Single-step income
+#    statement: Revenue → Operating expenses (broken down by nature: staff /
+#    utilities / contractors / repairs / D&A / impairment / other) → Operating profit.
+#    The cross-industry concepts `cogs` and `gross_profit` simply DO NOT APPEAR
+#    for AOT. ConceptMapper should leave these unmapped — that's correct.
+# 2. AOT's revenue line is `รายได้จากการขายหรือการให้บริการ` (note: "หรือ" = "or",
+#    NOT "และ" = "and" as in the canonical row). This is a real lexical variant
+#    used at AOT (and likely many service-industry filings). Add as alias.
+# 3. AOT-specific revenue concepts (NEW concept candidates, applicable_industries=transport):
+#       - airport_service_revenue       ค่าบริการสนามบิน (airport service / landing fees)
+#       - passenger_service_charge      ค่าบริการผู้โดยสารขาออก (PSC; the iconic 700-baht charge)
+#       - aircraft_parking_facility_fee ค่าเครื่องอำนวยความสะดวก (parking + ground handling facilities)
+#       - concession_revenue            รายได้ส่วนแบ่งผลประโยชน์ (revenue-share with concessionaires;
+#                                       was `รายได้ค่าสัมปทาน` pre-2015 — see alias)
+#       - office_and_property_rental    ค่าเช่าสำนักงานและอสังหาริมทรัพย์
+#       - service_related_revenue       รายได้เกี่ยวกับบริการ
+# 4. AOT BS line `อสังหาริมทรัพย์เพื่อการลงทุน` (investment property) is significant
+#    for an airport operator — a separate concept, distinct from PPE.
+# 5. The expected `concession_assets` (long-term concession rights as intangible)
+#    DOES NOT appear distinctly on AOT's BS. AOT is the concession GRANTOR, not
+#    grantee — the airport assets sit under regular PPE. Concession-related
+#    items appear only on revenue side (rev share) and contract-asset side
+#    (`รายได้รับล่วงหน้า` deferred revenue, `รายได้สัมปทานรับล่วงหน้า` in older filings).
+# 6. NO `government_subsidy` line observed on AOT — AOT is a profitable state
+#    enterprise; it pays dividends to the state, not the other way around.
+# 7. PPE label on AOT is `ที่ดิน อาคารและอุปกรณ์` (no `สุทธิ` suffix) — already
+#    covered by the canonical `ppe` row's existing aliases. No new alias needed
+#    for the BS row, but the cashflow capex side has new phrasings — see below.
+# 8. AOT introduced IFRS-16 right-of-use assets in 2020+: `สินทรัพย์สิทธิการใช้`
+#    and `หนี้สินตามสัญญาเช่า`. These are cross-industry (every IFRS-16 adopter
+#    has them); flag as candidates for inclusion in canonical concepts.csv but
+#    NOT industry-specific to transport.
+# 9. AOT historical revenue label evolution:
+#      pre-2015 (FY2010): `รายได้จากการดำเนินงาน` (operating revenue, generic)
+#      2015+:             `รายได้จากการขายหรือการให้บริการ`  (service-revenue framing)
+# 10. AOT historical capex phrasing evolution on Cash Flow Statement:
+#      FY2010: `ลงทุนในอาคารและอุปกรณ์และงานระหว่างก่อสร้าง`  (incl. CIP)
+#      FY2015: similar; modern adds split out lines
+#      FY2025: `เงินสดจ่ายในที่ดิน อาคารและอุปกรณ์` and `เงินสดจ่ายในสินทรัพย์ไม่มีตัวตน`
+#              (TWO separate lines for tangible vs intangible capex). Note the
+#              preposition is `ใน` ("invested in"), NOT `สำหรับ` ("for") or
+#              `เพื่อ` ("for the purpose of") used by other filers — this is
+#              a lexical fingerprint of AOT/SAO-influenced template style.
+#
+# Lines below are CSV (header row first).
+# Schema (same 8 columns as canonical concepts.csv) PLUS one extra audit column at end:
+#   action — alias_extension | new_concept   (informational; not in canonical schema)
+#
+concept,statement,label_en,label_th,aliases_th,xbrl_ref,applicable_industries,sign_convention,action
+revenue,IS,Revenue from sales and services,รายได้จากการขายและการให้บริการ,รายได้จากการขายหรือการให้บริการ|รวมรายได้จากการขายหรือการให้บริการ|รายได้จากการดำเนินงาน|รวมรายได้จากการดำเนินงาน,ifrs-full:Revenue,,as_reported,alias_extension
+operating_profit,IS,Operating profit,กำไรจากการดำเนินงาน,,ifrs-full:ProfitLossFromOperatingActivities,,as_reported,alias_extension
+ebit,IS,Profit before finance costs and income tax,กำไรก่อนต้นทุนทางการเงินและภาษีเงินได้,กำไร(ขาดทุน)ก่อนดอกเบี้ยจ่ายและภาษีเงินได้,,,as_reported,alias_extension
+profit_before_tax,IS,Profit before income tax,กำไรก่อนภาษีเงินได้,,ifrs-full:ProfitLossBeforeTax,,as_reported,alias_extension
+income_tax_expense,IS,Income tax expense,ค่าใช้จ่ายภาษีเงินได้,ภาษีเงินได้,ifrs-full:IncomeTaxExpenseContinuingOperations,,as_reported,alias_extension
+net_profit,IS,Profit for the period,กำไรสำหรับปี,กำไรสำหรับงวด|กำไรสุทธิสำหรับงวด,ifrs-full:ProfitLoss,,as_reported,alias_extension
+ppe,BS,Property plant and equipment,ที่ดิน อาคารและอุปกรณ์,ที่ดิน อาคารและอุปกรณ์ สุทธิ|อาคารและอุปกรณ์,ifrs-full:PropertyPlantAndEquipment,,as_reported,alias_extension
+capex,CF,Cash paid for property plant and equipment,เงินสดจ่ายสำหรับที่ดิน อาคารและอุปกรณ์ และอสังหาริมทรัพย์เพื่อการลงทุน,เงินสดจ่ายเพื่อซื้อสินทรัพย์ถาวร|เงินสดจ่ายในที่ดิน อาคารและอุปกรณ์|ลงทุนในอาคารและอุปกรณ์และงานระหว่างก่อสร้าง,ifrs-full:PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities,,negate_if_outflow,alias_extension
+investing_activities,CF,Net cash from (used in) investing activities,เงินสดสุทธิได้มาจาก(ใช้ไปใน)กิจกรรมลงทุน,เงินสดสุทธิใช้ไปในกิจกรรมลงทุน,ifrs-full:CashFlowsFromUsedInInvestingActivities,,as_reported,alias_extension
+financing_activities,CF,Net cash used in financing activities,เงินสดสุทธิใช้ไปในกิจกรรมจัดหาเงิน,,ifrs-full:CashFlowsFromUsedInFinancingActivities,,as_reported,alias_extension
+dividends_paid,CF,Dividends paid,เงินปันผลจ่าย,จ่ายเงินปันผล,ifrs-full:DividendsPaidClassifiedAsFinancingActivities,,negate_if_outflow,alias_extension
+interest_paid,CF,Finance costs paid,เงินสดจ่ายต้นทุนทางการเงิน,เงินสดจ่ายดอกเบี้ย|จ่ายต้นทุนทางการเงิน,ifrs-full:InterestPaidClassifiedAsOperatingActivities,,negate_if_outflow,alias_extension
+tax_paid,CF,Income tax paid,เงินสดจ่ายภาษีเงินได้,จ่ายภาษีเงินได้,ifrs-full:IncomeTaxesPaidRefundClassifiedAsOperatingActivities,,negate_if_outflow,alias_extension
+paid_up_capital,BS,Issued and paid-up share capital,ทุนออกจำหน่ายและชำระเต็มมูลค่าแล้ว,ทุนที่ออกและชำระแล้ว|ทุนที่ออกจำหน่ายและชำระเต็มมูลค่าแล้ว,ifrs-full:IssuedCapital,,as_reported,alias_extension
+airport_service_revenue,IS,Airport service revenue (landing/take-off charges),ค่าบริการสนามบิน,,,transport,as_reported,new_concept
+passenger_service_charge,IS,Passenger service charge (departure tax),ค่าบริการผู้โดยสารขาออก,,,transport,as_reported,new_concept
+aircraft_parking_facility_fee,IS,Aircraft parking and ground facility fees,ค่าเครื่องอำนวยความสะดวก,,,transport,as_reported,new_concept
+concession_revenue,IS,Concession revenue / revenue-share from concessionaires,รายได้ส่วนแบ่งผลประโยชน์,รายได้ค่าสัมปทาน,,transport,as_reported,new_concept
+office_and_property_rental,IS,Rental income from offices and properties,ค่าเช่าสำนักงานและอสังหาริมทรัพย์,,ifrs-full:RentalIncome,transport,as_reported,new_concept
+service_related_revenue,IS,Revenue related to other airport services,รายได้เกี่ยวกับบริการ,,,transport,as_reported,new_concept
+investment_property,BS,Investment property,อสังหาริมทรัพย์เพื่อการลงทุน,,ifrs-full:InvestmentProperty,,as_reported,new_concept
+right_of_use_assets,BS,Right-of-use assets (IFRS 16),สินทรัพย์สิทธิการใช้,,ifrs-full:RightofuseAssets,,as_reported,new_concept
+lease_liabilities_current,BS,Lease liabilities — current portion (IFRS 16),หนี้สินตามสัญญาเช่าที่ถึงกำหนดชำระภายในหนึ่งปี,,ifrs-full:CurrentLeaseLiabilities,,as_reported,new_concept
+lease_liabilities_noncurrent,BS,Lease liabilities — non-current (IFRS 16),หนี้สินตามสัญญาเช่า - สุทธิจากส่วนที่ถึงกำหนดชำระภายในหนึ่งปี,,ifrs-full:NoncurrentLeaseLiabilities,,as_reported,new_concept
+intangible_assets,BS,Intangible assets,สินทรัพย์ไม่มีตัวตน,,ifrs-full:IntangibleAssetsOtherThanGoodwill,,as_reported,new_concept
+deferred_tax_asset,BS,Deferred tax asset,สินทรัพย์ภาษีเงินได้รอการตัดบัญชี,,ifrs-full:DeferredTaxAssets,,as_reported,new_concept
+employee_benefit_provision,BS,Provision for employee benefits (severance / post-employment),สำรองผลประโยชน์พนักงาน,ภาระผูกพันผลประโยชน์พนักงาน|สำรองภาระผูกพันผลประโยชน์พนักงาน,ifrs-full:NoncurrentProvisionsForEmployeeBenefits,,as_reported,new_concept
+employee_benefit_expense,IS,Employee benefit expense,ค่าใช้จ่ายผลประโยชน์พนักงาน,,ifrs-full:EmployeeBenefitsExpense,,as_reported,new_concept
+utilities_expense,IS,Utilities expense,ค่าสาธารณูปโภค,,,,as_reported,new_concept
+outsourcing_expense,IS,Outsourced contractor expense,ค่าจ้างภายนอก,,,,as_reported,new_concept
+repairs_maintenance_expense,IS,Repairs and maintenance expense,ค่าซ่อมแซมและบำรุงรักษา,,,,as_reported,new_concept
+impairment_loss,IS,Impairment loss on assets,ขาดทุนจากการด้อยค่าสินทรัพย์,,ifrs-full:ImpairmentLossRecognisedInProfitOrLoss,,as_reported,new_concept
+deferred_concession_revenue,BS,Deferred concession / advance revenue,รายได้รับล่วงหน้า,รายได้สัมปทานรับล่วงหน้า,ifrs-full:DeferredIncomeIncludingContractLiabilities,transport,as_reported,new_concept
+short_term_loan_from_fi,BS,Short-term loan from financial institutions,เงินกู้ยืมระยะสั้นจากสถาบันการเงิน,,ifrs-full:CurrentBorrowings,,as_reported,new_concept
+long_term_loan_current_portion,BS,Long-term loan — current portion,เงินกู้ยืมระยะยาวที่ถึงกำหนดชำระภายในหนึ่งปี,,ifrs-full:CurrentPortionOfNoncurrentBorrowings,,as_reported,new_concept
+long_term_loan_noncurrent,BS,Long-term loan — non-current portion,เงินกู้ยืมระยะยาว - สุทธิจากส่วนที่ถึงกำหนดชำระภายในหนึ่งปี,,ifrs-full:NoncurrentBorrowings,,as_reported,new_concept
+non_controlling_interest,BS,Non-controlling interest,ส่วนของผู้มีส่วนได้เสียที่ไม่มีอำนาจควบคุมของบริษัทย่อย,ส่วนของผู้ถือหุ้นส่วนน้อย,ifrs-full:NoncontrollingInterests,,as_reported,new_concept
+retained_earnings_unappropriated,EQ,Retained earnings — unappropriated,ยังไม่ได้จัดสรร,กำไรสะสมยังไม่ได้จัดสรร,ifrs-full:RetainedEarnings,,as_reported,new_concept
+retained_earnings_legal_reserve,EQ,Retained earnings — appropriated as legal reserve,จัดสรรแล้ว - สำรองตามกฎหมาย,สำรองตามกฎหมาย,ifrs-full:StatutoryReserve,,as_reported,new_concept
+share_premium,EQ,Share premium / additional paid-in capital,ส่วนเกินมูลค่าหุ้นสามัญ,,ifrs-full:SharePremium,,as_reported,new_concept
+depreciation_amortization,CF,Depreciation and amortization,ค่าเสื่อมราคาและค่าตัดจำหน่าย,,ifrs-full:DepreciationAndAmortisationExpense,,as_reported,alias_extension
