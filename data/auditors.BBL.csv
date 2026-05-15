@@ -1,0 +1,28 @@
+# thaifin auditor registry — BBL scout staging (v0)
+#
+# Symbol: BBL (Bangkok Bank Public Company Limited)
+# Sample sweep: filings 1997, 1999, 2005, 2010, 2018, 2025 (annual) + 2026Q1 (interim)
+#
+# Findings:
+#   - BBL has used Deloitte's local Thai entity EXCLUSIVELY across all 30 years sampled (1997-2026).
+#   - The legal entity NAME changed once, ~2007-2010, when the firm reorganized from
+#     a "สำนักงาน" (office partnership) to a "บริษัท ... จำกัด" (limited company).
+#     Per the auditor-curation rules ("ONE row per legal entity"), this is TWO rows.
+#   - Five different signing partners observed across the sample, all under the same firm:
+#       1997: เติมศักดิ์ กฤษณามระ          (license #1106)   — under สำนักงาน form
+#       1999: ดร. ศุภมิตร เตชะมนตรีกุล    (license #3356)   — under สำนักงาน form (same partner returns 2018)
+#       2005: นิติ จึงนิจนิรันดร์          (license #3809)   — under สำนักงาน form
+#       2010: เพิ่มศักดิ์ วงศ์พัชรปกรณ์    (license #3427)   — under บริษัท form (transition year)
+#       2018: ดร. ศุภมิตร เตชะมนตรีกุล    (license #3356)   — under บริษัท form
+#       2025: นิสากร ทรงมณี                (license #5035)   — under บริษัท form (also signed 2026Q1 review)
+#   - Opinion patterns: all unqualified across the sample. 1997 contained an emphasis-of-matter
+#     paragraph about Asian Financial Crisis ("ความไม่มีเสถียรภาพของสถานการณ์ทางเศรษฐกิจ")
+#     which is NOT a going-concern modifier in the formal sense — log as anomaly.
+#   - 2026Q1 uses interim-review header: "รายงานการสอบทานข้อมูลทางการเงินระหว่างกาล"
+#     and the negative-form opinion language: "ข้าพเจ้าไม่พบสิ่งที่เป็นเหตุให้เชื่อว่า..."
+#     Quarterly review opinions use this distinct phrasing — flag for opinion-classifier design.
+#
+# Lines below are CSV (header row first). Comment lines starting with # are ignored.
+firm_id,canonical_en,canonical_th,parent_firm,aliases_en,aliases_th,is_government
+deloitte_th_office,Deloitte Touche Tohmatsu Jaiyos Office,สำนักงานดีลอยท์ ทู้ช โธมัทสุ ไชยยศ,deloitte_global,Deloitte Touche Tohmatsu Jaiyos,,false
+deloitte_th_audit,Deloitte Touche Tohmatsu Jaiyos Audit Co. Ltd.,บริษัท ดีลอยท์ ทู้ช โธมัทสุ ไชยยศ สอบบัญชี จำกัด,deloitte_global,Deloitte Touche Tohmatsu Jaiyos Audit,ดีลอยท์ ทู้ช โธมัทสุ ไชยยศ สอบบัญชี,false
