@@ -1,15 +1,28 @@
 """SEC IDISC ingest layer for the v2 dataset pipeline.
 
-Three layers, each independently usable:
-- ``symbols``   : enumerate ~866 listed companies from letter-pages
-- ``fetcher``   : incremental, polite zip downloader with state.json
-- ``normalize`` : libreoffice-backed legacy-XLS/DOC → OOXML wrapper
+Four layers, each independently usable:
 
-Discovery of filing URLs per symbol (the ``fs-norm`` page parser) lives
-in a sibling ``discovery`` module created by slice #15; this slice does
-not import it so the two slices can land independently.
+- ``symbols``    : enumerate ~866 listed companies from letter-pages (slice #17)
+- ``discovery``  : per-symbol ``fs-norm`` page parser → filing manifest (slice #15)
+- ``fetcher``    : incremental, polite zip downloader with state.json (slice #17)
+- ``normalize``  : libreoffice-backed legacy-XLS/DOC → OOXML wrapper (slice #17)
 """
 
-from thaifin.sources.sec_idisc import fetcher, normalize, symbols
+from thaifin.sources.sec_idisc import discovery, fetcher, normalize, symbols
+from thaifin.sources.sec_idisc.discovery import (
+    FilingManifestEntry,
+    discover_filings,
+    filings_to_records,
+    parse_fs_norm_html,
+)
 
-__all__ = ["fetcher", "normalize", "symbols"]
+__all__ = [
+    "FilingManifestEntry",
+    "discover_filings",
+    "discovery",
+    "fetcher",
+    "filings_to_records",
+    "normalize",
+    "parse_fs_norm_html",
+    "symbols",
+]
