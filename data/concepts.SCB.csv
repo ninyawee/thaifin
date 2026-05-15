@@ -1,0 +1,141 @@
+# thaifin concept dictionary — SCB scout staging (v0)
+#
+# Schema (matches data/concepts.csv plus a 9th column `aliases_th_to_append`):
+#   concept                — short stable English ID, snake_case.
+#   statement              — one of BS, IS, CF, EQ.
+#   label_en               — human English label.
+#   label_th               — canonical Thai label (verbatim from a real filing).
+#   aliases_th             — pipe-separated alternative phrasings observed in real filings.
+#   xbrl_ref               — IFRS XBRL taxonomy ID. Empty if no confident mapping.
+#   applicable_industries  — pipe-separated industries this concept applies to. EMPTY = all.
+#   sign_convention        — as_reported (default) | abs | negate_if_outflow.
+#   aliases_th_to_append   — STAGING ONLY. Populated only when this row PROPOSES extending an
+#                            existing canonical concept's `aliases_th` with phrasings observed
+#                            in SCB filings. Empty for "new concept" proposals.
+#
+# Sample sources cited (filing_id → period):
+#   22062377                          → SCB 2022Q1 (still bank entity, reviewed)
+#   23016979                          → SCBX FY2022 (audited, restructure year)
+#   1706FIN200220241653550737T        → SCBX FY2023 (audited)
+#   1706FIN190220251132070328T        → SCBX FY2024 (audited)
+#   1706FIN190220261234280476T        → SCBX FY2025 (audited)
+#   1706FIN141120251632000394T        → SCBX 2025Q3 (reviewed)
+#   1706FIN130520261402470059T        → SCBX 2026Q1 (reviewed)
+#
+# Sheet/row citations format: (filing_id, sheet, row).
+#
+# Naming note: the SCB ticker spans two legal entities. Pre-2022Q2 filings are signed by
+# "ธนาคารไทยพาณิชย์ จำกัด (มหาชน) และบริษัทย่อย" (Siam Commercial Bank Public Co. Ltd.); from
+# the 2022 annual filing onwards, the ticker carries "บริษัท เอสซีบี เอกซ์ จำกัด (มหาชน)
+# และบริษัทย่อย" (SCB X Public Co. Ltd. — the holding company). Sheet vocabulary is largely
+# stable across the migration; the entity-row text differs.
+#
+concept,statement,label_en,label_th,aliases_th,xbrl_ref,applicable_industries,sign_convention,aliases_th_to_append
+# === existing concepts: rows that match SCB labels with no change ===
+total_assets,BS,Total assets,รวมสินทรัพย์,,ifrs-full:Assets,,as_reported,
+total_liabilities,BS,Total liabilities,รวมหนี้สิน,,ifrs-full:Liabilities,,as_reported,
+equity,BS,Total equity,รวมส่วนของผู้ถือหุ้น,รวมส่วนของเจ้าของ,ifrs-full:Equity,,as_reported,
+cash,BS,Cash and cash equivalents,เงินสดและรายการเทียบเท่าเงินสด,,ifrs-full:CashAndCashEquivalents,,as_reported,เงินสด
+# Note: SCB / banks use bare "เงินสด" (just "Cash") rather than "เงินสดและรายการเทียบเท่าเงินสด" because
+# the cash equivalents (interbank/money market positions) are surfaced as their own line items.
+# This SHOULD be appended as an alias to the existing `cash` concept — but be aware that for banks,
+# `เงินสด` is a much narrower line than the general-industry concept; downstream users should treat
+# bank `cash` as vault cash + nostro accounts only, not interbank.
+financing_activities,CF,Net cash used in financing activities,เงินสดสุทธิใช้ไปในกิจกรรมจัดหาเงิน,,ifrs-full:CashFlowsFromUsedInFinancingActivities,,as_reported,เงินสดสุทธิจาก (ใช้ไปใน) กิจกรรมจัดหาเงิน
+investing_activities,CF,Net cash from (used in) investing activities,เงินสดสุทธิได้มาจาก(ใช้ไปใน)กิจกรรมลงทุน,เงินสดสุทธิใช้ไปในกิจกรรมลงทุน,ifrs-full:CashFlowsFromUsedInInvestingActivities,,as_reported,เงินสดสุทธิจาก (ใช้ไปใน) กิจกรรมลงทุน|เงินสดสุทธิ (ใช้ไปใน) จากกิจกรรมลงทุน
+ocf,CF,Net cash from operating activities,เงินสดสุทธิได้มาจากกิจกรรมดำเนินงาน,,ifrs-full:CashFlowsFromUsedInOperatingActivities,,as_reported,เงินสดสุทธิจาก (ใช้ไปใน) กิจกรรมดำเนินงาน
+net_profit,IS,Profit for the period,กำไรสำหรับปี,กำไรสำหรับรอบระยะเวลา,ifrs-full:ProfitLoss,,as_reported,กำไรสุทธิ
+profit_before_tax,IS,Profit before income tax,กำไรก่อนภาษีเงินได้,,ifrs-full:ProfitLossBeforeTax,,as_reported,กำไรจากการดำเนินงานก่อนภาษีเงินได้
+income_tax_expense,IS,Income tax expense,ค่าใช้จ่ายภาษีเงินได้,,ifrs-full:IncomeTaxExpenseContinuingOperations,,as_reported,ภาษีเงินได้
+eps_basic,IS,Basic earnings per share,กำไรต่อหุ้นขั้นพื้นฐาน,กำไรต่อหุ้นขั้นพื้นฐาน (บาท),ifrs-full:BasicEarningsLossPerShare,,as_reported,
+paid_up_capital,BS,Issued and paid-up share capital,ทุนออกจำหน่ายและชำระเต็มมูลค่าแล้ว,ทุนที่ออกและชำระแล้ว,ifrs-full:IssuedCapital,,as_reported,
+depreciation_amortization,CF,Depreciation and amortization,ค่าเสื่อมราคาและค่าตัดจำหน่าย,,ifrs-full:DepreciationAndAmortisationExpense,,as_reported,ค่าเสื่อมราคาและรายจ่ายตัดบัญชี
+tax_paid,CF,Income tax paid,เงินสดจ่ายภาษีเงินได้,จ่ายภาษีเงินได้,ifrs-full:IncomeTaxesPaidRefundClassifiedAsOperatingActivities,,negate_if_outflow,
+dividends_paid,CF,Dividends paid,เงินปันผลจ่าย,,ifrs-full:DividendsPaidClassifiedAsFinancingActivities,,negate_if_outflow,จ่ายเงินปันผลให้ผู้ถือหุ้นของบริษัท
+#
+# === NEW bank-specific concepts (applicable_industries=bank) ===
+#
+# --- Income statement (bank) ---
+interest_income,IS,Interest income,รายได้ดอกเบี้ย,,ifrs-full:InterestIncomeOnLoansAndAdvancesToCustomers,bank,as_reported,
+interest_expense,IS,Interest expense,ค่าใช้จ่ายดอกเบี้ย,,ifrs-full:InterestExpenseOnDepositsFromCustomers,bank,as_reported,
+net_interest_income,IS,Net interest income,รายได้ (ค่าใช้จ่าย) ดอกเบี้ยสุทธิ,รายได้ดอกเบี้ยสุทธิ,ifrs-full:InterestIncomeExpense,bank,as_reported,
+fee_and_service_income,IS,Fees and services income,รายได้ค่าธรรมเนียมและบริการ,,ifrs-full:FeeAndCommissionIncome,bank,as_reported,
+fee_and_service_expense,IS,Fees and services expense,ค่าใช้จ่ายค่าธรรมเนียมและบริการ,,ifrs-full:FeeAndCommissionExpense,bank,as_reported,
+net_fee_and_service_income,IS,Net fees and services income,รายได้ค่าธรรมเนียมและบริการสุทธิ,,ifrs-full:NetFeeAndCommissionIncome,bank,as_reported,
+gain_on_financial_instruments_fvtpl,IS,Gain (loss) on financial instruments at fair value through profit or loss,กำไร (ขาดทุน) สุทธิจากเครื่องมือทางการเงินที่วัดมูลค่าด้วยมูลค่ายุติธรรมผ่านกำไรหรือขาดทุน,กำไรสุทธิจากเครื่องมือทางการเงินที่วัดมูลค่าด้วยมูลค่ายุติธรรมผ่านกำไรหรือขาดทุน,,bank|insurance,as_reported,
+gain_on_investments,IS,Gain (loss) on investments,กำไร (ขาดทุน) สุทธิจากเงินลงทุน,กำไรสุทธิจากเงินลงทุน,,bank|insurance,as_reported,
+share_of_associate_profit,IS,Share of profit from associates and joint ventures,ส่วนแบ่งกำไรจากเงินลงทุนในบริษัทร่วมและการร่วมค้า,,ifrs-full:ShareOfProfitLossOfAssociatesAndJointVenturesAccountedForUsingEquityMethod,,as_reported,
+dividend_income,IS,Dividend income,รายได้เงินปันผล,,ifrs-full:DividendIncome,,as_reported,
+other_operating_income,IS,Other operating income,รายได้จากการดำเนินงานอื่น ๆ,,ifrs-full:OtherOperatingIncomeExpense,,as_reported,
+total_operating_income,IS,Total operating income,รวมรายได้จากการดำเนินงาน,,,bank|insurance,as_reported,
+employee_expenses,IS,Employee expenses,ค่าใช้จ่ายเกี่ยวกับพนักงาน,,ifrs-full:EmployeeBenefitsExpense,bank|insurance,as_reported,
+director_remuneration,IS,Director remuneration,ค่าตอบแทนกรรมการ,,,bank|insurance,as_reported,
+premises_and_equipment_expenses,IS,Premises and equipment expenses,ค่าใช้จ่ายเกี่ยวกับอาคารสถานที่และอุปกรณ์,,,bank|insurance,as_reported,
+tax_and_duties,IS,Tax and duties (operating),ค่าภาษีอากร,,,bank|insurance,as_reported,
+total_other_operating_expenses,IS,Total other operating expenses,รวมค่าใช้จ่ายจากการดำเนินงานอื่น ๆ,,,bank|insurance,as_reported,
+expected_credit_loss,IS,Expected credit losses,ผลขาดทุนด้านเครดิตที่คาดว่าจะเกิดขึ้น,,ifrs-full:ImpairmentLossRecognisedInProfitOrLossLoansAndAdvances,bank,as_reported,
+profit_to_parent,IS,Profit attributable to owners of the parent,ส่วนที่เป็นของบริษัทใหญ่,,ifrs-full:ProfitLossAttributableToOwnersOfParent,,as_reported,
+profit_to_nci,IS,Profit attributable to non-controlling interests,ส่วนที่เป็นของส่วนได้เสียที่ไม่มีอำนาจควบคุม,,ifrs-full:ProfitLossAttributableToNoncontrollingInterests,,as_reported,
+total_comprehensive_income,IS,Total comprehensive income,กำไรขาดทุนเบ็ดเสร็จรวม,กำไรเบ็ดเสร็จรวม,ifrs-full:ComprehensiveIncome,,as_reported,
+#
+# --- Balance sheet (bank) ---
+interbank_and_money_market_assets,BS,Interbank and money market items (assets),รายการระหว่างธนาคารและตลาดเงินสุทธิ,,,bank,as_reported,
+financial_assets_fvtpl,BS,Financial assets at fair value through profit or loss,สินทรัพย์ทางการเงินที่วัดมูลค่าด้วยมูลค่ายุติธรรมผ่านกำไรหรือขาดทุน,,ifrs-full:FinancialAssetsAtFairValueThroughProfitOrLoss,bank|insurance,as_reported,
+derivative_assets,BS,Derivative assets,สินทรัพย์อนุพันธ์,,ifrs-full:DerivativeFinancialAssets,bank|insurance,as_reported,
+investments_net,BS,Investments net,เงินลงทุนสุทธิ,,,bank|insurance,as_reported,
+investments_in_subs_associates_jv,BS,Investments in subsidiaries associates and joint ventures (net),เงินลงทุนในบริษัทย่อย บริษัทร่วมและการร่วมค้าสุทธิ,,,bank|insurance,as_reported,
+loans_to_customers,BS,Loans to customers and accrued interest receivable (net),เงินให้สินเชื่อแก่ลูกหนี้และดอกเบี้ยค้างรับสุทธิ,,ifrs-full:LoansAndAdvancesToCustomers,bank,as_reported,
+properties_for_sale,BS,Properties foreclosed (net),ทรัพย์สินรอการขายสุทธิ,,,bank,as_reported,
+investment_property,BS,Investment property net,อสังหาริมทรัพย์เพื่อการลงทุนสุทธิ,,ifrs-full:InvestmentProperty,,as_reported,
+ppe_net,BS,Property plant and equipment net (bank phrasing),ที่ดิน อาคารและอุปกรณ์สุทธิ,,ifrs-full:PropertyPlantAndEquipment,,as_reported,
+goodwill_and_intangibles,BS,Goodwill and intangible assets net,ค่าความนิยมและสินทรัพย์ไม่มีตัวตนอื่นสุทธิ,,,bank|insurance,as_reported,
+deferred_tax_asset,BS,Deferred tax assets,สินทรัพย์ภาษีเงินได้รอตัดบัญชี,,ifrs-full:DeferredTaxAssets,,as_reported,
+other_assets_net,BS,Other assets net,สินทรัพย์อื่นสุทธิ,,,bank|insurance,as_reported,
+# --- Liabilities (bank) ---
+deposits_from_customers,BS,Deposits,เงินรับฝาก,,ifrs-full:DepositsFromCustomers,bank,as_reported,
+interbank_and_money_market_liabilities,BS,Interbank and money market items (liabilities),รายการระหว่างธนาคารและตลาดเงิน,,,bank,as_reported,
+liabilities_payable_on_demand,BS,Liabilities payable on demand,หนี้สินจ่ายคืนเมื่อทวงถาม,,,bank,as_reported,
+financial_liabilities_fvtpl,BS,Financial liabilities at fair value through profit or loss,หนี้สินทางการเงินที่วัดมูลค่าด้วยมูลค่ายุติธรรมผ่านกำไรหรือขาดทุน,,ifrs-full:FinancialLiabilitiesAtFairValueThroughProfitOrLoss,bank|insurance,as_reported,
+derivative_liabilities,BS,Derivative liabilities,หนี้สินอนุพันธ์,,ifrs-full:DerivativeFinancialLiabilities,bank|insurance,as_reported,
+debt_issued_and_borrowings,BS,Debt issued and borrowings,ตราสารหนี้ที่ออกและเงินกู้ยืม,,,bank,as_reported,
+provisions_liabilities,BS,Provisions,ประมาณการหนี้สิน,,ifrs-full:Provisions,,as_reported,
+deferred_tax_liability,BS,Deferred tax liabilities,หนี้สินภาษีเงินได้รอตัดบัญชี,,ifrs-full:DeferredTaxLiabilities,,as_reported,
+other_liabilities,BS,Other liabilities,หนี้สินอื่น,,,,as_reported,
+# --- Equity (bank-relevant) ---
+share_premium_common,BS,Share premium on ordinary shares,ส่วนเกินมูลค่าหุ้นสามัญ,,ifrs-full:SharePremium,,as_reported,
+share_premium_preferred,BS,Share premium on preferred shares,ส่วนเกินมูลค่าหุ้นบุริมสิทธิ,,,bank|insurance,as_reported,
+other_components_of_equity,BS,Other components of equity,องค์ประกอบอื่นของส่วนของเจ้าของ,,,,as_reported,
+retained_earnings_appropriated_legal,BS,Retained earnings - legal reserve appropriated,ทุนสำรองตามกฎหมาย,,,,as_reported,
+retained_earnings_unappropriated,BS,Retained earnings - unappropriated,ยังไม่ได้จัดสรร,,ifrs-full:RetainedEarnings,,as_reported,
+equity_attrib_parent,BS,Equity attributable to owners of the parent,รวมส่วนของบริษัทใหญ่,,ifrs-full:EquityAttributableToOwnersOfParent,,as_reported,
+non_controlling_interests,BS,Non-controlling interests,ส่วนได้เสียที่ไม่มีอำนาจควบคุม,,ifrs-full:NoncontrollingInterests,,as_reported,
+total_liabilities_and_equity,BS,Total liabilities and equity,รวมหนี้สินและส่วนของเจ้าของ,,,,as_reported,
+#
+# --- Cash flow (bank-specific) ---
+cash_received_interest,CF,Cash received from interest,เงินสดรับดอกเบี้ย,,,bank,as_reported,
+cash_paid_interest,CF,Cash paid for interest,เงินสดจ่ายดอกเบี้ย,,,bank,negate_if_outflow,
+cash_received_dividends,CF,Cash received from dividends,เงินสดรับเงินปันผล,,,bank|insurance,as_reported,
+ecl_added_back,CF,Expected credit losses (non-cash adjustment),ผลขาดทุนด้านเครดิตที่คาดว่าจะเกิดขึ้น,,ifrs-full:AdjustmentsForImpairmentLossOnLoansAndAdvances,bank,as_reported,
+change_in_loans,CF,Change in loans to customers (operating cash flow),เงินให้สินเชื่อแก่ลูกหนี้,,,bank,as_reported,
+change_in_deposits,CF,Change in deposits (operating cash flow),เงินรับฝาก,,,bank,as_reported,
+proceeds_long_term_debt,CF,Proceeds from long-term debt issuance,เงินสดรับจากตราสารหนี้ระยะยาว,,,bank,as_reported,
+proceeds_short_term_debt,CF,Proceeds from short-term debt issuance,เงินสดรับจากตราสารหนี้ระยะสั้น,,,bank,as_reported,
+repayment_long_term_debt,CF,Repayment of long-term debt,เงินสดจ่ายชำระคืนตราสารหนี้ระยะยาว,,,bank,negate_if_outflow,
+repayment_short_term_debt,CF,Repayment of short-term debt,เงินสดจ่ายชำระคืนตราสารหนี้ระยะสั้น,,,bank,negate_if_outflow,
+repayment_long_term_borrowings,CF,Repayment of long-term borrowings,เงินสดจ่ายชำระคืนเงินกู้ยืมระยะยาว,,,bank,negate_if_outflow,
+repayment_lease_liabilities,CF,Repayment of lease liabilities,เงินสดจ่ายชำระหนี้สินตามสัญญาเช่า,,,bank|insurance,negate_if_outflow,
+purchase_securities_fvoci,CF,Purchase of securities at fair value through OCI,เงินสดจ่ายในการซื้อหลักทรัพย์ที่วัดมูลค่ายุติธรรมผ่านกำไรขาดทุนเบ็ดเสร็จอื่น,,,bank,negate_if_outflow,
+proceeds_securities_fvoci,CF,Proceeds from sale of securities at FVOCI,เงินสดรับจากการขายหลักทรัพย์ที่วัดมูลค่ายุติธรรมผ่านกำไรขาดทุนเบ็ดเสร็จอื่น,,,bank,as_reported,
+purchase_securities_amortized_cost,CF,Purchase of securities at amortized cost,เงินสดจ่ายในการซื้อหลักทรัพย์ที่วัดมูลค่าด้วยราคาทุนตัดจำหน่าย,,,bank,negate_if_outflow,
+proceeds_securities_amortized_cost,CF,Proceeds from redemption of securities at amortized cost,เงินสดรับจากการไถ่ถอนหลักทรัพย์ที่วัดมูลค่าด้วยราคาทุนตัดจำหน่าย,,,bank,as_reported,
+purchase_subs_associates_jv,CF,Cash paid to invest in subsidiaries associates and JVs,เงินสดจ่ายในการลงทุนในบริษัทย่อย บริษัทร่วมและการร่วมค้า,,,,negate_if_outflow,
+purchase_intangibles,CF,Cash paid for intangible assets,เงินสดจ่ายในการซื้อสินทรัพย์ไม่มีตัวตน,,,,negate_if_outflow,
+proceeds_ppe,CF,Proceeds from sale of PP&E,เงินสดรับจากการขายที่ดิน อาคารและอุปกรณ์,,,,as_reported,
+capex_bank,CF,Cash paid for property plant and equipment (bank phrasing),เงินสดจ่ายในการซื้อที่ดิน อาคารและอุปกรณ์,,ifrs-full:PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities,bank,negate_if_outflow,
+# Note: capex_bank is the bank-phrased variant of the existing `capex` concept. We have proposed
+# it as a separate concept rather than appending the alias because the wording difference
+# (`เงินสดจ่ายในการซื้อ...` vs general `เงินสดจ่ายเพื่อซื้อ...`) is consistent across all bank
+# filings observed and may signal a different intent. RECOMMEND: maintainer review whether to
+# (a) merge into `capex` as an alias, or (b) keep `capex_bank` separate to preserve the
+# distinction. Same question applies to the FVOCI security purchase/sale lines vs general
+# investment buy/sell wording.
