@@ -203,6 +203,107 @@ class Stock:
             name="capex",
         )
 
+    # --- v2 dataset-only statement / report properties ----------------------
+    #
+    # All five raise NotImplementedError under source="live" — they require
+    # a tagged-long ``financial_lines`` table or its DOC/DOCX siblings, none
+    # of which the v1.x Finnomena/ThaiSecuritiesData live sources expose.
+    # Revision resolution mirrors ``.capex`` above:
+    # ``self.revision -> get_data_revision() -> "main"``.
+
+    def _ensure_dataset_source(self, prop_name: str) -> str:
+        if self.source != "dataset":
+            raise NotImplementedError(
+                f"Stock.{prop_name} is only available with source='dataset'. "
+                "Pass source='dataset' (and revision='...') to Stock(...)."
+            )
+        return self.revision or get_data_revision()
+
+    def _statement_dataframe(self, statement: str) -> pd.DataFrame:
+        """Pivot ``financial_lines`` rows for one statement into a wide df.
+
+        Output: rows = ``period``, columns = ``concept``. Only mapped
+        concepts (``concept IS NOT NULL``) appear as columns; the
+        consolidated view is the canonical one. Same-period collisions on
+        a single concept (rare, would only happen on duplicate filings)
+        keep the most-recent value via ``ANY_VALUE``.
+        """
+        revision = self._ensure_dataset_source(f"{statement.lower()}_statement")
+        client = DatasetClient()
+        df = client.query(
+            "SELECT period, concept, value "
+            "FROM {lines} "
+            f"WHERE symbol = '{self.symbol_upper}' "
+            f"AND statement = '{statement}' "
+            "AND consolidation = 'consolidated' "
+            "AND concept IS NOT NULL "
+            "ORDER BY period",
+            revision=revision,
+        )
+        if df.empty:
+            return pd.DataFrame()
+        wide = df.pivot_table(
+            index="period",
+            columns="concept",
+            values="value",
+            aggfunc="first",
+        )
+        wide.columns.name = None
+        wide.index.name = "period"
+        return wide
+
+    @property
+    def income_statement(self) -> pd.DataFrame:
+        """Wide IS table indexed by ``period``, columns = mapped concepts."""
+        return self._statement_dataframe("IS")
+
+    @property
+    def balance_sheet(self) -> pd.DataFrame:
+        """Wide BS table indexed by ``period``, columns = mapped concepts."""
+        return self._statement_dataframe("BS")
+
+    @property
+    def cash_flow_statement(self) -> pd.DataFrame:
+        """Wide CF table indexed by ``period``, columns = mapped concepts."""
+        return self._statement_dataframe("CF")
+
+    @property
+    def notes(self) -> pd.DataFrame:
+        """Notes markdown keyed by ``period``.
+
+        Reads ``notes_text.parquet`` directly from HF (the default
+        ``DatasetClient`` query path resolves ``financial_lines.parquet``
+        only — for sibling tables we construct the URL inline).
+        """
+        revision = self._ensure_dataset_source("notes")
+        url = (
+            f"https://huggingface.co/datasets/ninyawee/thaifin-financials"
+            f"/resolve/{revision}/notes_text.parquet"
+        )
+        client = DatasetClient(parquet_url=url)
+        return client.query(
+            "SELECT period, filing_id, raw_text_md FROM {lines} "
+            f"WHERE symbol = '{self.symbol_upper}' "
+            "ORDER BY period"
+        ).set_index("period")
+
+    @property
+    def auditor_report(self) -> pd.DataFrame:
+        """Auditor-report rows keyed by ``period``."""
+        revision = self._ensure_dataset_source("auditor_report")
+        url = (
+            f"https://huggingface.co/datasets/ninyawee/thaifin-financials"
+            f"/resolve/{revision}/auditor_reports.parquet"
+        )
+        client = DatasetClient(parquet_url=url)
+        return client.query(
+            "SELECT period, filing_id, audit_basis, opinion_type, "
+            "going_concern_emphasis, auditor_firm, signing_date, "
+            "signing_partner, raw_text_md FROM {lines} "
+            f"WHERE symbol = '{self.symbol_upper}' "
+            "ORDER BY period"
+        ).set_index("period")
+
     def __repr__(self) -> str:
         """
         String representation of the Stock object.

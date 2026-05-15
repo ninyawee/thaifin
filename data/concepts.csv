@@ -1,4 +1,4 @@
-# thaifin concept dictionary — v0
+# thaifin concept dictionary — v0.1
 #
 # Schema (every row must have all 6 columns; aliases_th and xbrl_ref may be empty):
 #   concept       — short stable English ID, snake_case (e.g., capex, revenue, gross_profit).
@@ -25,31 +25,144 @@
 #   - PTT FY2025 (annual, audited)   — FILEID 0646FIN190220261747440265T
 #   - COM7 2025-Q1 (quarterly, reviewed) — FILEID 1272FIN130520251832480819T
 #
+# Sources for v0.1 expansion (slice #15, May 2026):
+#   - PTT 2016-2025 full filing set (~40 zips) — verified each new label_th
+#     appears verbatim across multiple periods before adding.
+#
 # Lines below are CSV (header row first). Comment lines starting with # are ignored by readers.
 concept,statement,label_en,label_th,aliases_th,xbrl_ref
 revenue,IS,Revenue from sales and services,รายได้จากการขายและการให้บริการ,,ifrs-full:Revenue
+other_income,IS,Other income,รายได้อื่น,,ifrs-full:OtherIncome
 cogs,IS,Cost of sales and services,ต้นทุนขายและการให้บริการ,,ifrs-full:CostOfSales
 gross_profit,IS,Gross profit,กำไรขั้นต้น,,ifrs-full:GrossProfit
 selling_expenses,IS,Selling and distribution expenses,ค่าใช้จ่ายในการขายและจัดจำหน่าย,ค่าใช้จ่ายในการขายและต้นทุนในการจัดจำหน่าย,ifrs-full:DistributionCosts
 admin_expenses,IS,Administrative expenses,ค่าใช้จ่ายในการบริหาร,,ifrs-full:AdministrativeExpense
+royalty_expenses,IS,Royalty expenses,ค่าภาคหลวง,,
 operating_profit,IS,Operating profit,กำไรจากการดำเนินงาน,,ifrs-full:ProfitLossFromOperatingActivities
+share_of_profit_associates,IS,Share of profit (loss) of associates and joint ventures,ส่วนแบ่งกำไร(ขาดทุน)จากเงินลงทุนในการร่วมค้าและบริษัทร่วม,ส่วนแบ่งกำไรจากเงินลงทุนในการร่วมค้าและบริษัทร่วม|ส่วนแบ่งกำไรจากเงินลงทุนในการร่วมค้า|ส่วนแบ่งกำไรจากเงินลงทุนในบริษัทร่วม,ifrs-full:ShareOfProfitLossOfAssociatesAndJointVenturesAccountedForUsingEquityMethod
 ebit,IS,Profit before finance costs and income tax,กำไรก่อนต้นทุนทางการเงินและภาษีเงินได้,,
 finance_costs,IS,Finance costs,ต้นทุนทางการเงิน,,ifrs-full:FinanceCosts
 profit_before_tax,IS,Profit before income tax,กำไรก่อนภาษีเงินได้,,ifrs-full:ProfitLossBeforeTax
-income_tax_expense,IS,Income tax expense,ค่าใช้จ่ายภาษีเงินได้,,ifrs-full:IncomeTaxExpenseContinuingOperations
-net_profit,IS,Profit for the period,กำไรสำหรับปี,กำไรสำหรับรอบระยะเวลา,ifrs-full:ProfitLoss
+income_tax_expense,IS,Income tax expense,ค่าใช้จ่ายภาษีเงินได้,ภาษีเงินได้,ifrs-full:IncomeTaxExpenseContinuingOperations
+net_profit,IS,Profit for the period,กำไรสำหรับปี,กำไรสำหรับรอบระยะเวลา|กำไรสำหรับงวด,ifrs-full:ProfitLoss
+net_profit_continuing_operations,IS,Profit for the period from continuing operations,กำไรสำหรับงวดจากการดำเนินงานต่อเนื่อง,กำไรสำหรับปีจากการดำเนินงานต่อเนื่อง,ifrs-full:ProfitLossFromContinuingOperations
+total_comprehensive_income,IS,Total comprehensive income for the period,กำไรเบ็ดเสร็จรวมสำหรับปี,กำไรเบ็ดเสร็จรวมสำหรับงวด,ifrs-full:ComprehensiveIncome
+other_comprehensive_income,IS,Other comprehensive income for the period - net of tax,กำไร(ขาดทุน)เบ็ดเสร็จอื่นสำหรับปี - สุทธิจากภาษี,กำไร(ขาดทุน)เบ็ดเสร็จอื่นสำหรับงวด - สุทธิจากภาษี|ขาดทุนเบ็ดเสร็จอื่นสำหรับปี - สุทธิจากภาษี|กำไร(ขาดทุน)เบ็ดเสร็จอื่นสำหรับปี|กำไร(ขาดทุน)เบ็ดเสร็จอื่นสำหรับงวด,ifrs-full:OtherComprehensiveIncome
+fx_gain_loss,IS,Gain (loss) on foreign exchange,กำไร(ขาดทุน)จากอัตราแลกเปลี่ยนเงินตราต่างประเทศ,กำไรจากอัตราแลกเปลี่ยนเงินตราต่างประเทศ,
 eps_basic,IS,Basic earnings per share,กำไรต่อหุ้นขั้นพื้นฐาน,กำไรต่อหุ้นขั้นพื้นฐาน (บาท),ifrs-full:BasicEarningsLossPerShare
+net_profit_owners_of_parent,IS,Profit attributable to owners of the parent,ส่วนที่เป็นของผู้ถือหุ้นของบริษัทฯ,,ifrs-full:ProfitLossAttributableToOwnersOfParent
+net_profit_nci,IS,Profit attributable to non-controlling interests,ส่วนที่เป็นของผู้มีส่วนได้เสียที่ไม่มีอำนาจควบคุมของบริษัทย่อย,,ifrs-full:ProfitLossAttributableToNoncontrollingInterests
+share_of_other_ci_associates,IS,Share of other comprehensive income (loss) of associates and JV,ส่วนแบ่งกำไร(ขาดทุน)เบ็ดเสร็จอื่นในการร่วมค้าและบริษัทร่วม,ส่วนแบ่งขาดทุนเบ็ดเสร็จอื่นในการร่วมค้าและบริษัทร่วม,ifrs-full:ShareOfOtherComprehensiveIncomeOfAssociatesAndJointVenturesAccountedForUsingEquityMethod
+tax_on_cash_flow_hedges,IS,Income tax relating to cash flow hedges,ภาษีเงินได้เกี่ยวกับการป้องกันความเสี่ยงกระแสเงินสด,,
 cash,BS,Cash and cash equivalents,เงินสดและรายการเทียบเท่าเงินสด,,ifrs-full:CashAndCashEquivalents
+short_term_investments,BS,Short-term financial-asset investments,เงินลงทุนในสินทรัพย์ทางการเงินระยะสั้น,,
+trade_receivables,BS,Trade receivables,ลูกหนี้การค้า,,ifrs-full:TradeAndOtherReceivables
+other_current_receivables,BS,Other current receivables,ลูกหนี้หมุนเวียนอื่น,,
+inventory,BS,Inventories,สินค้าคงเหลือ,,ifrs-full:Inventories
+materials_inventory,BS,Materials and supplies inventory,พัสดุคงเหลือ,,
+short_term_loans_receivable,BS,Short-term loans receivable,เงินให้กู้ยืมระยะสั้น,,
+long_term_loans_receivable,BS,Long-term loans receivable,เงินให้กู้ยืมระยะยาว,,
+other_current_assets,BS,Other current assets,สินทรัพย์หมุนเวียนอื่น,,
+investment_in_subsidiaries,BS,Investment in subsidiaries,เงินลงทุนในบริษัทย่อย,,
+investment_in_associates,BS,Investment in associates,เงินลงทุนในบริษัทร่วม,,
+investment_in_joint_ventures,BS,Investment in joint ventures,เงินลงทุนในการร่วมค้า,,
+investment_property,BS,Investment property,อสังหาริมทรัพย์เพื่อการลงทุน,,ifrs-full:InvestmentProperty
 ppe,BS,Property plant and equipment,ที่ดิน อาคารและอุปกรณ์,ที่ดิน อาคารและอุปกรณ์ สุทธิ,ifrs-full:PropertyPlantAndEquipment
+right_of_use_assets,BS,Right-of-use assets,สินทรัพย์สิทธิการใช้,,ifrs-full:RightofuseAssets
+goodwill,BS,Goodwill,ค่าความนิยม,,ifrs-full:Goodwill
+intangible_assets,BS,Intangible assets other than goodwill,สินทรัพย์ไม่มีตัวตนอื่นนอกจากค่าความนิยม,,ifrs-full:IntangibleAssetsOtherThanGoodwill
+deferred_tax_assets,BS,Deferred tax assets,สินทรัพย์ภาษีเงินได้รอการตัดบัญชี,,ifrs-full:DeferredTaxAssets
+other_non_current_assets,BS,Other non-current assets,สินทรัพย์ไม่หมุนเวียนอื่น,,
 total_assets,BS,Total assets,รวมสินทรัพย์,,ifrs-full:Assets
+bank_overdrafts_short_term_borrowings,BS,Bank overdrafts and short-term borrowings from financial institutions,เงินเบิกเกินบัญชีและเงินกู้ยืมระยะสั้นจากสถาบันการเงิน,,
+trade_payables,BS,Trade payables,เจ้าหนี้การค้า,,ifrs-full:TradeAndOtherPayables
+income_tax_payable,BS,Income tax payable,ภาษีเงินได้ค้างจ่าย,,ifrs-full:CurrentTaxLiabilitiesCurrent
+current_lease_liabilities,BS,Current portion of lease liabilities,ส่วนของหนี้สินตามสัญญาเช่าที่ถึงกำหนดชำระภายในหนึ่งปี,,
+current_long_term_borrowings,BS,Current portion of long-term borrowings,ส่วนของเงินกู้ยืมระยะยาวที่ถึงกำหนดชำระภายในหนึ่งปี,,
+other_current_liabilities,BS,Other current liabilities,หนี้สินหมุนเวียนอื่น,,
+long_term_borrowings,BS,Long-term borrowings,เงินกู้ยืมระยะยาว,,
+non_current_lease_liabilities,BS,Non-current lease liabilities,หนี้สินตามสัญญาเช่า,,ifrs-full:LeaseLiabilities
+deferred_tax_liabilities,BS,Deferred tax liabilities,หนี้สินภาษีเงินได้รอการตัดบัญชี,,ifrs-full:DeferredTaxLiabilities
+employee_benefits_provision,BS,Provision for employee benefits,ประมาณการหนี้สินสำหรับผลประโยชน์พนักงาน,,
+decommissioning_provision_long_term,BS,Long-term decommissioning provision,ประมาณการหนี้สินค่ารื้อถอนระยะยาว,,
+other_non_current_liabilities,BS,Other non-current liabilities,หนี้สินไม่หมุนเวียนอื่น,,
 total_liabilities,BS,Total liabilities,รวมหนี้สิน,,ifrs-full:Liabilities
-equity,BS,Total equity,รวมส่วนของผู้ถือหุ้น,รวมส่วนของเจ้าของ,ifrs-full:Equity
 paid_up_capital,BS,Issued and paid-up share capital,ทุนออกจำหน่ายและชำระเต็มมูลค่าแล้ว,ทุนที่ออกและชำระแล้ว,ifrs-full:IssuedCapital
+share_premium,BS,Share premium - ordinary shares,ส่วนเกินมูลค่าหุ้นสามัญ,,ifrs-full:SharePremium
+treasury_shares,BS,Treasury shares,หุ้นทุนซื้อคืน,,ifrs-full:TreasuryShares
+other_equity_components,BS,Other components of equity,องค์ประกอบอื่นของส่วนของผู้ถือหุ้น,,ifrs-full:OtherReserves
+equity_owners_of_parent,BS,Equity attributable to owners of the parent,ส่วนของผู้ถือหุ้นของบริษัทฯ,ส่วนที่เป็นของผู้ถือหุ้นของบริษัทฯ,ifrs-full:EquityAttributableToOwnersOfParent
+non_controlling_interests,BS,Non-controlling interests,ส่วนของผู้มีส่วนได้เสียที่ไม่มีอำนาจควบคุมของบริษัทย่อย,ส่วนที่เป็นของผู้มีส่วนได้เสียที่ไม่มีอำนาจควบคุมของบริษัทย่อย,ifrs-full:NoncontrollingInterests
+equity,BS,Total equity,รวมส่วนของผู้ถือหุ้น,รวมส่วนของเจ้าของ,ifrs-full:Equity
+total_liabilities_and_equity,BS,Total liabilities and equity,รวมหนี้สินและส่วนของผู้ถือหุ้น,,ifrs-full:EquityAndLiabilities
 ocf,CF,Net cash from operating activities,เงินสดสุทธิได้มาจากกิจกรรมดำเนินงาน,,ifrs-full:CashFlowsFromUsedInOperatingActivities
+cash_received_from_operations,CF,Cash received from operations,เงินสดรับจากการดำเนินงาน,,
+interest_received,CF,Interest received,เงินสดรับจากดอกเบี้ย,ดอกเบี้ยรับ,ifrs-full:InterestReceivedClassifiedAsOperatingActivities
+dividends_received,CF,Dividends received,เงินสดรับจากเงินปันผล,เงินปันผลรับ,ifrs-full:DividendsReceivedClassifiedAsOperatingActivities
+tax_paid,CF,Income tax paid,เงินสดจ่ายภาษีเงินได้,จ่ายภาษีเงินได้,ifrs-full:IncomeTaxesPaidRefundClassifiedAsOperatingActivities
+interest_paid,CF,Finance costs paid,เงินสดจ่ายต้นทุนทางการเงิน,จ่ายต้นทุนทางการเงิน,ifrs-full:InterestPaidClassifiedAsOperatingActivities
+depreciation_amortization,CF,Depreciation and amortization,ค่าเสื่อมราคาและค่าตัดจำหน่าย,,ifrs-full:DepreciationAndAmortisationExpense
 capex,CF,Cash paid for property plant and equipment,เงินสดจ่ายสำหรับที่ดิน อาคารและอุปกรณ์ และอสังหาริมทรัพย์เพื่อการลงทุน,เงินสดจ่ายเพื่อซื้อสินทรัพย์ถาวร,ifrs-full:PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities
 investing_activities,CF,Net cash from (used in) investing activities,เงินสดสุทธิได้มาจาก(ใช้ไปใน)กิจกรรมลงทุน,เงินสดสุทธิใช้ไปในกิจกรรมลงทุน,ifrs-full:CashFlowsFromUsedInInvestingActivities
 financing_activities,CF,Net cash used in financing activities,เงินสดสุทธิใช้ไปในกิจกรรมจัดหาเงิน,,ifrs-full:CashFlowsFromUsedInFinancingActivities
-tax_paid,CF,Income tax paid,เงินสดจ่ายภาษีเงินได้,จ่ายภาษีเงินได้,ifrs-full:IncomeTaxesPaidRefundClassifiedAsOperatingActivities
-interest_paid,CF,Finance costs paid,เงินสดจ่ายต้นทุนทางการเงิน,จ่ายต้นทุนทางการเงิน,ifrs-full:InterestPaidClassifiedAsOperatingActivities
+proceeds_from_long_term_borrowings,CF,Proceeds from long-term borrowings,เงินสดรับจากการกู้ยืมระยะยาว,,ifrs-full:ProceedsFromBorrowingsClassifiedAsFinancingActivities
+repayment_of_long_term_borrowings,CF,Repayment of long-term borrowings,เงินสดจ่ายคืนเงินกู้ยืมระยะยาว,,ifrs-full:RepaymentsOfBorrowingsClassifiedAsFinancingActivities
+lease_payments,CF,Cash paid for lease liabilities,เงินสดจ่ายค่างวดตามสัญญาเช่า,,ifrs-full:CashOutflowForLeases
+treasury_share_buyback,CF,Cash paid for treasury share buyback,เงินสดจ่ายซื้อหุ้นทุนซื้อคืน,,
 dividends_paid,CF,Dividends paid,เงินปันผลจ่าย,,ifrs-full:DividendsPaidClassifiedAsFinancingActivities
-depreciation_amortization,CF,Depreciation and amortization,ค่าเสื่อมราคาและค่าตัดจำหน่าย,,ifrs-full:DepreciationAndAmortisationExpense
+fx_effect_on_cash,CF,Effect of exchange rates on cash and equivalents,ผลกระทบจากอัตราแลกเปลี่ยนในเงินสดและรายการเทียบเท่าเงินสด,,ifrs-full:EffectOfExchangeRateChangesOnCashAndCashEquivalents
+net_change_in_cash,CF,Net increase (decrease) in cash and cash equivalents,เงินสดและรายการเทียบเท่าเงินสดเพิ่มขึ้น(ลดลง)สุทธิ,,
+cash_beginning_of_period,CF,Cash and cash equivalents at the beginning of the period,เงินสดและรายการเทียบเท่าเงินสด ณ วันต้นงวด,,ifrs-full:CashAndCashEquivalents
+cash_end_of_period,CF,Cash and cash equivalents at the end of the period,เงินสดและรายการเทียบเท่าเงินสด ณ วันปลายงวด,,
+fx_translation_difference,CF,Exchange differences on translation of financial statements,ผลต่างจากการแปลงค่างบการเงิน,,ifrs-full:ExchangeDifferencesOnTranslationOfForeignOperationsBeforeTax
+proceeds_from_subsidiary_share_issue,CF,Proceeds from issuance of subsidiary's ordinary shares,เงินสดรับจากการออกหุ้นสามัญของบริษัทย่อย,,
+right_of_use_asset_payments,CF,Cash paid for right-of-use assets,เงินสดจ่ายสำหรับสินทรัพย์สิทธิการใช้,,
+exploration_and_evaluation_paid,CF,Cash paid for exploration and evaluation,เงินสดจ่ายสำหรับการสำรวจและประเมินค่า,,
+loans_made_long_term,CF,Cash paid for long-term loans receivable,เงินสดจ่ายสำหรับเงินให้กู้ยืมระยะยาว,,
+proceeds_from_long_term_loans_receivable,CF,Cash received from long-term loans receivable,เงินสดรับคืนเงินให้กู้ยืมระยะยาว,,
+gas_cylinder_deposits,BS,Gas cylinder deposits (energy-sector specific),เงินมัดจำถังก๊าซ,,
+short_term_borrowings,BS,Short-term borrowings,เงินกู้ยืมระยะสั้น,,
+other_receivables,BS,Other receivables,ลูกหนี้อื่น,,
+other_payables,BS,Other payables,เจ้าหนี้อื่น,,
+exploration_and_evaluation_assets,BS,Exploration and evaluation assets,สินทรัพย์ที่เกิดจากการสำรวจและประเมินค่า,,ifrs-full:ExplorationAndEvaluationAssets
+current_lease_liabilities_v2,BS,Current portion of long-term borrowings,เงินกู้ยืมระยะยาวที่ถึงกำหนดชำระภายในหนึ่งปี,,
+decommissioning_provision_short_term,BS,Short-term decommissioning provision,ประมาณการหนี้สินค่ารื้อถอนระยะสั้น,,
+current_derivative_assets,BS,Current derivative-instrument assets,สินทรัพย์ตราสารอนุพันธ์หมุนเวียน,,
+non_current_derivative_assets,BS,Non-current derivative-instrument assets,สินทรัพย์ตราสารอนุพันธ์ไม่หมุนเวียน,,
+current_derivative_liabilities,BS,Current derivative-instrument liabilities,หนี้สินตราสารอนุพันธ์หมุนเวียน,,
+non_current_derivative_liabilities,BS,Non-current derivative-instrument liabilities,หนี้สินตราสารอนุพันธ์ไม่หมุนเวียน,,
+intangible_asset_payables,CF,Cash paid for intangible-asset purchases,เจ้าหนี้จากการซื้อสินทรัพย์ไม่มีตัวตน,,
+proceeds_from_short_term_borrowings,CF,Net change in short-term borrowings,เงินกู้ยืมระยะสั้นเพิ่มขึ้น(ลดลง),,
+profit_for_period_eq,EQ,Profit for the period (equity-changes view),กำไรสำหรับปี,กำไรสำหรับงวด,
+dividends_paid_eq,EQ,Dividends paid (equity-changes view),เงินปันผลจ่าย,,
+dividends_paid_subsidiary_eq,EQ,Dividends paid by subsidiaries to NCI,เงินปันผลจ่ายของบริษัทย่อย,,
+short_term_investments_legacy,BS,Short-term investments (legacy term),เงินลงทุนชั่วคราว,,
+long_term_investments_other,BS,Other long-term investments,เงินลงทุนระยะยาวอื่น|เงินลงทุนในสินทรัพย์ทางการเงินระยะยาวอื่น,,
+other_current_financial_assets,BS,Other current financial assets,สินทรัพย์ทางการเงินหมุนเวียนอื่น,,
+other_non_current_financial_assets,BS,Other non-current financial assets,สินทรัพย์ทางการเงินไม่หมุนเวียนอื่น,,
+other_current_financial_liabilities,BS,Other current financial liabilities,หนี้สินทางการเงินหมุนเวียนอื่น,,
+other_non_current_financial_liabilities,BS,Other non-current financial liabilities,หนี้สินทางการเงินไม่หมุนเวียนอื่น,,
+assets_held_for_sale,BS,Assets held for sale,สินทรัพย์ที่ถือไว้เพื่อขาย,,ifrs-full:NoncurrentAssetsHeldForSale
+liabilities_held_for_sale,BS,Liabilities directly associated with assets held for sale,หนี้สินที่เกี่ยวข้องโดยตรงกับสินทรัพย์ที่ถือไว้เพื่อขาย,,
+proceeds_from_subsidiary_disposal,CF,Cash received from disposal of investments in subsidiaries,เงินสดรับจากการขายเงินลงทุนในบริษัทย่อย,,
+proceeds_from_long_term_investment_disposal,CF,Cash received from disposal of long-term investments,เงินสดรับจากการขายเงินลงทุนในสินทรัพย์ทางการเงินระยะยาวอื่น,,
+investment_in_subsidiary_paid,CF,Cash paid for investment in subsidiaries,เงินสดจ่ายสำหรับเงินลงทุนในบริษัทย่อย,,
+investment_in_long_term_other_paid,CF,Cash paid for long-term other investments,เงินสดจ่ายสำหรับเงินลงทุนในสินทรัพย์ทางการเงินระยะยาวอื่น,,
+derivative_paid,CF,Cash paid for derivatives,เงินสดจ่ายสำหรับตราสารอนุพันธ์,เงินสดจ่ายตราสารอนุพันธ์,
+derivative_received,CF,Cash received from derivatives,เงินสดรับจากตราสารอนุพันธ์,,
+change_in_subsidiary_share,CF,Cash paid for change in subsidiary ownership,เงินสดจ่ายจากการเปลี่ยนสัดส่วนเงินลงทุนในบริษัทย่อย,,
+discontinued_operations,IS,Profit (loss) from discontinued operations - net of tax,จากการดำเนินงานที่ยกเลิก - สุทธิจากภาษี,จากการดำเนินงานที่ยกเลิก,ifrs-full:ProfitLossFromDiscontinuedOperations
+fx_translation_difference_is,IS,Exchange differences from translation of financial statements,ผลต่างของอัตราแลกเปลี่ยนจากการแปลงค่างบการเงิน,,
+profit_before_tax_cf,CF,Profit before income tax (CF starting point),กำไรก่อนภาษีเงินได้,,
+intangible_asset_cash_paid,CF,Cash paid for intangible assets,เงินสดจ่ายสำหรับสินทรัพย์ไม่มีตัวตน,,
+business_acquisition_paid,CF,Net cash paid for business combinations,เงินสดจ่ายสุทธิจากการซื้อธุรกิจ,,ifrs-full:CashFlowsFromLosingControlOfSubsidiariesOrOtherBusinessesClassifiedAsInvestingActivities
+change_in_short_term_loans_from_fi,CF,Change in bank overdrafts and short-term loans from financial institutions,เงินเบิกเกินบัญชีและเงินกู้ยืมระยะสั้นจากสถาบันการเงินเพิ่มขึ้น(ลดลง),,
+change_in_subsidiary_ownership_eq,EQ,Change in ownership interest in subsidiaries (equity-changes view),การเปลี่ยนแปลงส่วนได้เสียในบริษัทย่อย,,
+subsidiary_share_increase_eq,EQ,Subsidiary share capital increase (equity-changes view),การเพิ่มทุนของบริษัทย่อย,,
+available_for_sale_investments,BS,Available-for-sale investments,เงินลงทุนเผื่อขาย,,
+royalty_and_petroleum_remuneration,IS,Royalty and petroleum remuneration,ค่าภาคหลวงและค่าตอบแทนสำหรับปิโตรเลียม,,
+gain_loss_on_derivatives,IS,Gain (loss) on derivatives,กำไร(ขาดทุน)จากตราสารอนุพันธ์,,
+tax_on_hedge_instruments,IS,Income tax relating to cash-flow hedge instruments,ภาษีเงินได้เกี่ยวกับเครื่องมือป้องกันความเสี่ยงกระแสเงินสด,,
+current_lease_liabilities_simple,BS,Lease liabilities due within one year,หนี้สินตามสัญญาเช่าที่ถึงกำหนดชำระภายในหนึ่งปี,,
+tax_on_afs_investments,IS,Income tax relating to available-for-sale investments,ภาษีเงินได้เกี่ยวกับการวัดมูลค่าเงินลงทุนเผื่อขาย,,
+share_of_other_ci_associates_v2,IS,Share of other comprehensive income of associates and JV (positive form),ส่วนแบ่งกำไรเบ็ดเสร็จอื่นในการร่วมค้าและบริษัทร่วม,,
