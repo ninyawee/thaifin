@@ -2,9 +2,12 @@
 This module provides the `Stock` class, which serves as the main API for accessing individual Thai stock fundamental data.
 """
 
+from typing import Literal
+
 import arrow
 import pandas as pd
 
+from thaifin.data import DatasetClient
 from thaifin.sources.finnomena.model import QuarterFinancialSheetDatum
 from thaifin.sources.thai_securities_data.models import SecurityData
 from thaifin.sources.finnomena import FinnomenaService
@@ -12,16 +15,31 @@ from thaifin.sources.thai_securities_data import ThaiSecuritiesDataService
 
 class Stock:
 
-    def __init__(self, symbol: str, language: str = "en"):
+    def __init__(
+        self,
+        symbol: str,
+        language: str = "en",
+        source: Literal["dataset", "live"] = "live",
+        revision: str | None = None,
+    ):
         """
         Initialize a Stock object with the given symbol and language.
 
         Args:
             symbol (str): The stock symbol.
             language (str): Language preference ("en" or "th"). Defaults to "en".
+            source (str): Data source. ``"live"`` (default in v1.x; preserves
+                existing behavior) reaches Finnomena/ThaiSecuritiesData over
+                HTTP. ``"dataset"`` reads from the HuggingFace-hosted parquet
+                via DuckDB streaming. The default flips to ``"dataset"`` in a
+                later slice once dataset coverage is broad enough.
+            revision (str | None): HF dataset revision (git tag, branch, or
+                sha) when ``source="dataset"``. Ignored when ``source="live"``.
         """
         self.symbol_upper: str = symbol.upper()
         self.language: str = language
+        self.source: Literal["dataset", "live"] = source
+        self.revision: str | None = revision
         self.info: SecurityData = ThaiSecuritiesDataService().get_stock(self.symbol_upper, language=self.language)
         self.updated: arrow.Arrow = arrow.utcnow()
 
@@ -135,6 +153,36 @@ class Stock:
         df.index = pd.to_datetime(df.index, format="%Y").to_period("Y")
         df = df.drop(columns=[quarter_col])
         return df
+
+    @property
+    def capex(self) -> pd.Series:
+        """Capital expenditure series indexed by period.
+
+        Dataset-only. Reads ``concept = "capex"`` rows from
+        ``financial_lines.parquet`` at the configured HF revision, filtered
+        to consolidated rows. Returns a ``pd.Series`` indexed by ``period``
+        (str), values are float THB.
+        """
+        if self.source != "dataset":
+            raise NotImplementedError(
+                "Stock.capex is only available with source='dataset'. "
+                "Pass source='dataset' (and revision='...') to Stock(...)."
+            )
+        revision = self.revision or "main"
+        client = DatasetClient()
+        df = client.query(
+            "SELECT period, value FROM {lines} "
+            f"WHERE symbol = '{self.symbol_upper}' "
+            "AND concept = 'capex' "
+            "AND consolidation = 'consolidated' "
+            "ORDER BY period",
+            revision=revision,
+        )
+        return pd.Series(
+            df["value"].to_numpy(),
+            index=pd.Index(df["period"].to_numpy(), name="period"),
+            name="capex",
+        )
 
     def __repr__(self) -> str:
         """
