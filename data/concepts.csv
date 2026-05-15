@@ -1,16 +1,27 @@
-# thaifin concept dictionary — v0
+# thaifin concept dictionary — v0.1
 #
-# Schema (every row must have all 6 columns; aliases_th and xbrl_ref may be empty):
-#   concept       — short stable English ID, snake_case (e.g., capex, revenue, gross_profit).
-#                   STABILITY PROMISE: concept IDs are stable identifiers. Renaming a concept
-#                   is a BREAKING CHANGE for dataset consumers and requires a major version bump.
-#   statement     — one of BS, IS, CF, EQ.
-#   label_en      — human English label.
-#   label_th      — the canonical Thai label (most common phrasing, verbatim from a real filing).
-#   aliases_th    — pipe-separated (|) list of alternative Thai phrasings observed in real
-#                   filings. Empty if there's only one phrasing or no aliases observed yet.
-#   xbrl_ref      — IFRS XBRL taxonomy ID (e.g., ifrs-full:Revenue). Empty if no confident
-#                   mapping exists. Better empty than mislabeled.
+# Schema (every row must have all 8 columns; trailing columns may be empty):
+#   concept                — short stable English ID, snake_case (e.g., capex, revenue).
+#                            STABILITY PROMISE: concept IDs are stable identifiers. Renaming a
+#                            concept is a BREAKING CHANGE for consumers and requires a major
+#                            version bump.
+#   statement              — one of BS, IS, CF, EQ.
+#   label_en               — human English label.
+#   label_th               — the canonical Thai label (most common phrasing, verbatim from a
+#                            real filing).
+#   aliases_th             — pipe-separated (|) list of alternative Thai phrasings observed in
+#                            real filings. Empty if no aliases observed yet.
+#   xbrl_ref               — IFRS XBRL taxonomy ID (e.g., ifrs-full:Revenue). Empty if no
+#                            confident mapping exists. Better empty than mislabeled.
+#   applicable_industries  — pipe-separated industries this concept applies to. EMPTY = all
+#                            industries (cross-industry concept). Use specific values like
+#                            "bank|insurance" for industry-only concepts (interest_income,
+#                            premium_income). Industry tags align with SET sector taxonomy.
+#   sign_convention        — how the parser interprets values for this concept:
+#                              as_reported  — use values as they appear (default)
+#                              abs          — take absolute value (filing inconsistency observed)
+#                              negate_if_outflow — flip sign so outflows are always negative
+#                            Default for new rows: as_reported.
 #
 # How to add a new concept:
 #   1. Open a PR against this file.
@@ -26,30 +37,30 @@
 #   - COM7 2025-Q1 (quarterly, reviewed) — FILEID 1272FIN130520251832480819T
 #
 # Lines below are CSV (header row first). Comment lines starting with # are ignored by readers.
-concept,statement,label_en,label_th,aliases_th,xbrl_ref
-revenue,IS,Revenue from sales and services,รายได้จากการขายและการให้บริการ,,ifrs-full:Revenue
-cogs,IS,Cost of sales and services,ต้นทุนขายและการให้บริการ,,ifrs-full:CostOfSales
-gross_profit,IS,Gross profit,กำไรขั้นต้น,,ifrs-full:GrossProfit
-selling_expenses,IS,Selling and distribution expenses,ค่าใช้จ่ายในการขายและจัดจำหน่าย,ค่าใช้จ่ายในการขายและต้นทุนในการจัดจำหน่าย,ifrs-full:DistributionCosts
-admin_expenses,IS,Administrative expenses,ค่าใช้จ่ายในการบริหาร,,ifrs-full:AdministrativeExpense
-operating_profit,IS,Operating profit,กำไรจากการดำเนินงาน,,ifrs-full:ProfitLossFromOperatingActivities
-ebit,IS,Profit before finance costs and income tax,กำไรก่อนต้นทุนทางการเงินและภาษีเงินได้,,
-finance_costs,IS,Finance costs,ต้นทุนทางการเงิน,,ifrs-full:FinanceCosts
-profit_before_tax,IS,Profit before income tax,กำไรก่อนภาษีเงินได้,,ifrs-full:ProfitLossBeforeTax
-income_tax_expense,IS,Income tax expense,ค่าใช้จ่ายภาษีเงินได้,,ifrs-full:IncomeTaxExpenseContinuingOperations
-net_profit,IS,Profit for the period,กำไรสำหรับปี,กำไรสำหรับรอบระยะเวลา,ifrs-full:ProfitLoss
-eps_basic,IS,Basic earnings per share,กำไรต่อหุ้นขั้นพื้นฐาน,กำไรต่อหุ้นขั้นพื้นฐาน (บาท),ifrs-full:BasicEarningsLossPerShare
-cash,BS,Cash and cash equivalents,เงินสดและรายการเทียบเท่าเงินสด,,ifrs-full:CashAndCashEquivalents
-ppe,BS,Property plant and equipment,ที่ดิน อาคารและอุปกรณ์,ที่ดิน อาคารและอุปกรณ์ สุทธิ,ifrs-full:PropertyPlantAndEquipment
-total_assets,BS,Total assets,รวมสินทรัพย์,,ifrs-full:Assets
-total_liabilities,BS,Total liabilities,รวมหนี้สิน,,ifrs-full:Liabilities
-equity,BS,Total equity,รวมส่วนของผู้ถือหุ้น,รวมส่วนของเจ้าของ,ifrs-full:Equity
-paid_up_capital,BS,Issued and paid-up share capital,ทุนออกจำหน่ายและชำระเต็มมูลค่าแล้ว,ทุนที่ออกและชำระแล้ว,ifrs-full:IssuedCapital
-ocf,CF,Net cash from operating activities,เงินสดสุทธิได้มาจากกิจกรรมดำเนินงาน,,ifrs-full:CashFlowsFromUsedInOperatingActivities
-capex,CF,Cash paid for property plant and equipment,เงินสดจ่ายสำหรับที่ดิน อาคารและอุปกรณ์ และอสังหาริมทรัพย์เพื่อการลงทุน,เงินสดจ่ายเพื่อซื้อสินทรัพย์ถาวร,ifrs-full:PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities
-investing_activities,CF,Net cash from (used in) investing activities,เงินสดสุทธิได้มาจาก(ใช้ไปใน)กิจกรรมลงทุน,เงินสดสุทธิใช้ไปในกิจกรรมลงทุน,ifrs-full:CashFlowsFromUsedInInvestingActivities
-financing_activities,CF,Net cash used in financing activities,เงินสดสุทธิใช้ไปในกิจกรรมจัดหาเงิน,,ifrs-full:CashFlowsFromUsedInFinancingActivities
-tax_paid,CF,Income tax paid,เงินสดจ่ายภาษีเงินได้,จ่ายภาษีเงินได้,ifrs-full:IncomeTaxesPaidRefundClassifiedAsOperatingActivities
-interest_paid,CF,Finance costs paid,เงินสดจ่ายต้นทุนทางการเงิน,จ่ายต้นทุนทางการเงิน,ifrs-full:InterestPaidClassifiedAsOperatingActivities
-dividends_paid,CF,Dividends paid,เงินปันผลจ่าย,,ifrs-full:DividendsPaidClassifiedAsFinancingActivities
-depreciation_amortization,CF,Depreciation and amortization,ค่าเสื่อมราคาและค่าตัดจำหน่าย,,ifrs-full:DepreciationAndAmortisationExpense
+concept,statement,label_en,label_th,aliases_th,xbrl_ref,applicable_industries,sign_convention
+revenue,IS,Revenue from sales and services,รายได้จากการขายและการให้บริการ,,ifrs-full:Revenue,,as_reported
+cogs,IS,Cost of sales and services,ต้นทุนขายและการให้บริการ,,ifrs-full:CostOfSales,,as_reported
+gross_profit,IS,Gross profit,กำไรขั้นต้น,,ifrs-full:GrossProfit,,as_reported
+selling_expenses,IS,Selling and distribution expenses,ค่าใช้จ่ายในการขายและจัดจำหน่าย,ค่าใช้จ่ายในการขายและต้นทุนในการจัดจำหน่าย,ifrs-full:DistributionCosts,,as_reported
+admin_expenses,IS,Administrative expenses,ค่าใช้จ่ายในการบริหาร,,ifrs-full:AdministrativeExpense,,as_reported
+operating_profit,IS,Operating profit,กำไรจากการดำเนินงาน,,ifrs-full:ProfitLossFromOperatingActivities,,as_reported
+ebit,IS,Profit before finance costs and income tax,กำไรก่อนต้นทุนทางการเงินและภาษีเงินได้,,,,as_reported
+finance_costs,IS,Finance costs,ต้นทุนทางการเงิน,,ifrs-full:FinanceCosts,,as_reported
+profit_before_tax,IS,Profit before income tax,กำไรก่อนภาษีเงินได้,,ifrs-full:ProfitLossBeforeTax,,as_reported
+income_tax_expense,IS,Income tax expense,ค่าใช้จ่ายภาษีเงินได้,,ifrs-full:IncomeTaxExpenseContinuingOperations,,as_reported
+net_profit,IS,Profit for the period,กำไรสำหรับปี,กำไรสำหรับรอบระยะเวลา,ifrs-full:ProfitLoss,,as_reported
+eps_basic,IS,Basic earnings per share,กำไรต่อหุ้นขั้นพื้นฐาน,กำไรต่อหุ้นขั้นพื้นฐาน (บาท),ifrs-full:BasicEarningsLossPerShare,,as_reported
+cash,BS,Cash and cash equivalents,เงินสดและรายการเทียบเท่าเงินสด,,ifrs-full:CashAndCashEquivalents,,as_reported
+ppe,BS,Property plant and equipment,ที่ดิน อาคารและอุปกรณ์,ที่ดิน อาคารและอุปกรณ์ สุทธิ,ifrs-full:PropertyPlantAndEquipment,,as_reported
+total_assets,BS,Total assets,รวมสินทรัพย์,,ifrs-full:Assets,,as_reported
+total_liabilities,BS,Total liabilities,รวมหนี้สิน,,ifrs-full:Liabilities,,as_reported
+equity,BS,Total equity,รวมส่วนของผู้ถือหุ้น,รวมส่วนของเจ้าของ,ifrs-full:Equity,,as_reported
+paid_up_capital,BS,Issued and paid-up share capital,ทุนออกจำหน่ายและชำระเต็มมูลค่าแล้ว,ทุนที่ออกและชำระแล้ว,ifrs-full:IssuedCapital,,as_reported
+ocf,CF,Net cash from operating activities,เงินสดสุทธิได้มาจากกิจกรรมดำเนินงาน,,ifrs-full:CashFlowsFromUsedInOperatingActivities,,as_reported
+capex,CF,Cash paid for property plant and equipment,เงินสดจ่ายสำหรับที่ดิน อาคารและอุปกรณ์ และอสังหาริมทรัพย์เพื่อการลงทุน,เงินสดจ่ายเพื่อซื้อสินทรัพย์ถาวร,ifrs-full:PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities,,negate_if_outflow
+investing_activities,CF,Net cash from (used in) investing activities,เงินสดสุทธิได้มาจาก(ใช้ไปใน)กิจกรรมลงทุน,เงินสดสุทธิใช้ไปในกิจกรรมลงทุน,ifrs-full:CashFlowsFromUsedInInvestingActivities,,as_reported
+financing_activities,CF,Net cash used in financing activities,เงินสดสุทธิใช้ไปในกิจกรรมจัดหาเงิน,,ifrs-full:CashFlowsFromUsedInFinancingActivities,,as_reported
+tax_paid,CF,Income tax paid,เงินสดจ่ายภาษีเงินได้,จ่ายภาษีเงินได้,ifrs-full:IncomeTaxesPaidRefundClassifiedAsOperatingActivities,,negate_if_outflow
+interest_paid,CF,Finance costs paid,เงินสดจ่ายต้นทุนทางการเงิน,จ่ายต้นทุนทางการเงิน,ifrs-full:InterestPaidClassifiedAsOperatingActivities,,negate_if_outflow
+dividends_paid,CF,Dividends paid,เงินปันผลจ่าย,,ifrs-full:DividendsPaidClassifiedAsFinancingActivities,,negate_if_outflow
+depreciation_amortization,CF,Depreciation and amortization,ค่าเสื่อมราคาและค่าตัดจำหน่าย,,ifrs-full:DepreciationAndAmortisationExpense,,as_reported
