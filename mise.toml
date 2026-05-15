@@ -8,3 +8,6 @@ run = [
 [tasks.docs]
 description = "Generate API documentation with pdoc"
 run = "pdoc ./thaifin/ -o ./docs/"
+
+[tools]
+"pipx:hf" = "latest"

@@ -28,7 +28,7 @@ The fiscal period a filing reports. Quarterly → `YYYYQq` (e.g. `2025Q4`). Annu
 ### Artifact & schema
 
 **Dataset / Artifact** (interchangeable):
-The published, versioned bundle of parquet files (plus raw mirrors) derived from filings. Hosted on HuggingFace Datasets at `hf.co/datasets/thaifin/financials` (canonical) with revisions tagged per build (e.g., `2026.q1`). Distributed independently of the Python library.
+The published, versioned bundle of parquet files (plus raw mirrors) derived from filings. Hosted on HuggingFace Datasets at `hf.co/datasets/ninyawee/thaifin-financials` (canonical) with revisions tagged per build (e.g., `2026.05`). Distributed independently of the Python library.
 _Avoid_: "database", "snapshot" (reserved for a specific point-in-time copy of one company's history).
 
 **Revision** (HF terminology, reused here):
