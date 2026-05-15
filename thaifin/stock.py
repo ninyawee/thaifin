@@ -2,16 +2,24 @@
 This module provides the `Stock` class, which serves as the main API for accessing individual Thai stock fundamental data.
 """
 
-from typing import Literal
+import warnings
+from typing import Any, Literal
 
 import arrow
 import pandas as pd
 
-from thaifin.data import DatasetClient
+from thaifin.data import DatasetClient, get_data_revision
 from thaifin.sources.finnomena.model import QuarterFinancialSheetDatum
 from thaifin.sources.thai_securities_data.models import SecurityData
 from thaifin.sources.finnomena import FinnomenaService
 from thaifin.sources.thai_securities_data import ThaiSecuritiesDataService
+
+
+# Sentinel that lets us tell "user passed source=..." from "user omitted it".
+# Using object() (not None) so users can still pass None explicitly if they ever
+# want the default-with-warning behavior.
+_DEFAULT_SOURCE: Any = object()
+
 
 class Stock:
 
@@ -19,7 +27,7 @@ class Stock:
         self,
         symbol: str,
         language: str = "en",
-        source: Literal["dataset", "live"] = "live",
+        source: Literal["dataset", "live"] = _DEFAULT_SOURCE,  # type: ignore[assignment]
         revision: str | None = None,
     ):
         """
@@ -28,14 +36,25 @@ class Stock:
         Args:
             symbol (str): The stock symbol.
             language (str): Language preference ("en" or "th"). Defaults to "en".
-            source (str): Data source. ``"live"`` (default in v1.x; preserves
-                existing behavior) reaches Finnomena/ThaiSecuritiesData over
-                HTTP. ``"dataset"`` reads from the HuggingFace-hosted parquet
-                via DuckDB streaming. The default flips to ``"dataset"`` in a
-                later slice once dataset coverage is broad enough.
+            source (str): Data source. ``"live"`` reaches Finnomena and
+                ThaiSecuritiesData over HTTP (v1.x behavior). ``"dataset"``
+                reads from the HuggingFace-hosted parquet via DuckDB streaming.
+                When omitted, ``"dataset"`` is used and a ``DeprecationWarning``
+                fires noting that the v3.0 default will be explicit-only. Pass
+                ``source="live"`` or ``source="dataset"`` to silence.
             revision (str | None): HF dataset revision (git tag, branch, or
-                sha) when ``source="dataset"``. Ignored when ``source="live"``.
+                sha) when ``source="dataset"``. Falls back to
+                ``thaifin.get_data_revision()`` when omitted. Ignored when
+                ``source="live"``.
         """
+        if source is _DEFAULT_SOURCE:
+            warnings.warn(
+                "Stock() default source will become 'dataset' in v3.0. "
+                "Pass source='live' or source='dataset' explicitly to silence.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            source = "dataset"
         self.symbol_upper: str = symbol.upper()
         self.language: str = language
         self.source: Literal["dataset", "live"] = source
@@ -168,7 +187,7 @@ class Stock:
                 "Stock.capex is only available with source='dataset'. "
                 "Pass source='dataset' (and revision='...') to Stock(...)."
             )
-        revision = self.revision or "main"
+        revision = self.revision or get_data_revision()
         client = DatasetClient()
         df = client.query(
             "SELECT period, value FROM {lines} "
