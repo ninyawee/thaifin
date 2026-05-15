@@ -1,0 +1,94 @@
+# thaifin concept dictionary — CPALL scout staging (v0.1)
+#
+# Sources for this scout (filing_id derived from FILEID; symbol = CPALL):
+#   2003 audited annual    — dat/news/200402/04004428.zip
+#                            (full-doc filing — cp7-11t1.doc/t2.doc/t3.doc; pre-XLS era)
+#                            Company name then: "ซี.พี. เซเว่นอีเลฟเว่น จำกัด (มหาชน)"
+#   2008 audited annual    — dat/news/200902/09007190.zip   (cpallt2.xls)
+#   2015 audited annual    — dat/news/201602/16017244.zip
+#   2020 audited annual    — dat/news/202102/21018726.zip   (TFRS-16 first-time adoption)
+#   2025 audited annual    — dat/news/202602/0737FIN250220261406350902T.zip
+#   2026Q1 reviewed quarterly — dat/news/202605/0737FIN130520261329450345T.zip
+#
+# Sheet structure note: CPALL annual XLS uses 7 sheets (no separate OCI sheet —
+# OCI is appended below the regular PL section in the same sheet "PL N-N").
+# This contrasts with PTT's documented 8-sheet pattern (separate OCI_Accum).
+# 2026Q1 has 6 statement sheets + 4 internal "DS_INTERNAL_*" storage sheets
+# that the parser must skip.
+#
+# Action types in this file:
+#   * `aliases_th_to_append` row → append the Thai label to the existing concept
+#     in canonical concepts.csv (do not create a new row in the canonical file).
+#   * action `new` → propose a new concept row for the canonical file.
+#   * action `confirmed` → label_th already matches canonical exactly; no change needed
+#     but recorded here for coverage tracking.
+#
+concept,statement,label_en,label_th,aliases_th,xbrl_ref,applicable_industries,sign_convention,action,source_period,source_sheet,source_row,notes
+# ---- IS / PL section ----
+revenue,IS,Revenue from sales and services,รายได้จากการขายและการให้บริการ,รายได้จากการขายสินค้าและการให้บริการ,ifrs-full:Revenue,,as_reported,aliases_th_to_append,2025,PL 10-11,9,"CPALL adds 'สินค้า' (goods) — 'sales of goods AND services'. Same concept; alias only."
+cogs,IS,Cost of sales and services,ต้นทุนขายและการให้บริการ,ต้นทุนขายสินค้าและต้นทุนการให้บริการ,ifrs-full:CostOfSales,,as_reported,aliases_th_to_append,2025,PL 10-11,18,"CPALL: 'cost of sales of goods and cost of services'."
+selling_expenses,IS,Selling and distribution expenses,ค่าใช้จ่ายในการขายและจัดจำหน่าย,ต้นทุนในการจัดจำหน่าย,ifrs-full:DistributionCosts,,as_reported,aliases_th_to_append,2025,PL 10-11,19,"CPALL splits cost-of-sales/distribution differently: 'distribution cost' is reported as a discrete expense line, no 'selling' wording."
+admin_expenses,IS,Administrative expenses,ค่าใช้จ่ายในการบริหาร,,ifrs-full:AdministrativeExpense,,as_reported,confirmed,2025,PL 10-11,20,
+operating_profit,IS,Operating profit,กำไรจากการดำเนินงาน,กำไรจากกิจกรรมดำเนินงาน,ifrs-full:ProfitLossFromOperatingActivities,,as_reported,aliases_th_to_append,2025,PL 10-11,24,"CPALL uses 'กิจกรรมดำเนินงาน' (operating activities) instead of 'การดำเนินงาน' (the operation)."
+ebit,IS,Profit before finance costs and income tax,กำไรก่อนต้นทุนทางการเงินและภาษีเงินได้,กำไรก่อนต้นทุนทางการเงินและค่าใช้จ่ายภาษีเงินได้,,,as_reported,aliases_th_to_append,2025,PL 10-11,27,"CPALL adds 'ค่าใช้จ่าย' (expense)."
+finance_costs,IS,Finance costs,ต้นทุนทางการเงิน,,ifrs-full:FinanceCosts,,as_reported,confirmed,2025,PL 10-11,28,
+profit_before_tax,IS,Profit before income tax,กำไรก่อนภาษีเงินได้,กำไรก่อนค่าใช้จ่ายภาษีเงินได้,ifrs-full:ProfitLossBeforeTax,,as_reported,aliases_th_to_append,2025,PL 10-11,29,"CPALL adds 'ค่าใช้จ่าย'."
+income_tax_expense,IS,Income tax expense,ค่าใช้จ่ายภาษีเงินได้,,ifrs-full:IncomeTaxExpenseContinuingOperations,,as_reported,confirmed,2025,PL 10-11,30,
+net_profit,IS,Profit for the period,กำไรสำหรับปี,กำไรสำหรับงวด,ifrs-full:ProfitLoss,,as_reported,aliases_th_to_append,2026Q1,PL3M-6-7,31,"Quarterly format uses 'งวด' (period) instead of 'ปี' (year). Already in canonical aliases as 'กำไรสำหรับรอบระยะเวลา' — append plain 'งวด' form too."
+eps_basic,IS,Basic earnings per share,กำไรต่อหุ้นขั้นพื้นฐาน,กำไรต่อหุ้นขั้นพื้นฐาน (บาท),ifrs-full:BasicEarningsLossPerShare,,as_reported,confirmed,2026Q1,PL3M-6-7,38,"Already in canonical aliases."
+# ---- BS / Balance Sheet ----
+cash,BS,Cash and cash equivalents,เงินสดและรายการเทียบเท่าเงินสด,,ifrs-full:CashAndCashEquivalents,,as_reported,confirmed,2025,BS 7-9,8,
+ppe,BS,Property plant and equipment,ที่ดิน อาคารและอุปกรณ์,,ifrs-full:PropertyPlantAndEquipment,,as_reported,confirmed,2025,BS 7-9,24,"CPALL omits 'สุทธิ' (net) — bare label."
+total_assets,BS,Total assets,รวมสินทรัพย์,,ifrs-full:Assets,,as_reported,confirmed,2025,BS 7-9,29,
+total_liabilities,BS,Total liabilities,รวมหนี้สิน,,ifrs-full:Liabilities,,as_reported,confirmed,2025,BS 7-9,71,
+equity,BS,Total equity,รวมส่วนของผู้ถือหุ้น,,ifrs-full:Equity,,as_reported,confirmed,2025,BS 7-9,103,
+paid_up_capital,BS,Issued and paid-up share capital,ทุนออกจำหน่ายและชำระเต็มมูลค่าแล้ว,ทุนที่ออกและชำระแล้ว,ifrs-full:IssuedCapital,,as_reported,confirmed,2025,BS 7-9,84,"Already in canonical aliases."
+# ---- CF / Cash Flow ----
+ocf,CF,Net cash from operating activities,เงินสดสุทธิได้มาจากกิจกรรมดำเนินงาน,กระแสเงินสดสุทธิได้มาจากกิจกรรมดำเนินงาน|เงินสดสุทธิได้มาจากกิจกรรมดำเนินงาน,ifrs-full:CashFlowsFromUsedInOperatingActivities,,as_reported,aliases_th_to_append,2025,CF 16-19,69,"2025 uses 'กระแสเงินสดสุทธิ...' (cash-flow-net), 2008 uses bare 'เงินสดสุทธิ...' . Both must alias."
+capex,CF,Cash paid for property plant and equipment,เงินสดจ่ายสำหรับที่ดิน อาคารและอุปกรณ์ และอสังหาริมทรัพย์เพื่อการลงทุน,เงินสดจ่ายเพื่อซื้อที่ดิน อาคารและอุปกรณ์|ซื้อที่ดิน อาคารและอุปกรณ์,ifrs-full:PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities,,negate_if_outflow,aliases_th_to_append,2025,CF 16-19,~95,"CPALL CapEx label is shorter than PTT's combined PPE+InvProp line. CPALL reports PPE acquisitions and investment-property acquisitions on SEPARATE lines. Use the PPE line as 'capex'. 2008 uses just 'ซื้อที่ดิน อาคารและอุปกรณ์'."
+investing_activities,CF,Net cash from (used in) investing activities,เงินสดสุทธิได้มาจาก(ใช้ไปใน)กิจกรรมลงทุน,กระแสเงินสดสุทธิใช้ไปในกิจกรรมลงทุน|เงินสดสุทธิใช้ไปในกิจกรรมลงทุน,ifrs-full:CashFlowsFromUsedInInvestingActivities,,as_reported,aliases_th_to_append,2025,CF 16-19,~110,"CPALL 2025 uses 'กระแสเงินสดสุทธิ...' (full prefix)."
+financing_activities,CF,Net cash used in financing activities,เงินสดสุทธิใช้ไปในกิจกรรมจัดหาเงิน,กระแสเงินสดสุทธิใช้ไปในกิจกรรมจัดหาเงิน,ifrs-full:CashFlowsFromUsedInFinancingActivities,,as_reported,aliases_th_to_append,2025,CF 16-19,~135,
+tax_paid,CF,Income tax paid,เงินสดจ่ายภาษีเงินได้,ภาษีเงินได้จ่ายออก|จ่ายภาษีเงินได้,ifrs-full:IncomeTaxesPaidRefundClassifiedAsOperatingActivities,,negate_if_outflow,aliases_th_to_append,2025,CF 16-19,68,"CPALL 2025 uses unusual 'ภาษีเงินได้จ่ายออก' (income tax paid-out). Already in canonical aliases as 'จ่ายภาษีเงินได้'."
+interest_paid,CF,Finance costs paid,เงินสดจ่ายต้นทุนทางการเงิน,ดอกเบี้ยจ่าย|จ่ายดอกเบี้ย,ifrs-full:InterestPaidClassifiedAsOperatingActivities,,negate_if_outflow,aliases_th_to_append,2025,CF 16-19,~119,"CPALL classifies interest paid under FINANCING activities (not operating!), and labels it 'ดอกเบี้ยจ่าย' (interest paid) rather than 'finance cost paid'. Existing canonical 'จ่ายต้นทุนทางการเงิน' alias is fine; add the simpler 'ดอกเบี้ยจ่าย' alias too."
+dividends_paid,CF,Dividends paid,เงินปันผลจ่าย,เงินปันผลจ่ายให้ผู้ถือหุ้นของบริษัท|จ่ายเงินปันผลให้ผู้ถือหุ้นของบริษัท,ifrs-full:DividendsPaidClassifiedAsFinancingActivities,,negate_if_outflow,aliases_th_to_append,2025,CF 16-19,~121,"CPALL splits dividend paid into 'to shareholders of the company' and 'to non-controlling interests'. The first is the standard parent-shareholder dividend; alias both phrasings."
+depreciation_amortization,CF,Depreciation and amortization,ค่าเสื่อมราคาและค่าตัดจำหน่าย,,ifrs-full:DepreciationAndAmortisationExpense,,as_reported,confirmed,2025,CF 16-19,~10,"NOTE: CPALL splits depreciation across 4 separate CF add-back lines (investment property, PPE, ROU asset, intangible amortization). The combined 'D&A' label does NOT appear as a single line — parser may need to SUM depreciation lines per filing. Flagging in anomaly log."
+# ---- NEW concepts proposed (retail-relevant) ----
+inventory,BS,Inventories,สินค้าคงเหลือ,,ifrs-full:Inventories,,as_reported,new,2025,BS 7-9,13,"NEW concept. Highly relevant for retail (CPALL inventory is ~7.5% of total assets). Same label across 2008/2015/2020/2025."
+investment_property,BS,Investment property,อสังหาริมทรัพย์เพื่อการลงทุน,,ifrs-full:InvestmentProperty,retail|reit,as_reported,new,2025,BS 7-9,23,"NEW concept. CPALL has ~60B THB in investment property (Lotus's malls). Important for retail and REIT."
+right_of_use_asset,BS,Right-of-use asset (TFRS 16),สินทรัพย์สิทธิการใช้,,ifrs-full:RightofuseAssets,,as_reported,new,2025,BS 7-9,25,"NEW. TFRS-16 adoption from 1-Jan-2020. CPALL has ~102B THB ROU asset (huge — store leases). Pre-2020 filings show 0 / no row, with predecessor lines 'สิทธิการเช่า' (leasehold rights) instead. Cite: 2020 BS row 27 — first appearance."
+lease_liability_current,BS,Lease liabilities (current portion),หนี้สินตามสัญญาเช่า ที่ถึงกำหนดชำระภายในหนึ่งปี,ส่วนของหนี้สินตามสัญญาเช่าที่ถึงกำหนดชำระภายในหนึ่งปี,ifrs-full:CurrentLeaseLiabilities,,as_reported,new,2025,BS 7-9,53,"NEW. TFRS-16. Material for retail (~12B THB current portion). Note label is split across multiple cells in source — parser must concatenate."
+lease_liability_noncurrent,BS,Lease liabilities (non-current),หนี้สินตามสัญญาเช่า,,ifrs-full:LeaseLiabilities,,as_reported,new,2025,BS 7-9,67,"NEW. TFRS-16. ~104B THB non-current. Note: AMBIGUOUS BARE LABEL — same wording is used as the BS subtotal header. Parser must distinguish by row position (under non-current liabilities) or use surrounding context."
+goodwill,BS,Goodwill,ค่าความนิยม,,ifrs-full:Goodwill,,as_reported,new,2025,BS 7-9,29,"NEW. CPALL goodwill is 363B THB (largest single asset — from Lotus's & Makro acquisitions). Cross-industry but extremely material here."
+intangible_assets,BS,Other intangible assets (excluding goodwill),สินทรัพย์ไม่มีตัวตนอื่นนอกจากค่าความนิยม,สินทรัพย์ไม่มีตัวตน,ifrs-full:IntangibleAssetsOtherThanGoodwill,,as_reported,new,2025,BS 7-9,30,"NEW. 2008 used short form 'สินทรัพย์ไม่มีตัวตน' (no goodwill exclusion clause)."
+trade_payables,BS,Trade payables,เจ้าหนี้การค้า,,ifrs-full:TradePayables,,as_reported,new,2025,BS 7-9,46,"NEW. Retail-critical (CPALL trade payables = 134B THB; supplier financing is core to convenience-store cash cycle)."
+trade_receivables,BS,Trade receivables,ลูกหนี้การค้า,,ifrs-full:TradeReceivables,,as_reported,new,2025,BS 7-9,11,"NEW. Cross-industry."
+short_term_borrowings,BS,Short-term borrowings from financial institutions,เงินกู้ยืมระยะสั้นจากสถาบันการเงิน,,ifrs-full:ShorttermBorrowings,,as_reported,new,2025,BS 7-9,40,"NEW. Cross-industry funding line."
+debentures,BS,Debentures,หุ้นกู้,,ifrs-full:DebtSecuritiesIssued,,as_reported,new,2025,BS 7-9,63,"NEW. CPALL has 245B THB debentures — primary funding instrument."
+non_controlling_interest,BS,Non-controlling interests,ส่วนได้เสียที่ไม่มีอำนาจควบคุม,,ifrs-full:NoncontrollingInterests,,as_reported,new,2025,BS 7-9,102,"NEW. CPALL NCI is huge (193B THB — from Lotus's/Makro consolidation). Critical for any group analysis."
+share_premium,BS,Share premium,ส่วนเกินมูลค่าหุ้นสามัญ,,ifrs-full:SharePremium,,as_reported,new,2025,BS 7-9,90,
+retained_earnings,BS,Retained earnings (unappropriated),ยังไม่ได้จัดสรร,กำไรสะสม - ยังไม่ได้จัดสรร,ifrs-full:RetainedEarnings,,as_reported,new,2025,BS 7-9,96,"NEW. Note CPALL nests this under a 'กำไรสะสม' header row (which itself is empty) then 'จัดสรรแล้ว' subgroup then 'ยังไม่ได้จัดสรร' line. Parser must concatenate context."
+treasury_shares,BS,Treasury shares,หุ้นทุนซื้อคืน,,ifrs-full:TreasuryShares,,as_reported,new,2025,BS 7-9,98,"NEW. CPALL has 3.36B THB treasury shares as of FY2025 (new this year)."
+employee_benefits_provision,BS,Provision for employee benefits,ประมาณการหนี้สินสำหรับผลประโยชน์พนักงาน,,ifrs-full:NoncurrentRetirementBenefitObligation,,as_reported,new,2025,BS 7-9,68,"NEW. Cross-industry."
+deferred_tax_liability,BS,Deferred tax liabilities,หนี้สินภาษีเงินได้รอการตัดบัญชี,,ifrs-full:DeferredTaxLiabilities,,as_reported,new,2025,BS 7-9,69,"NEW."
+deferred_tax_asset,BS,Deferred tax assets,สินทรัพย์ภาษีเงินได้รอการตัดบัญชี,,ifrs-full:DeferredTaxAssets,,as_reported,new,2025,BS 7-9,31,"NEW."
+investment_in_subsidiaries,BS,Investment in subsidiaries,เงินลงทุนในบริษัทย่อย,,ifrs-full:InvestmentsInSubsidiaries,,as_reported,new,2025,BS 7-9,19,"NEW. Only in 'company' columns (zero in consolidated). Critical for parent-only analysis."
+# ---- IS additional ----
+share_of_profit_associates,IS,Share of profit of associates and joint ventures (equity method),ส่วนแบ่งกำไรของบริษัทร่วมและการร่วมค้าตามวิธีส่วนได้เสีย,,ifrs-full:ShareOfProfitLossOfAssociatesAndJointVenturesAccountedForUsingEquityMethod,,as_reported,new,2025,PL 10-11,25,"NEW. CPALL has equity-method investments (Lotus's, Makro, related JVs). Material under-the-EBIT line."
+profit_attributable_to_parent,IS,Profit attributable to owners of the parent,ส่วนที่เป็นของผู้ถือหุ้นของบริษัท,,ifrs-full:ProfitLossAttributableToOwnersOfParent,,as_reported,new,2025,PL 10-11,33,"NEW. With ~17% NCI in CPALL group, parent-attributable profit (28.2B) is materially less than total (31.9B)."
+profit_attributable_to_nci,IS,Profit attributable to non-controlling interests,ส่วนที่เป็นของส่วนได้เสียที่ไม่มีอำนาจควบคุม,,ifrs-full:ProfitLossAttributableToNoncontrollingInterests,,as_reported,new,2025,PL 10-11,34,"NEW. Companion to profit_attributable_to_parent."
+total_revenue,IS,Total revenue,รวมรายได้,,ifrs-full:Revenue,,as_reported,new,2025,PL 10-11,15,"NEW. CPALL reports 'รวมรายได้' (=sales+interest+dividend+other) DISTINCT from 'รายได้จากการขายและการให้บริการ'. Mapping the wrong one to 'revenue' would inflate by ~3%. Prefer 'revenue' (sales-only) per IFRS convention; expose 'total_revenue' for comparability."
+other_income,IS,Other income,รายได้อื่น,,ifrs-full:OtherIncome,,as_reported,new,2025,PL 10-11,14,"NEW. CPALL has 31B THB other income (rental, supplier rebates) — material for retail conglomerate."
+total_expenses,IS,Total expenses,รวมค่าใช้จ่าย,,ifrs-full:Expenses,,as_reported,new,2025,PL 10-11,22,"NEW."
+# ---- CF additional ----
+depreciation_ppe,CF,Depreciation of property plant and equipment,ค่าเสื่อมราคาที่ดิน อาคารและอุปกรณ์,ค่าเสื่อมราคา,ifrs-full:DepreciationPropertyPlantAndEquipment,,as_reported,new,2025,CF 16-19,11,"NEW. CPALL splits depreciation by asset class (PPE vs ROU vs Investment Property). 2008 used a single combined 'ค่าเสื่อมราคา'. Aliasing both."
+depreciation_rou,CF,Depreciation of right-of-use assets,ค่าเสื่อมราคาสินทรัพย์สิทธิการใช้,,ifrs-full:DepreciationRightofuseAssets,,as_reported,new,2025,CF 16-19,12,"NEW. TFRS-16 add-back. CPALL: 13.6B THB. From 2020 onward only."
+amortization_intangibles,CF,Amortization of intangibles,ค่าตัดจำหน่ายสินทรัพย์ไม่มีตัวตนอื่นนอกจากค่าความนิยม,ค่าตัดจำหน่าย - สินทรัพย์ไม่มีตัวตน,ifrs-full:AmortisationIntangibleAssetsOtherThanGoodwill,,as_reported,new,2025,CF 16-19,13,"NEW. 2008 used short form."
+lease_payments,CF,Cash paid on lease liabilities,เงินสดจ่ายชำระหนี้สินตามสัญญาเช่า,,ifrs-full:RepaymentsOfBorrowingsClassifiedAsFinancingActivities,retail,negate_if_outflow,new,2025,CF 16-19,~125,"NEW. TFRS-16 line. Highly material for retail (CPALL: -17.3B THB in 2025). Reported under FINANCING activities. Pre-2020 filings did NOT have this line — operating leases were straight expensed and never appeared as a CF financing outflow."
+proceeds_from_debentures,CF,Proceeds from issue of debentures,เงินสดรับจากการออกหุ้นกู้,,ifrs-full:ProceedsFromIssuingDebtSecurities,,as_reported,new,2025,CF 16-19,~131,"NEW. CPALL recurring large issuance (49.8B THB FY2025)."
+repayment_of_debentures,CF,Repayment of debentures,เงินสดจ่ายเพื่อชำระหุ้นกู้,,ifrs-full:RepaymentsOfBorrowings,,negate_if_outflow,new,2025,CF 16-19,~132,"NEW. -41.7B THB FY2025."
+acquisition_of_subsidiaries,CF,Cash paid for acquisition of subsidiaries net of cash acquired,เงินสดจ่ายเพื่อซื้อบริษัทย่อยสุทธิจากเงินสดที่ได้มา,,ifrs-full:CashFlowsUsedInObtainingControlOfSubsidiariesOrOtherBusinesses,,negate_if_outflow,new,2025,CF 16-19,~85,"NEW. CPALL recurring M&A activity (-6.9B THB FY2025)."
+# ---- Sign-convention surprises ----
+# CPALL CF reports OUTFLOWS as POSITIVE in many cases (e.g., 'ภาษีเงินได้จ่ายออก' = 7.7B is the
+# absolute value, not -7.7B). The 'as_reported' default would treat this as a positive flow.
+# Concepts marked `negate_if_outflow` above are correct; adding a few more where CPALL flips sign:
+share_buyback,CF,Cash paid to acquire treasury shares,เงินสดจ่ายเพื่อซื้อหุ้นทุนซื้อคืน,,ifrs-full:PaymentsToAcquireTreasuryShares,,negate_if_outflow,new,2025,CF 16-19,~143,"NEW. CPALL did 3.36B THB buyback in 2025 (first appearance)."
