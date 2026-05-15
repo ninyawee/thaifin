@@ -15,6 +15,16 @@ hasn't been mapped to a curated concept yet — coverage going down means
 either new symbols brought in unfamiliar Thai labels, or somebody removed
 entries from ``data/concepts.csv``. Either way, surface it before publishing.
 
+KNOWN LIMITATION (tracked separately): the gate currently computes ONE
+global coverage %. When the dataset adds the first bank symbol (BBL/SCB),
+its ~70% non-mapped rate will tank global coverage by ~0.5pp per bank
+even with perfect dictionary work — bank line items genuinely don't
+overlap with industrial-template concepts (interest_income vs revenue).
+The gate needs to become PER-INDUSTRY (use ``concepts.applicable_industries``
+to weight) before the universe expands beyond modern industrials. Until
+that lands, run with ``--max-regression-pp 5`` (or higher) when
+ingesting non-industrial symbols for the first time.
+
 Previous-revision coverage is computed by reading the same parquet from the
 HF dataset repo via DuckDB-over-HTTP. No local caching needed; this only
 runs once per publish.
