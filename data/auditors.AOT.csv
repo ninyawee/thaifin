@@ -1,0 +1,30 @@
+# thaifin auditor registry — AOT scout staging file
+#
+# Scope: rows discovered while inspecting AOT (Airports of Thailand) sample filings.
+# Source filings inspected (verbatim citations for every alias below):
+#   - AOT FY2004 (annual, audited)  — FILEID dat/news/200501/05000650
+#   - AOT FY2010 (annual, audited)  — FILEID dat/news/201011/10043104  (qualified opinion!)
+#   - AOT FY2015 (annual, audited)  — FILEID dat/news/201511/15089649
+#   - AOT FY2020 (annual, audited)  — FILEID dat/news/202011/20132206  (modern ISA template, KAM)
+#   - AOT FY2025 (annual, audited)  — FILEID dat/news/202511/0765FIN211120251647180466T  (EY!)
+#   - AOT 2026Q1   (quarterly, reviewed) — FILEID dat/news/202602/0765FIN120220261513170588T  (KPMG!)
+#
+# === MAJOR FINDING: AOT auditor changed at the FY2025 (Sep 2025) audit ===
+# AOT was audited by SAO continuously from IPO (2004) through FY2024 (verified via 5
+# stratified samples 2004/2010/2015/2020 — all SAO).  The FY2025 annual audit was
+# instead signed by EY (with reference to "หลักเกณฑ์มาตรฐานเกี่ยวกับการตรวจเงินแผ่นดิน"
+# alongside standard auditing standards — i.e., SAO-style standards still applied
+# but a private CPA firm performs the audit).  Then the very next quarterly (2026Q1,
+# Dec-2025 period) was signed by KPMG, not EY.
+# This is unusual and parser-relevant: AOT now potentially rotates between Big-4
+# firms while still operating under SAO oversight.  The "เรื่องอื่น" (Other Matter)
+# paragraph in 2026Q1 explicitly notes the comparative period was audited "by another
+# auditor" ("ผู้สอบบัญชีอื่น"), confirming the rotation.
+#
+# Schema: same as canonical data/auditors.csv — see header there for column docs.
+#
+# Lines below are CSV (header row first). Comment lines starting with # are ignored by readers.
+firm_id,canonical_en,canonical_th,parent_firm,aliases_en,aliases_th,is_government
+sao,Office of the Auditor General of Thailand,สำนักงานการตรวจเงินแผ่นดิน,,State Audit Office of Thailand|OAG Thailand|SAO,สตง.|สำนักงานการตรวจเงินแผ่นดิน (สตง.),true
+ey_th,EY Office Limited,บริษัท สำนักงาน อีวาย จำกัด,ey_global,Ernst & Young Office Limited|EY Thailand,สำนักงาน อีวาย|อีวาย|EY (Thailand),false
+kpmg_phoomchai,KPMG Phoomchai Audit Ltd.,บริษัท เคพีเอ็มจี ภูมิไชย สอบบัญชี จำกัด,kpmg_global,KPMG Phoomchai|KPMG Phoom Chai Audit,เคพีเอ็มจี ภูมิไชย|เคพีเอ็มจี ภูมิไชย สอบบัญชี,false
