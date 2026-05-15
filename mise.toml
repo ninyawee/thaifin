@@ -1,0 +1,10 @@
+[tasks.models]
+description = "Generate Pydantic models from JSON schemas"
+run = [
+    "datamodel-codegen --input stock.json --output stock_model.py",
+    "datamodel-codegen --input list.json --output list_model.py",
+]
+
+[tasks.docs]
+description = "Generate API documentation with pdoc"
+run = "pdoc ./thaifin/ -o ./docs/"
