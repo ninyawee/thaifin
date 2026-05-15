@@ -1,0 +1,21 @@
+# thaifin auditor registry — CPALL scout staging
+#
+# CPALL has used a SINGLE audit firm consistently from 2003 to present:
+# KPMG Phoomchai Audit Limited.
+#
+# The brief's hint of "EY (Ernst & Young; verify on the fly)" was WRONG for CPALL —
+# CPALL has been a KPMG client for the entire ~23-year sample window. No auditor
+# switch observed. No EY rename evidence found in CPALL filings (would need to
+# scout an EY-audited symbol to verify the EY rename hypothesis).
+#
+# Source filings inspected:
+#   2003 audited annual    — cp7-11t1.doc   (signing partner: นางสุดจิตร์ บุญประกอบ, reg. 2991)
+#   2008 audited annual    — cpallt1.doc    (signing partner: นายเจริญ ผู้สัมฤทธิ์เลิศ, reg. 4068)
+#   2015 audited annual    — AUDITOR_REPORT.DOC (signing partner: นายเจริญ ผู้สัมฤทธิ์เลิศ, reg. 4068)
+#   2020 audited annual    — AUDITOR_REPORT.DOC (signing partner: not extracted in scout — full report present)
+#   2025 audited annual    — AUDITOR_REPORT.DOCX (signing partner: นายวีระชัย รัตนจรัสกุล, reg. 4323)
+#   2026Q1 reviewed        — AUDITOR_REPORT.DOCX (signing partner: นางมัญชุภา สิงห์สุขสวัสดิ์, reg. 6112)
+#
+# Lines below are CSV (header row first). Comment lines starting with # are ignored.
+firm_id,canonical_en,canonical_th,parent_firm,aliases_en,aliases_th,is_government
+kpmg_phoomchai,KPMG Phoomchai Audit Ltd.,บริษัท เคพีเอ็มจี ภูมิไชย สอบบัญชี จำกัด,kpmg_global,KPMG Phoomchai Audit Limited|KPMG Audit (Thailand) Limited,เคพีเอ็มจี ภูมิไชย สอบบัญชี,false
