@@ -1,10 +1,18 @@
 """DuckDB-over-HTTP client for the HuggingFace-hosted thaifin dataset.
 
-Slice #14 (tracer bullet): no caching, no enumeration of tables — single
-`financial_lines.parquet` resolved by HF dataset revision.
+Slice #14 introduced the tracer round-trip. Slice #16 adds:
+  - Session-level memoization via ``functools.lru_cache`` keyed on
+    ``(sql, revision)``. Two identical queries within one process result
+    in exactly one HTTP round-trip.
+  - Local-cache routing: if ``download_dataset(revision=...)`` has been
+    called (or the user constructs a client with ``local_cache_dir=...``),
+    queries read from the on-disk parquet instead of the HF URL.
 """
 
 from __future__ import annotations
+
+from functools import lru_cache
+from pathlib import Path
 
 import duckdb
 import pandas as pd
@@ -26,41 +34,70 @@ def _parquet_url(revision: str, table: str = "financial_lines") -> str:
 
 
 class DatasetClient:
-    """Minimum DuckDB-over-HTTP client.
+    """DuckDB-over-HTTP client with session memoization and offline support.
 
-    Two construction modes:
-      - production: ``DatasetClient()`` resolves to the HF-hosted parquet at
-        the revision passed to ``query``.
-      - test: ``DatasetClient(parquet_url="file:///tmp/...parquet")`` pins one
-        URL/path and ignores the revision argument on ``query``.
+    Three construction modes (most-specific wins):
+      - ``DatasetClient(parquet_url="file:///tmp/...parquet")`` pins one
+        URL/path and ignores ``revision``. Used by tests.
+      - ``DatasetClient(local_cache_dir=Path("/.../<revision>"))`` reads
+        ``financial_lines.parquet`` from a local directory (typical after
+        ``download_dataset()``).
+      - ``DatasetClient()`` resolves to the HF-hosted parquet at the
+        revision passed to ``query``.
     """
 
-    def __init__(self, parquet_url: str | None = None) -> None:
+    def __init__(
+        self,
+        parquet_url: str | None = None,
+        local_cache_dir: Path | None = None,
+    ) -> None:
         self._parquet_url_override = parquet_url
+        self._local_cache_dir = local_cache_dir
 
-    def _resolve_url(self, revision: str) -> str:
+    def _resolve_url(self, revision: str, table: str = "financial_lines") -> str:
         if self._parquet_url_override is not None:
             return self._parquet_url_override
-        return _parquet_url(revision)
+        if self._local_cache_dir is not None:
+            local = Path(self._local_cache_dir) / f"{table}.parquet"
+            if local.exists():
+                return str(local)
+        return _parquet_url(revision, table)
 
     def query(self, sql: str, revision: str = "main") -> pd.DataFrame:
         """Run a DuckDB query against the resolved parquet URL.
 
         The SQL must reference the parquet via the placeholder ``{lines}`` —
         the client substitutes the resolved URL inside ``read_parquet(...)``.
-        Example::
-
-            client.query(
-                "SELECT period, value FROM {lines} "
-                "WHERE symbol = 'PTT' AND concept = 'capex'",
-                revision="tracer.0",
-            )
+        Results are memoized per ``(sql, revision)`` for the lifetime of
+        the process; clear with :func:`clear_cache`.
         """
         url = self._resolve_url(revision)
-        rendered = sql.format(lines=f"read_parquet('{url}')")
-        con = duckdb.connect()
-        try:
-            con.execute("INSTALL httpfs; LOAD httpfs;")
-            return con.execute(rendered).fetchdf()
-        finally:
-            con.close()
+        return _cached_query(sql, url).copy()
+
+    @staticmethod
+    def clear_cache() -> None:
+        """Drop the session memoization. Mainly for tests."""
+        _cached_query.cache_clear()
+
+    @staticmethod
+    def cache_info():  # pragma: no cover - thin pass-through
+        """Expose lru_cache stats (hits/misses/maxsize/currsize)."""
+        return _cached_query.cache_info()
+
+
+@lru_cache(maxsize=128)
+def _cached_query(sql: str, url: str) -> pd.DataFrame:
+    """Execute a query against a resolved parquet URL. Memoized per process.
+
+    Cache key is ``(sql, url)``; ``url`` already encodes the revision (or
+    points at a local cache file), so this matches the spec's
+    ``(sql, revision)`` semantics without leaking the revision string when
+    a ``parquet_url`` override or local cache is in play.
+    """
+    rendered = sql.format(lines=f"read_parquet('{url}')")
+    con = duckdb.connect()
+    try:
+        con.execute("INSTALL httpfs; LOAD httpfs;")
+        return con.execute(rendered).fetchdf()
+    finally:
+        con.close()

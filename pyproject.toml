@@ -26,6 +26,7 @@ dependencies = [
     "ipython>=9.4.0",
     "duckdb>=1.0",
     "huggingface-hub>=0.25",
+    "polars>=1.0",
     "pyarrow>=15",
     "xlrd==2.0.1",
     "openpyxl>=3.1.0",
