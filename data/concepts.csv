@@ -67,12 +67,12 @@ share_of_other_ci_associates,IS,Share of other comprehensive income (loss) of as
 tax_on_cash_flow_hedges,IS,Income tax relating to cash flow hedges,ภาษีเงินได้เกี่ยวกับการป้องกันความเสี่ยงกระแสเงินสด,,,,as_reported
 cash,BS,Cash and cash equivalents,เงินสดและรายการเทียบเท่าเงินสด,,ifrs-full:CashAndCashEquivalents,,as_reported
 short_term_investments,BS,Short-term financial-asset investments,เงินลงทุนในสินทรัพย์ทางการเงินระยะสั้น,,,,as_reported
-trade_receivables,BS,Trade receivables,ลูกหนี้การค้า,,ifrs-full:TradeAndOtherReceivables,,as_reported
+trade_receivables,BS,Trade receivables,ลูกหนี้การค้า,ลูกหนี้การค้าและลูกหนี้อื่น|ลูกหนี้การค้าและลูกหนี้หมุนเวียนอื่น,ifrs-full:TradeAndOtherReceivables,,as_reported
 other_current_receivables,BS,Other current receivables,ลูกหนี้หมุนเวียนอื่น,,,,as_reported
 inventory,BS,Inventories,สินค้าคงเหลือ,สินค้าและวัสดุคงเหลือ,ifrs-full:Inventories,,as_reported
 materials_inventory,BS,Materials and supplies inventory,พัสดุคงเหลือ,,,,as_reported
-short_term_loans_receivable,BS,Short-term loans receivable,เงินให้กู้ยืมระยะสั้น,,,,as_reported
-long_term_loans_receivable,BS,Long-term loans receivable,เงินให้กู้ยืมระยะยาว,,,,as_reported
+short_term_loans_receivable,BS,Short-term loans receivable,เงินให้กู้ยืมระยะสั้น,เงินให้กู้ยืมระยะสั้นและดอกเบี้ยค้างรับ - กิจการที่เกี่ยวข้องกัน|เงินให้กู้ยืมระยะยาวแก่กิจการที่เกี่ยวข้องกัน ที่ถึงกำหนดชำระภายในหนึ่งปี|เงินให้กู้ยืมระยะยาวแก่กิจการอื่นที่ถึงกำหนดชำระภายในหนึ่งปี|เงินให้กู้ยืมระยะยาวแก่กิจการที่เกี่ยวข้องกันที่ถึงกำหนดชำระ ภายในหนึ่งปี|เงินให้กู้ยืมระยะสั้นและดอกเบี้ยค้างรับจากกิจการที่เกี่ยวข้องกัน,,,as_reported
+long_term_loans_receivable,BS,Long-term loans receivable,เงินให้กู้ยืมระยะยาว,เงินให้กู้ยืมระยะยาวแก่กิจการที่เกี่ยวข้องกัน|เงินให้กู้ยืมระยะยาวและดอกเบี้ยค้างรับ - กิจการที่เกี่ยวข้องกัน|เงินให้กู้ยืมระยะยาวแก่กิจการอื่น|เงินให้กู้ยืมระยะยาวและดอกเบี้ยค้างรับจากกิจการที่เกี่ยวข้องกัน,,,as_reported
 other_current_assets,BS,Other current assets,สินทรัพย์หมุนเวียนอื่น,,,,as_reported
 investment_in_subsidiaries,BS,Investment in subsidiaries,เงินลงทุนในบริษัทย่อย,,,,as_reported
 investment_in_associates,BS,Investment in associates,เงินลงทุนในบริษัทร่วม,,,,as_reported
@@ -86,15 +86,15 @@ deferred_tax_assets,BS,Deferred tax assets,สินทรัพย์ภาษ�
 other_non_current_assets,BS,Other non-current assets,สินทรัพย์ไม่หมุนเวียนอื่น,,,,as_reported
 total_assets,BS,Total assets,รวมสินทรัพย์,,ifrs-full:Assets,,as_reported
 bank_overdrafts_short_term_borrowings,BS,Bank overdrafts and short-term borrowings from financial institutions,เงินเบิกเกินบัญชีและเงินกู้ยืมระยะสั้นจากสถาบันการเงิน,,,,as_reported
-trade_payables,BS,Trade payables,เจ้าหนี้การค้า,,ifrs-full:TradeAndOtherPayables,,as_reported
+trade_payables,BS,Trade payables,เจ้าหนี้การค้า,เจ้าหนี้การค้าและเจ้าหนี้อื่น|เจ้าหนี้การค้าและเจ้าหนี้หมุนเวียนอื่น,ifrs-full:TradeAndOtherPayables,,as_reported
 income_tax_payable,BS,Income tax payable,ภาษีเงินได้ค้างจ่าย,ภาษีเงินได้นิติบุคคลค้างจ่าย,ifrs-full:CurrentTaxLiabilitiesCurrent,,as_reported
-current_lease_liabilities,BS,Current portion of lease liabilities,ส่วนของหนี้สินตามสัญญาเช่าที่ถึงกำหนดชำระภายในหนึ่งปี,,,,as_reported
-current_long_term_borrowings,BS,Current portion of long-term borrowings,ส่วนของเงินกู้ยืมระยะยาวที่ถึงกำหนดชำระภายในหนึ่งปี,,,,as_reported
+current_lease_liabilities,BS,Current portion of lease liabilities,ส่วนของหนี้สินตามสัญญาเช่าที่ถึงกำหนดชำระภายในหนึ่งปี,หนี้สินตามสัญญาเช่าทางการเงินที่ถึงกำหนดชำระภายในหนึ่งปี,,,as_reported
+current_long_term_borrowings,BS,Current portion of long-term borrowings,ส่วนของเงินกู้ยืมระยะยาวที่ถึงกำหนดชำระภายในหนึ่งปี,ส่วนของเงินกู้ยืมระยะยาวจากกิจการที่เกี่ยวข้องกัน ที่ถึงกำหนดชำระภายในหนึ่งปี,,,as_reported
 other_current_liabilities,BS,Other current liabilities,หนี้สินหมุนเวียนอื่น,,,,as_reported
-long_term_borrowings,BS,Long-term borrowings,เงินกู้ยืมระยะยาว,เงินกู้ยืมระยะยาว - สุทธิจากส่วนที่ถึงกำหนด ชำระภายในหนึ่งปี,,,as_reported
-non_current_lease_liabilities,BS,Non-current lease liabilities,หนี้สินตามสัญญาเช่า,หนี้สินตามสัญญาเช่า - สุทธิจากส่วนที่ถึงกำหนด ชำระภายในหนึ่งปี|หนี้สินตามสัญญาเช่าการเงิน,ifrs-full:LeaseLiabilities,,as_reported
+long_term_borrowings,BS,Long-term borrowings,เงินกู้ยืมระยะยาว,เงินกู้ยืมระยะยาว - สุทธิจากส่วนที่ถึงกำหนด ชำระภายในหนึ่งปี|เงินกู้ยืมระยะยาว - สุทธิจากส่วนที่ถึงกำหนดชำระ ภายในหนึ่งปี|เงินกู้ยืมระยะยาว - สุทธิจากส่วนที่ถึงกำหนดชำระภายในหนึ่งปี|เงินกู้ยืมระยะยาวจากกิจการที่เกี่ยวข้องกัน|เงินกู้ยืมระยะยาว - กิจการที่เกี่ยวข้องกัน|เงินกู้ยืมระยะยาวจากกิจการที่เกี่ยวข้องกัน - สุทธิจาก ส่วนที่ถึงกำหนดชำระภายในหนึ่งปี,,,as_reported
+non_current_lease_liabilities,BS,Non-current lease liabilities,หนี้สินตามสัญญาเช่า,หนี้สินตามสัญญาเช่า - สุทธิจากส่วนที่ถึงกำหนด ชำระภายในหนึ่งปี|หนี้สินตามสัญญาเช่าการเงิน|หนี้สินตามสัญญาเช่า - สุทธิจากส่วนที่ถึงกำหนดชำระ ภายในหนึ่งปี|หนี้สินตามสัญญาเช่าทางการเงิน - สุทธิจากส่วนที่ถึงกำหนด ชำระภายในหนึ่งปี|หนี้สินตามสัญญาเช่าทางการเงิน - สุทธิจากส่วนที่ถึงกำหนดชำระ ภายในหนึ่งปี,ifrs-full:LeaseLiabilities,,as_reported
 deferred_tax_liabilities,BS,Deferred tax liabilities,หนี้สินภาษีเงินได้รอการตัดบัญชี,,ifrs-full:DeferredTaxLiabilities,,as_reported
-employee_benefits_provision,BS,Provision for employee benefits,ประมาณการหนี้สินสำหรับผลประโยชน์พนักงาน,ภาระผูกพันผลประโยชน์พนักงาน|ประมาณการหนี้สินไม่หมุนเวียนสำหรับผลประโยชน์พนักงาน|สำรองผลประโยชน์พนักงาน,,,as_reported
+employee_benefits_provision,BS,Provision for employee benefits,ประมาณการหนี้สินสำหรับผลประโยชน์พนักงาน,ภาระผูกพันผลประโยชน์พนักงาน|ประมาณการหนี้สินไม่หมุนเวียนสำหรับผลประโยชน์พนักงาน|สำรองผลประโยชน์พนักงาน|สำรองผลประโยชน์ระยะยาวของพนักงาน,,,as_reported
 decommissioning_provision_long_term,BS,Long-term decommissioning provision,ประมาณการหนี้สินค่ารื้อถอนระยะยาว,,,,as_reported
 other_non_current_liabilities,BS,Other non-current liabilities,หนี้สินไม่หมุนเวียนอื่น,,,,as_reported
 total_liabilities,BS,Total liabilities,รวมหนี้สิน,,ifrs-full:Liabilities,,as_reported
@@ -132,7 +132,7 @@ exploration_and_evaluation_paid,CF,Cash paid for exploration and evaluation,เ�
 loans_made_long_term,CF,Cash paid for long-term loans receivable,เงินสดจ่ายสำหรับเงินให้กู้ยืมระยะยาว,เงินจ่ายสำหรับเงินให้กู้ยืมระยะยาว|เงินสดจ่ายให้กู้ยืมแก่กิจการที่เกี่ยวข้องกัน|เงินให้กู้ยืมแก่กิจการที่เกี่ยวข้องกัน,,,negate_if_outflow
 proceeds_from_long_term_loans_receivable,CF,Cash received from long-term loans receivable,เงินสดรับคืนเงินให้กู้ยืมระยะยาว,รับคืนเงินให้กู้ยืมระยะยาว|เงินสดรับชำระคืนเงินให้กู้ยืมจากกิจการที่เกี่ยวข้องกัน|รับชำระคืนเงินให้กู้ยืมจากกิจการที่เกี่ยวข้องกัน,,,as_reported
 gas_cylinder_deposits,BS,Gas cylinder deposits (energy-sector specific),เงินมัดจำถังก๊าซ,,,,as_reported
-short_term_borrowings,BS,Short-term borrowings,เงินกู้ยืมระยะสั้น,เงินกู้ยืมระยะสั้นจากสถาบันการเงิน,,,as_reported
+short_term_borrowings,BS,Short-term borrowings,เงินกู้ยืมระยะสั้น,เงินกู้ยืมระยะสั้นจากสถาบันการเงิน|เงินกู้ยืมระยะสั้นและดอกเบี้ยค้างจ่าย - กิจการที่เกี่ยวข้องกัน|เงินกู้ยืมระยะสั้นและดอกเบี้ยค้างจ่ายจากกิจการที่เกี่ยวข้องกัน,,,as_reported
 other_receivables,BS,Other receivables,ลูกหนี้อื่น,,,,as_reported
 other_payables,BS,Other payables,เจ้าหนี้อื่น,,,,as_reported
 exploration_and_evaluation_assets,BS,Exploration and evaluation assets,สินทรัพย์ที่เกิดจากการสำรวจและประเมินค่า,,ifrs-full:ExplorationAndEvaluationAssets,,as_reported
@@ -516,13 +516,13 @@ total_non_current_assets,BS,Total non-current assets,รวมสินทรั
 total_non_current_liabilities,BS,Total non-current liabilities,รวมหนี้สินไม่หมุนเวียน,,ifrs-full:NoncurrentLiabilities,,as_reported
 income_tax_payable,CF,Income tax payable (CF change),ภาษีเงินได้ค้างจ่าย,,ifrs-full:CurrentTaxLiabilitiesCurrent,,as_reported
 total_current_liabilities,BS,Total current liabilities,รวมหนี้สินหมุนเวียน,,ifrs-full:CurrentLiabilities,,as_reported
-short_term_provisions,BS,Current provisions,ประมาณการหนี้สินระยะสั้น,,ifrs-full:CurrentProvisions,,as_reported
+short_term_provisions,BS,Current provisions,ประมาณการหนี้สินระยะสั้น,ประมาณการหนี้สินหมุนเวียนอื่น,ifrs-full:CurrentProvisions,,as_reported
 long_term_provisions,BS,Non-current provisions,ประมาณการหนี้สินระยะยาว,,ifrs-full:NoncurrentProvisions,,as_reported
 inventory,CF,Inventories (CF change),สินค้าและวัสดุคงเหลือ,,ifrs-full:Inventories,,as_reported
 inventory_obsolescence_provision,CF,Provision for inventory obsolescence,สำรองวัสดุคงเหลือเสื่อมสภาพ,,ifrs-full:WriteDownsReversalsOfInventories,,as_reported
 investment_property_paid,CF,Cash paid for investment property,ลงทุนในอสังหาริมทรัพย์เพื่อการลงทุน,,ifrs-full:PurchaseOfInvestmentProperty,,negate_if_outflow
 deferred_revenue_change,CF,Change in deferred revenue,รายได้รอตัดบัญชี,,ifrs-full:DeferredIncomeIncludingCurrentAndNoncurrent,,as_reported
-restricted_bank_deposits,BS,Restricted bank deposits (pledged),เงินฝากธนาคารที่มีภาระค้ำประกัน,,ifrs-full:RestrictedCashAndCashEquivalents,,as_reported
+restricted_bank_deposits,BS,Restricted bank deposits (pledged),เงินฝากธนาคารที่มีภาระค้ำประกัน,เงินฝากธนาคารที่ติดภาระค้ำประกัน,ifrs-full:RestrictedCashAndCashEquivalents,,as_reported
 retained_earnings_legal_reserve,BS,Appropriated retained earnings - legal reserve,กำไรสะสม จัดสรรแล้ว - สำรองตามกฎหมาย,จัดสรรแล้ว - สำรองตามกฎหมาย,ifrs-full:StatutoryReserve,,as_reported
 non_current_trade_receivables,BS,Non-current trade receivables,ลูกหนี้การค้าไม่หมุนเวียน,,ifrs-full:NoncurrentTradeReceivables,,as_reported
 fx_gain_loss,CF,FX gain/loss (CF reconciliation adjustment),กำไรจากอัตราแลกเปลี่ยน,,,,as_reported
@@ -538,3 +538,9 @@ impairment_loss_other_assets,IS,Impairment loss on assets (IS line),ขาดท
 short_term_provisions,CF,Short-term provisions (CF change),ประมาณการหนี้สินระยะสั้น,,ifrs-full:CurrentProvisions,,as_reported
 accrued_income_bs,BS,Accrued income,รายได้ค้างรับ,,ifrs-full:OtherCurrentReceivables,,as_reported
 construction_in_progress,BS,Construction in progress,สินทรัพย์ระหว่างก่อสร้าง,,ifrs-full:ConstructionInProgress,,as_reported
+land_held_for_development,BS,Land held for future development (property developers),ที่ดินรอการพัฒนา,,ifrs-full:Inventories,property|reit,as_reported
+debentures_non_current,BS,Debentures - net of current portion (long-term),หุ้นกู้ - สุทธิจากส่วนที่ถึงกำหนดชำระภายในหนึ่งปี,หุ้นกู้,ifrs-full:BondsIssued,,as_reported
+cost_to_obtain_contracts,BS,Cost to obtain contracts with customers (IFRS 15),ต้นทุนในการได้มาซึ่งสัญญาที่ทำกับลูกค้า,,ifrs-full:AssetsRecognisedFromCostsToObtainOrFulfilContractsWithCustomers,,as_reported
+customer_deposits_real_estate,BS,Customer deposits / down-payments for real-estate sales (contract liability IFRS 15),เงินรับล่วงหน้าจากลูกค้า,เงินมัดจำรับจากลูกค้า,ifrs-full:CurrentContractLiabilities,property|reit,as_reported
+construction_retention_payable,BS,Construction retention payable to contractors,เงินประกันงานก่อสร้าง,เงินประกันผลงาน,ifrs-full:OtherPayables,property|reit,as_reported
+current_debentures,BS,Current portion of debentures (due within one year),ส่วนของหุ้นกู้ที่ถึงกำหนดชำระภายในหนึ่งปี,หุ้นกู้ที่ถึงกำหนดชำระภายในหนึ่งปี,ifrs-full:ShorttermBorrowings,,as_reported
