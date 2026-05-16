@@ -108,11 +108,11 @@ equity,BS,Total equity,รวมส่วนของผู้ถือหุ้
 total_liabilities_and_equity,BS,Total liabilities and equity,รวมหนี้สินและส่วนของผู้ถือหุ้น,,ifrs-full:EquityAndLiabilities,,as_reported
 ocf,CF,Net cash from operating activities,เงินสดสุทธิได้มาจากกิจกรรมดำเนินงาน,เงินสดสุทธิได้มาจาก(ใช้ไปใน)กิจกรรมดำเนินงาน,ifrs-full:CashFlowsFromUsedInOperatingActivities,,as_reported
 cash_received_from_operations,CF,Cash received from operations,เงินสดรับจากการดำเนินงาน,เงินสดรับ(จ่าย)จากการดำเนินงาน,,,as_reported
-interest_received,CF,Interest received,เงินสดรับจากดอกเบี้ย,ดอกเบี้ยรับ,ifrs-full:InterestReceivedClassifiedAsOperatingActivities,,as_reported
-dividends_received,CF,Dividends received,เงินสดรับจากเงินปันผล,เงินปันผลรับ,ifrs-full:DividendsReceivedClassifiedAsOperatingActivities,,as_reported
+interest_received,CF,Interest received,เงินสดรับจากดอกเบี้ย,ดอกเบี้ยรับ|เงินสดรับดอกเบี้ย,ifrs-full:InterestReceivedClassifiedAsOperatingActivities,,as_reported
+dividends_received,CF,Dividends received,เงินสดรับจากเงินปันผล,เงินปันผลรับ|เงินสดรับเงินปันผล,ifrs-full:DividendsReceivedClassifiedAsOperatingActivities,,as_reported
 tax_paid,CF,Income tax paid,เงินสดจ่ายภาษีเงินได้,จ่ายภาษีเงินได้,ifrs-full:IncomeTaxesPaidRefundClassifiedAsOperatingActivities,,negate_if_outflow
-interest_paid,CF,Finance costs paid,เงินสดจ่ายต้นทุนทางการเงิน,จ่ายต้นทุนทางการเงิน,ifrs-full:InterestPaidClassifiedAsOperatingActivities,,negate_if_outflow
-depreciation_amortization,CF,Depreciation and amortization,ค่าเสื่อมราคาและค่าตัดจำหน่าย,,ifrs-full:DepreciationAndAmortisationExpense,,as_reported
+interest_paid,CF,Finance costs paid,เงินสดจ่ายต้นทุนทางการเงิน,จ่ายต้นทุนทางการเงิน|เงินสดจ่ายดอกเบี้ย,ifrs-full:InterestPaidClassifiedAsOperatingActivities,,negate_if_outflow
+depreciation_amortization,CF,Depreciation and amortization,ค่าเสื่อมราคาและค่าตัดจำหน่าย,ค่าเสื่อมราคาและรายจ่ายตัดบัญชี,ifrs-full:DepreciationAndAmortisationExpense,,as_reported
 capex,CF,Cash paid for property plant and equipment,เงินสดจ่ายสำหรับที่ดิน อาคารและอุปกรณ์ และอสังหาริมทรัพย์เพื่อการลงทุน,เงินสดจ่ายเพื่อซื้อสินทรัพย์ถาวร|เงินจ่ายสำหรับที่ดิน อาคารและอุปกรณ์ และอสังหาริมทรัพย์เพื่อการลงทุน,ifrs-full:PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities,,negate_if_outflow
 investing_activities,CF,Net cash from (used in) investing activities,เงินสดสุทธิได้มาจาก(ใช้ไปใน)กิจกรรมลงทุน,เงินสดสุทธิใช้ไปในกิจกรรมลงทุน,ifrs-full:CashFlowsFromUsedInInvestingActivities,,as_reported
 financing_activities,CF,Net cash used in financing activities,เงินสดสุทธิใช้ไปในกิจกรรมจัดหาเงิน,เงินสดสุทธิได้มาจาก(ใช้ไปใน)กิจกรรมจัดหาเงิน,ifrs-full:CashFlowsFromUsedInFinancingActivities,,as_reported
@@ -221,3 +221,19 @@ reserve_change_in_subsidiary_ownership,BS,Reserve from change in ownership inter
 key_management_compensation,IS,Director and key management personnel compensation,ค่าตอบแทนกรรมการและผู้บริหาร,,ifrs-full:KeyManagementPersonnelCompensation,,as_reported
 proceeds_from_subsidiary_closure,CF,Cash received from loss of control of subsidiary,เงินสดรับจากการปิดบริษัทย่อย,,ifrs-full:CashFlowsFromLosingControlOfSubsidiariesOrOtherBusinessesClassifiedAsInvestingActivities,,as_reported
 net_profit_owners_of_parent_cf,CF,Profit attributable to owners of the parent (CF view),กำไรส่วนที่เป็นของบริษัทใหญ่,,ifrs-full:ProfitLossAttributableToOwnersOfParent,,as_reported
+net_interest_income,IS,Net interest income (banks),รายได้ดอกเบี้ยสุทธิ,,ifrs-full:InterestIncomeExpenseNet,bank,as_reported
+interest_income,IS,Interest income (banks),รายได้ดอกเบี้ย,ดอกเบี้ยรับ,ifrs-full:InterestIncome,bank,as_reported
+interest_expense,IS,Interest expense (banks),ค่าใช้จ่ายดอกเบี้ย,,ifrs-full:InterestExpense,bank,as_reported
+loans_to_customers,BS,Loans and advances to customers (banks),เงินให้สินเชื่อแก่ลูกหนี้,เงินให้สินเชื่อแก่ลูกหนี้และดอกเบี้ยค้างรับ,ifrs-full:LoansAndAdvancesToCustomers,bank,as_reported
+deposits_from_customers,BS,Deposits from customers (banks),เงินรับฝาก,,ifrs-full:DepositsFromCustomers,bank,as_reported
+demand_deposits,BS,Deposits repayable on demand (banks),หนี้สินจ่ายคืนเมื่อทวงถาม,,ifrs-full:DepositsRepayableOnDemandClassifiedAsFinancialLiabilities,bank,as_reported
+employee_expenses,IS,Employee benefit expenses,ค่าใช้จ่ายเกี่ยวกับพนักงาน,,ifrs-full:EmployeeBenefitsExpense,,as_reported
+dividend_income,IS,Dividend income (banks),รายได้เงินปันผล,,ifrs-full:DividendIncome,,as_reported
+other_liabilities,BS,Other liabilities,หนี้สินอื่น,,ifrs-full:OtherLiabilities,,as_reported
+other_assets,BS,Other assets,สินทรัพย์อื่น,,ifrs-full:OtherAssets,,as_reported
+provisions,BS,Provisions,ประมาณการหนี้สิน,,ifrs-full:Provisions,,as_reported
+retained_earnings_unappropriated,BS,Unappropriated retained earnings,ยังไม่ได้จัดสรร,,ifrs-full:RetainedEarningsUnappropriated,,as_reported
+assets_pending_sale,BS,Assets pending sale,ทรัพย์สินรอการขาย,,ifrs-full:NoncurrentAssetsHeldForSaleAndDisposalGroups,,as_reported
+net_profit_bank_owners,IS,Profit attributable to the bank (owners),ส่วนที่เป็นของธนาคาร,,ifrs-full:ProfitLossAttributableToOwnersOfParent,bank,as_reported
+director_compensation,IS,Directors compensation,ค่าตอบแทนกรรมการ,,ifrs-full:KeyManagementPersonnelCompensation,,as_reported
+tax_expense,IS,Tax expense (banks),ค่าภาษีอากร,,ifrs-full:IncomeTaxExpenseContinuingOperations,bank,as_reported
