@@ -33,6 +33,7 @@ a non-empty Thai string in the data band.
 
 from __future__ import annotations
 
+import logging
 import re
 from dataclasses import dataclass
 from pathlib import Path
@@ -43,6 +44,8 @@ import openpyxl
 from openpyxl.worksheet.worksheet import Worksheet
 
 from thaifin.parsers._convert import ensure_xlsx
+
+logger = logging.getLogger(__name__)
 
 # --- Sheet → statement classification ---------------------------------------
 
@@ -81,8 +84,34 @@ _UNIT_MARKERS: list[tuple[str, float]] = [
     ("บาท", 1.0),
 ]
 
-# Hidden / vendor-internal sheets to skip outright.
-_HIDDEN_SHEET_PREFIXES = ("_", "DS_INTERNAL", "_com.sap")
+# Hidden / vendor-internal sheets to skip outright. Covers the SAP BI export
+# ``_com.sap.ip.bi.xl.hiddensheet`` (AOT 2020+), DataSnipper artifact sheets
+# ``DS_INTERNAL_*`` (CPALL 2026Q1), and any other ``_``-prefixed scratch sheet.
+SHEET_NAME_BLACKLIST_RE = re.compile(r"^(_|DS_INTERNAL)")
+
+# Line-wrap detection (Fix 1). When a long financial-statement label doesn't
+# fit one print row, Excel splits it across two cells: the first cell holds
+# the head of the phrase (with empty value cells), the next cell holds the
+# tail (with the value cells populated). The tail almost always indents with
+# leading whitespace OR starts with a Thai grammatical particle that can't
+# begin a fresh sentence. Without merging, the parser emits the tail as a
+# phantom orphan label that never maps to a canonical concept (PTT FY2025
+# cash-flow row 39 ``และหนี้สินดำเนินงาน`` is the textbook case).
+_THAI_CONTINUATION_PARTICLES = (
+    "และ",     # "and"
+    "หรือ",    # "or"
+    "ที่",     # relative pronoun "that/which"
+    "จาก",     # "from"
+    "ของ",     # "of"
+    "ใน",      # "in"
+    "ต่อ",     # "per/to"
+    "ภาษี",    # "tax" — common tail in cash-flow-line continuations
+    "มูลค่า",  # "value"
+    "เพื่อ",   # "for"
+    "ตาม",     # "according to"
+    "โดย",     # "by"
+    "กับ",     # "with"
+)
 
 
 def classify_sheet(name: str) -> str | None:
@@ -195,16 +224,123 @@ def _data_row_value(ws: Worksheet, row: int, col: int) -> float | None:
     return None
 
 
-def _label_at(ws: Worksheet, row: int, label_cols: list[int]) -> str | None:
-    """Return the first non-empty Thai label found across ``label_cols``."""
+def _label_at(ws: Worksheet, row: int, label_cols: list[int]) -> tuple[str, str] | None:
+    """Return ``(stripped, raw)`` for the first non-empty label across ``label_cols``.
+
+    The raw form preserves leading whitespace, which is the strongest signal
+    that a row is a line-wrap continuation of the row above.
+    """
     for col in label_cols:
         v = ws.cell(row=row, column=col).value
         if isinstance(v, str) and v.strip():
-            return v.strip()
+            return v.strip(), v
     return None
 
 
+def _looks_like_continuation(stripped: str, raw: str) -> bool:
+    """Return True if ``(stripped, raw)`` looks like a line-wrap tail.
+
+    Two orthogonal signals — either is enough:
+
+    1. Raw label starts with whitespace (Excel renders wrapped text
+       indented; this is the strongest signal observed in PTT filings).
+    2. Stripped label starts with a Thai grammatical particle that can't
+       grammatically begin a fresh line item (และ, ที่, จาก, …).
+
+    A short-length heuristic was considered but rejected — legitimate short
+    line items (``เงินกู้ยืมระยะยาว``, ``กำไรขั้นต้น``) collide with the
+    common section-header-then-first-item pattern in BS sheets.
+    """
+    if raw != raw.lstrip():
+        return True
+    for particle in _THAI_CONTINUATION_PARTICLES:
+        if stripped.startswith(particle):
+            return True
+    return False
+
+
 # --- Sheet extraction ------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class _RawRow:
+    """Pre-merge view of one worksheet row."""
+
+    row_num: int
+    label_stripped: str
+    label_raw: str
+    cons_value: float | None
+    comp_value: float | None
+
+
+def _collect_rows(
+    ws: Worksheet,
+    label_cols: list[int],
+    consolidated_col: int | None,
+    company_col: int | None,
+    multiplier: float,
+) -> list[_RawRow]:
+    """First pass: gather every labelled row with its scaled values."""
+    out: list[_RawRow] = []
+    for row in range(1, ws.max_row + 1):
+        label = _label_at(ws, row, label_cols)
+        if label is None:
+            continue
+        stripped, raw = label
+        cons_raw = (
+            _data_row_value(ws, row, consolidated_col)
+            if consolidated_col is not None
+            else None
+        )
+        comp_raw = (
+            _data_row_value(ws, row, company_col)
+            if company_col is not None
+            else None
+        )
+        cons = cons_raw * multiplier if cons_raw is not None else None
+        comp = comp_raw * multiplier if comp_raw is not None else None
+        out.append(_RawRow(row, stripped, raw, cons, comp))
+    return out
+
+
+def _merge_line_wraps(rows: list[_RawRow]) -> list[_RawRow]:
+    """Fold tail rows that look like line-wrap continuations into their head.
+
+    Value-continuity guardrail: only fold when the head row's value cells
+    are empty AND the tail row's value cells are non-empty. If both have
+    values they're separate line items; if both are empty neither survives
+    the value-filter downstream so the merge would be a no-op anyway.
+    """
+    merged: list[_RawRow] = []
+    skip_next = False
+    for i, row in enumerate(rows):
+        if skip_next:
+            skip_next = False
+            continue
+        head_has_value = row.cons_value is not None or row.comp_value is not None
+        if head_has_value or i + 1 >= len(rows):
+            merged.append(row)
+            continue
+        tail = rows[i + 1]
+        tail_has_value = tail.cons_value is not None or tail.comp_value is not None
+        if not tail_has_value:
+            merged.append(row)
+            continue
+        if not _looks_like_continuation(tail.label_stripped, tail.label_raw):
+            merged.append(row)
+            continue
+        combined_label = f"{row.label_stripped} {tail.label_stripped}"
+        merged.append(
+            _RawRow(
+                row_num=row.row_num,
+                label_stripped=combined_label,
+                label_raw=combined_label,
+                cons_value=tail.cons_value,
+                comp_value=tail.comp_value,
+            )
+        )
+        skip_next = True
+    return merged
 
 
 def _extract_sheet(
@@ -222,6 +358,9 @@ def _extract_sheet(
     populated consolidation column). Prior-year columns inside the same
     filing are intentionally dropped because the prior filing's own
     current-year column carries the canonical value.
+
+    A line-wrap pre-pass folds two-row labels back into a single row before
+    emission — see :func:`_merge_line_wraps`.
     """
     consolidated_col, company_col = _find_section_columns(ws)
     multiplier = _detect_unit_multiplier(ws)
@@ -230,37 +369,27 @@ def _extract_sheet(
     # Allow the label to live one column to the right (sub-section indent).
     label_cols = [label_col_primary, label_col_primary + 1]
 
+    raw_rows = _collect_rows(
+        ws, label_cols, consolidated_col, company_col, multiplier
+    )
+    rows = _merge_line_wraps(raw_rows)
+
     out: list[FinancialLineRow] = []
     seen_labels: set[str] = set()
-    for row in range(1, ws.max_row + 1):
-        label = _label_at(ws, row, label_cols)
-        if label is None:
-            continue
-        cons_raw = (
-            _data_row_value(ws, row, consolidated_col)
-            if consolidated_col is not None
-            else None
-        )
-        comp_raw = (
-            _data_row_value(ws, row, company_col)
-            if company_col is not None
-            else None
-        )
-        cons_value = cons_raw * multiplier if cons_raw is not None else None
-        comp_value = comp_raw * multiplier if comp_raw is not None else None
-        if cons_value is None and comp_value is None:
+    for r in rows:
+        if r.cons_value is None and r.comp_value is None:
             continue
         # Deduplicate within the sheet — labels can recur (e.g. note
         # references) but only the first numeric occurrence is canonical.
-        if label in seen_labels:
+        if r.label_stripped in seen_labels:
             continue
-        seen_labels.add(label)
-        if cons_value is not None:
+        seen_labels.add(r.label_stripped)
+        if r.cons_value is not None:
             out.append(
                 FinancialLineRow(
                     statement=statement,
-                    raw_label_th=label,
-                    value=cons_value,
+                    raw_label_th=r.label_stripped,
+                    value=r.cons_value,
                     audit_basis=audit_basis,
                     consolidation="consolidated",
                     filing_id=filing_id,
@@ -268,12 +397,12 @@ def _extract_sheet(
                     symbol=symbol,
                 )
             )
-        if comp_value is not None:
+        if r.comp_value is not None:
             out.append(
                 FinancialLineRow(
                     statement=statement,
-                    raw_label_th=label,
-                    value=comp_value,
+                    raw_label_th=r.label_stripped,
+                    value=r.comp_value,
                     audit_basis=audit_basis,
                     consolidation="company",
                     filing_id=filing_id,
@@ -308,7 +437,12 @@ def parse_financial_statements(
         rows: list[FinancialLineRow] = []
         for sheet_name in wb.sheetnames:
             # Skip vendor / hidden / DataSnipper / SAP-export sheets.
-            if any(sheet_name.startswith(p) for p in _HIDDEN_SHEET_PREFIXES):
+            if SHEET_NAME_BLACKLIST_RE.match(sheet_name):
+                logger.debug(
+                    "skip-hidden-sheet filing=%s sheet=%s",
+                    filing_id,
+                    sheet_name,
+                )
                 continue
             statement = classify_sheet(sheet_name)
             if statement is None:
