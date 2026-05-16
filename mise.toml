@@ -13,6 +13,7 @@ run = "pdoc ./thaifin/ -o ./docs/"
 
 [tasks."autonomy:start"]
 description = "Launch the autonomous SET100 grind in a fresh `claude -p` supervisor session"
+shell = "bash -c"
 usage = '''
 flag "--leaders <list>" default="PTTGC,KTB,CPF,LH,BH,DELTA,GULF,BLA,AOT,CPN,ADVANC" help="Comma-separated industry-leader symbols (L4 priority order)"
 flag "--queue <queue>" default="set100" help="Symbol-list file under data/ (without _symbols.txt suffix): set100 | setmai"
@@ -45,6 +46,7 @@ echo "Supervisor launched. PID=$(cat runs/$RUN_TS/supervisor.pid). Log: runs/$RU
 
 [tasks."autonomy:status"]
 description = "Print the latest run's dashboard"
+shell = "bash -c"
 run = '''
 set -e
 RUN=$(ls -1t runs/ 2>/dev/null | head -1)
@@ -58,6 +60,7 @@ echo "== state.json summary =="
 
 [tasks."autonomy:pause"]
 description = "Graceful drain — supervisor stops dequeuing on next poll"
+shell = "bash -c"
 run = '''
 RUN=$(ls -1t runs/ 2>/dev/null | head -1)
 [ -n "$RUN" ] || { echo "no runs"; exit 1; }
@@ -67,6 +70,7 @@ echo "PAUSE sentinel set: runs/$RUN/PAUSE"
 
 [tasks."autonomy:resume"]
 description = "Clear PAUSE; supervisor picks up on next poll"
+shell = "bash -c"
 run = '''
 RUN=$(ls -1t runs/ 2>/dev/null | head -1)
 [ -n "$RUN" ] || { echo "no runs"; exit 1; }
@@ -79,6 +83,7 @@ echo "PAUSE cleared"
 
 [tasks."autonomy:kill"]
 description = "Hard kill (use after pause fails to drain)"
+shell = "bash -c"
 run = '''
 RUN=$(ls -1t runs/ 2>/dev/null | head -1)
 [ -n "$RUN" ] || { echo "no runs"; exit 1; }
