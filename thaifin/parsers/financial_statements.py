@@ -50,6 +50,12 @@ logger = logging.getLogger(__name__)
 # --- Sheet → statement classification ---------------------------------------
 
 # Order matters: more specific patterns first. Each tuple is (regex, statement).
+#
+# The generic ``^BS\b`` / ``^PL\b`` / ``^CF\b`` fallbacks at the tail cover
+# CPALL (``BS 3-5``, ``PL 3M 6-8``, ``CF 12-15``), SCB (bare ``BS``,
+# ``PL (3M)``, ``CF``) and BDMS (``BS&PL Thai``, ``PL-T (3)``). They sit
+# after the PTT-specific ``^BS[-\s]?Asset`` etc. so PTT classification is
+# unchanged (the specific rule wins by being listed first).
 _SHEET_RULES: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"^EQ\s*Change", re.IGNORECASE), "EQ"),
     (re.compile(r"^BS[-\s]?Asset", re.IGNORECASE), "BS"),
@@ -64,11 +70,57 @@ _SHEET_RULES: list[tuple[re.Pattern[str], str]] = [
     # Legacy BS sheet names — pre-2010 filings used "งบดุล" before TFRS
     # adopted "งบแสดงฐานะการเงิน" / "งบฐานะการเงิน".
     (re.compile(r"^(งบ)?(ดุล|แสดงฐานะการเงิน|ฐานะการเงิน)"), "BS"),
+    # Generic short-code fallbacks (CPALL / SCB / BDMS). ``\b`` here means
+    # the BS/PL/CF token is followed by a non-word char or end-of-string,
+    # so ``BSE`` / ``PLN`` / ``CFA`` don't accidentally match. Note that
+    # ``\b`` does fire between ``S`` and ``-`` / ``&`` / `` `` / ``(``, so
+    # ``BS-Asset`` would also match — but that's already handled above and
+    # earlier rules win.
+    (re.compile(r"^BS\b", re.IGNORECASE), "BS"),
+    (re.compile(r"^PL\b", re.IGNORECASE), "IS"),
+    (re.compile(r"^CF\b", re.IGNORECASE), "CF"),
 ]
+
+# Content-sniffer keyword → statement. Scanned in declaration order; the
+# first match wins so longer / more-specific Thai phrases must come first.
+# Only applied to sheets whose name carries no classification signal at
+# all (currently: purely numeric names — SCC uses ``1``, ``2``, … as
+# sheet names). Sheets that DON'T match a name rule and AREN'T pure
+# numerics are still treated as unknown (skipped) — this keeps behaviour
+# identical for AOT/ADVANC/etc. whose "Cover" / "SFP(P.3-5)" sheets must
+# not be reclassified.
+_CONTENT_KEYWORDS: list[tuple[str, str]] = [
+    ("งบแสดงฐานะการเงิน", "BS"),
+    ("งบฐานะการเงิน", "BS"),
+    ("งบดุล", "BS"),
+    ("งบกำไรขาดทุน", "IS"),
+    ("กำไรขาดทุน", "IS"),
+    ("งบกระแสเงินสด", "CF"),
+    ("กระแสเงินสด", "CF"),
+    ("งบการเปลี่ยนแปลงส่วนของผู้ถือหุ้น", "EQ"),
+    ("งบแสดงการเปลี่ยนแปลงส่วนของผู้ถือหุ้น", "EQ"),
+]
+
+# Rows to scan when sniffing a sheet's content for statement type. Title
+# bands sit at the very top of every SEC-IDISC sheet observed.
+_CONTENT_SNIFF_ROW_LIMIT = 10
+
+# Sheets whose name is just digits (e.g. SCC's ``1``, ``2``, ``3``…)
+# carry no classification signal in the name and need content sniffing.
+_PURE_NUMERIC_SHEET_RE = re.compile(r"^\d+$")
 
 # Headers that mark the consolidated / company section bands.
 _CONSOLIDATED_HEADERS = ("งบการเงินรวม", "ข้อมูลทางการเงินรวม")
 _COMPANY_HEADERS = ("งบการเงินเฉพาะกิจการ", "ข้อมูลทางการเงินเฉพาะกิจการ")
+
+# Header-row Thai labels that look like data rows but are actually
+# table headers (CPN places ``หมายเหตุ`` in the label column with
+# year values ``2568`` / ``2567`` in the section columns — without
+# this filter the parser emits two phantom BS rows). These labels
+# must never reach the row-emission step.
+_HEADER_LABEL_BLOCKLIST: frozenset[str] = frozenset({
+    "หมายเหตุ",
+})
 
 # Column scanning bounds — sheet headers always sit in the first 12 rows.
 _HEADER_ROW_LIMIT = 12
@@ -115,11 +167,39 @@ _THAI_CONTINUATION_PARTICLES = (
 
 
 def classify_sheet(name: str) -> str | None:
-    """Return ``'BS' | 'IS' | 'CF' | 'EQ'`` or None if unknown."""
+    """Return ``'BS' | 'IS' | 'CF' | 'EQ'`` or None if unknown.
+
+    Name-only classification. Sheets like SCC's ``1`` / ``2`` / ``3`` carry
+    no name signal — those go through :func:`classify_sheet_by_content`
+    inside :func:`parse_financial_statements`.
+    """
     s = name.strip()
     for pattern, statement in _SHEET_RULES:
         if pattern.search(s):
             return statement
+    return None
+
+
+def classify_sheet_by_content(ws: Worksheet) -> str | None:
+    """Sniff the title band of ``ws`` for a Thai statement-type keyword.
+
+    Caller is responsible for only invoking this when the sheet name
+    carries no classification signal (currently restricted to pure-numeric
+    names — see ``_PURE_NUMERIC_SHEET_RE``). Returns ``'BS' | 'IS' | 'CF'
+    | 'EQ'`` or None.
+    """
+    end_row = min(_CONTENT_SNIFF_ROW_LIMIT, ws.max_row)
+    for row in range(1, end_row + 1):
+        for col in range(1, ws.max_column + 1):
+            v = ws.cell(row=row, column=col).value
+            if not isinstance(v, str):
+                continue
+            text = v.strip()
+            if not text:
+                continue
+            for keyword, statement in _CONTENT_KEYWORDS:
+                if keyword in text:
+                    return statement
     return None
 
 
@@ -182,6 +262,62 @@ def _find_section_columns(ws: Worksheet) -> tuple[int | None, int | None]:
     return consolidated_col, company_col
 
 
+# Minimum absolute value a cell must reach for the column to count as a
+# "real" value column. SEC IDISC figures are reported in baht (or
+# thousands-of-baht). Note-ref columns hold small integers like ``8`` or
+# ``3``; this filter rejects them while still admitting real values.
+_VALUE_COLUMN_MIN_MAGNITUDE = 1000.0
+
+
+def _infer_value_column(ws: Worksheet, label_col: int) -> int | None:
+    """Pick the leftmost data column to use when no section header exists.
+
+    SCC's separate-company filings have no ``งบการเงินรวม`` /
+    ``งบการเงินเฉพาะกิจการ`` banner — the values just sit in a single
+    column with a Thai date header. Strategy:
+
+    1. Walk columns right of the label column.
+    2. For each, count cells whose magnitude is ``>= 1000`` (real
+       money values, not note references).
+    3. Return the leftmost column with ``>= 3`` such cells.
+
+    Returning the *leftmost* matches the convention used elsewhere
+    (current period is always left of prior period in SEC filings).
+    Returns None if no column qualifies — caller should skip the sheet.
+    """
+    end = min(60, ws.max_row) + 1
+    for col in range(label_col + 1, ws.max_column + 1):
+        count = 0
+        for row in range(1, end):
+            v = ws.cell(row=row, column=col).value
+            if isinstance(v, (int, float)):
+                if abs(v) >= _VALUE_COLUMN_MIN_MAGNITUDE:
+                    count += 1
+            elif isinstance(v, str):
+                s = v.strip().replace(",", "")
+                try:
+                    f = float(s)
+                except (TypeError, ValueError):
+                    continue
+                if abs(f) >= _VALUE_COLUMN_MIN_MAGNITUDE:
+                    count += 1
+            if count >= 3:
+                return col
+    return None
+
+
+def _is_thai_text(s: str) -> bool:
+    """True if ``s`` contains at least one Thai-script character (U+0E00-U+0E7F).
+
+    Used to distinguish real labels (``เงินสด``) from notes/reference
+    cells (``'8'``, ``'3, 8'``) that are otherwise non-digit strings.
+    """
+    for ch in s:
+        if "฀" <= ch <= "๿":
+            return True
+    return False
+
+
 def _guess_label_column(ws: Worksheet) -> int:
     """Return the leftmost column that holds Thai labels in the data band.
 
@@ -201,6 +337,30 @@ def _guess_label_column(ws: Worksheet) -> int:
         if candidate_counts.get(col, 0) >= 3:
             return col
     return 2  # safe default for the modern PTT layout
+
+
+def _guess_label_column_leftmost(ws: Worksheet) -> int:
+    """Label-column heuristic for SCC-style sheets without section headers.
+
+    SCC's separate filings and SCB's late-format bank sheets place
+    labels in col 1 with note refs in col 2 — the opposite of the
+    PTT-modern layout. ``_guess_label_column`` defaults to col 2 for
+    PTT compatibility, so this leftmost variant is used only by the
+    no-section-header fallback path in ``_extract_sheet``.
+    """
+    candidate_counts: dict[int, int] = {}
+    end = min(40, ws.max_row) + 1
+    for row in range(10, end):
+        for col in (1, 2, 3, 4):
+            if col > ws.max_column:
+                continue
+            v = ws.cell(row=row, column=col).value
+            if isinstance(v, str) and v.strip() and _is_thai_text(v):
+                candidate_counts[col] = candidate_counts.get(col, 0) + 1
+    for col in (1, 2, 3, 4):
+        if candidate_counts.get(col, 0) >= 3:
+            return col
+    return 1
 
 
 def _data_row_value(ws: Worksheet, row: int, col: int) -> float | None:
@@ -225,15 +385,31 @@ def _data_row_value(ws: Worksheet, row: int, col: int) -> float | None:
 
 
 def _label_at(ws: Worksheet, row: int, label_cols: list[int]) -> tuple[str, str] | None:
-    """Return ``(stripped, raw)`` for the first non-empty label across ``label_cols``.
+    """Return ``(stripped, raw)`` for the first label across ``label_cols``.
 
     The raw form preserves leading whitespace, which is the strongest signal
     that a row is a line-wrap continuation of the row above.
+
+    Cells must contain at least one Thai character to qualify as a label.
+    This filters note-ref cells (``'8'``, ``'2, 3'``, ``'5, 6'``) so that
+    when the label-column heuristic mis-picks a note-ref column (CPN
+    ``BS Conso-3-5`` selects col 2 = note refs) no spurious rows are
+    emitted. Every Thai-language SEC IDISC filing examined puts real
+    line-item labels in Thai script, so this restriction is safe.
+
+    Header-row labels in ``_HEADER_LABEL_BLOCKLIST`` (``หมายเหตุ`` /
+    Notes) are also rejected — CPN puts that header in the label column
+    with year values in the section columns, which the row collector
+    would otherwise mistake for a data row.
     """
     for col in label_cols:
         v = ws.cell(row=row, column=col).value
-        if isinstance(v, str) and v.strip():
-            return v.strip(), v
+        if not (isinstance(v, str) and v.strip() and _is_thai_text(v)):
+            continue
+        stripped = v.strip()
+        if stripped in _HEADER_LABEL_BLOCKLIST:
+            continue
+        return stripped, v
     return None
 
 
@@ -365,7 +541,17 @@ def _extract_sheet(
     consolidated_col, company_col = _find_section_columns(ws)
     multiplier = _detect_unit_multiplier(ws)
 
-    label_col_primary = _guess_label_column(ws)
+    # Branch on whether section headers exist. The two-section layout
+    # (PTT / banks / CPALL / BDMS / SCB legacy) uses col 2 for labels
+    # — the PTT-modern preference order. SCC's separate filings have
+    # no section headers AND keep labels in col 1, so the no-header
+    # branch flips to leftmost-first and synthesises a value column.
+    if consolidated_col is None and company_col is None:
+        label_col_primary = _guess_label_column_leftmost(ws)
+        company_col = _infer_value_column(ws, label_col_primary)
+    else:
+        label_col_primary = _guess_label_column(ws)
+
     # Allow the label to live one column to the right (sub-section indent).
     label_cols = [label_col_primary, label_col_primary + 1]
 
@@ -445,9 +631,24 @@ def parse_financial_statements(
                 )
                 continue
             statement = classify_sheet(sheet_name)
+            ws = wb[sheet_name]
+            # Content-based fallback for sheet names that carry no
+            # classification signal — SCC names sheets ``1`` / ``2`` /
+            # ``3`` / ``4`` / ``5``. Restricted to pure-numeric names so
+            # that genuinely unknown sheets (e.g. ADVANC ``SFP(P.3-5)``)
+            # continue to be skipped — those need their own name rules,
+            # not opportunistic content matching.
+            if statement is None and _PURE_NUMERIC_SHEET_RE.match(sheet_name.strip()):
+                statement = classify_sheet_by_content(ws)
+                if statement is not None:
+                    logger.debug(
+                        "content-sniff-matched filing=%s sheet=%s -> %s",
+                        filing_id,
+                        sheet_name,
+                        statement,
+                    )
             if statement is None:
                 continue
-            ws = wb[sheet_name]
             rows.extend(
                 _extract_sheet(
                     ws,
@@ -482,6 +683,7 @@ def rows_to_records(rows: Iterable[FinancialLineRow]) -> list[dict]:
 __all__ = [
     "FinancialLineRow",
     "classify_sheet",
+    "classify_sheet_by_content",
     "parse_financial_statements",
     "rows_to_records",
 ]
