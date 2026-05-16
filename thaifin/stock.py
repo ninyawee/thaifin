@@ -2,6 +2,7 @@
 This module provides the `Stock` class, which serves as the main API for accessing individual Thai stock fundamental data.
 """
 
+import re
 import warnings
 from typing import Any, Literal
 
@@ -19,6 +20,87 @@ from thaifin.sources.thai_securities_data import ThaiSecuritiesDataService
 # Using object() (not None) so users can still pass None explicitly if they ever
 # want the default-with-warning behavior.
 _DEFAULT_SOURCE: Any = object()
+
+
+_PERIOD_RE = re.compile(r"^(\d{4})(?:Q([1-3]))?$")
+
+# Flow concepts (IS/CF) need standalone-quarter derivation from YTD-as-stored;
+# stock concepts (BS/EQ) are point-in-time snapshots and have no Q4 column
+# (Thai SEC IDISC publishes no Q4 filing). See docs/adr/0002.
+_FLOW_STATEMENTS = frozenset({"IS", "CF"})
+_FLOW_PERIOD_TYPES = ("Q1", "Q2", "Q3", "Q4", "FY")
+_STOCK_PERIOD_TYPES = ("Q1", "Q2", "Q3", "FY")
+_PERIOD_TYPE_ORDER = {pt: i for i, pt in enumerate(_FLOW_PERIOD_TYPES)}
+
+
+def _parse_period(period: str) -> tuple[int, str]:
+    """Parse a raw ``period`` value into ``(year, raw_period_type)``.
+
+    ``"YYYY"`` → ``(YYYY, "FY")``; ``"YYYYQq"`` → ``(YYYY, "Q{q}_YTD")``
+    for ``q ∈ {1, 2, 3}``. The ``_YTD`` suffix is an internal column tag
+    on the pivot intermediate — the consumer-facing frame renames Q1..Q3
+    to standalone names after derivation.
+    """
+    m = _PERIOD_RE.match(period)
+    if m is None:
+        raise ValueError(f"unrecognised period: {period!r}")
+    year = int(m.group(1))
+    q = m.group(2)
+    return year, "FY" if q is None else f"Q{q}_YTD"
+
+
+_RAW_FLOW_COLS = ["Q1_YTD", "Q2_YTD", "Q3_YTD", "FY"]
+_RAW_STOCK_COLS = ["Q1_YTD", "Q2_YTD", "Q3_YTD", "FY"]
+_STOCK_RENAME = {"Q1_YTD": "Q1", "Q2_YTD": "Q2", "Q3_YTD": "Q3", "FY": "FY"}
+
+
+def _derive_flow_standalones(wide: pd.DataFrame) -> pd.DataFrame:
+    """Convert a ``(concept, period_type_raw)`` pivot into standalone-Q columns.
+
+    ``wide`` has whatever subset of ``{Q1_YTD, Q2_YTD, Q3_YTD, FY}`` was
+    present in the data for each concept. The output has all five
+    standalone columns ``Q1, Q2, Q3, Q4, FY`` per concept; missing
+    inputs propagate as ``NaN``.
+    """
+    concepts = wide.columns.get_level_values(0).unique()
+    out_frames = []
+    for concept in concepts:
+        sub = wide[concept].reindex(columns=_RAW_FLOW_COLS)
+        q1, q2, q3, fy = sub["Q1_YTD"], sub["Q2_YTD"], sub["Q3_YTD"], sub["FY"]
+        standalone = pd.DataFrame(
+            {
+                "Q1": q1,
+                "Q2": q2 - q1,
+                "Q3": q3 - q2,
+                "Q4": fy - q3,
+                "FY": fy,
+            },
+            index=wide.index,
+        )
+        standalone.columns = pd.MultiIndex.from_product(
+            [[concept], standalone.columns]
+        )
+        out_frames.append(standalone)
+    return pd.concat(out_frames, axis=1)
+
+
+def _rename_stock_columns(wide: pd.DataFrame) -> pd.DataFrame:
+    """Drop the ``_YTD`` suffix on stock-statement columns; no Q4 emitted.
+
+    Each cell is already a point-in-time snapshot at period end — no
+    derivation is needed. Q4 has no source (no Q4 filing) and is omitted
+    by construction.
+    """
+    concepts = wide.columns.get_level_values(0).unique()
+    out_frames = []
+    for concept in concepts:
+        sub = wide[concept].reindex(columns=_RAW_STOCK_COLS)
+        renamed = sub.rename(columns=_STOCK_RENAME)
+        renamed.columns = pd.MultiIndex.from_product(
+            [[concept], renamed.columns]
+        )
+        out_frames.append(renamed)
+    return pd.concat(out_frames, axis=1)
 
 
 class Stock:
@@ -173,36 +255,6 @@ class Stock:
         df = df.drop(columns=[quarter_col])
         return df
 
-    @property
-    def capex(self) -> pd.Series:
-        """Capital expenditure series indexed by period.
-
-        Dataset-only. Reads ``concept = "capex"`` rows from
-        ``financial_lines.parquet`` at the configured HF revision, filtered
-        to consolidated rows. Returns a ``pd.Series`` indexed by ``period``
-        (str), values are float THB.
-        """
-        if self.source != "dataset":
-            raise NotImplementedError(
-                "Stock.capex is only available with source='dataset'. "
-                "Pass source='dataset' (and revision='...') to Stock(...)."
-            )
-        revision = self.revision or get_data_revision()
-        client = DatasetClient()
-        df = client.query(
-            "SELECT period, value FROM {lines} "
-            f"WHERE symbol = '{self.symbol_upper}' "
-            "AND concept = 'capex' "
-            "AND consolidation = 'consolidated' "
-            "ORDER BY period",
-            revision=revision,
-        )
-        return pd.Series(
-            df["value"].to_numpy(),
-            index=pd.Index(df["period"].to_numpy(), name="period"),
-            name="capex",
-        )
-
     # --- v2 dataset-only statement / report properties ----------------------
     #
     # All five raise NotImplementedError under source="live" — they require
@@ -220,13 +272,27 @@ class Stock:
         return self.revision or get_data_revision()
 
     def _statement_dataframe(self, statement: str) -> pd.DataFrame:
-        """Pivot ``financial_lines`` rows for one statement into a wide df.
+        """Wide statement DataFrame indexed by fiscal year.
 
-        Output: rows = ``period``, columns = ``concept``. Only mapped
-        concepts (``concept IS NOT NULL``) appear as columns; the
-        consolidated view is the canonical one. Same-period collisions on
-        a single concept (rare, would only happen on duplicate filings)
-        keep the most-recent value via ``ANY_VALUE``.
+        Rows are ``PeriodIndex(freq='Y')``; columns are a ``MultiIndex`` of
+        ``(concept, period_type)``.
+
+        For **flow** statements (``IS``, ``CF``), ``period_type`` is one of
+        ``{Q1, Q2, Q3, Q4, FY}`` with ``Q1..Q4`` as standalone-quarter
+        values derived from the YTD-as-stored raw filings:
+        ``Q1 = Q1_YTD``, ``Q2 = Q2_YTD − Q1_YTD``,
+        ``Q3 = Q3_YTD − Q2_YTD``, ``Q4 = FY − Q3_YTD``. ``Q1..Q3`` are
+        reviewed-basis, ``Q4`` is mixed-basis (audited FY − reviewed
+        Q3-YTD), ``FY`` is audited.
+
+        For **stock** statements (``BS``, ``EQ``), ``period_type`` is one
+        of ``{Q1, Q2, Q3, FY}`` — each cell is a per-filing point-in-time
+        snapshot. There is no ``Q4`` column because Thai SEC IDISC
+        publishes no Q4 filing; the audited annual is the year-end
+        snapshot. ``Q1..Q3`` are reviewed; ``FY`` is audited.
+
+        Missing inputs propagate as ``NaN`` — no gap-filling. See
+        ``docs/adr/0002`` for the design rationale.
         """
         revision = self._ensure_dataset_source(f"{statement.lower()}_statement")
         client = DatasetClient()
@@ -242,29 +308,65 @@ class Stock:
         )
         if df.empty:
             return pd.DataFrame()
+
+        parsed = df["period"].map(_parse_period)
+        df = df.assign(
+            _year=parsed.map(lambda t: t[0]),
+            _period_type_raw=parsed.map(lambda t: t[1]),
+        )
+
         wide = df.pivot_table(
-            index="period",
-            columns="concept",
+            index="_year",
+            columns=["concept", "_period_type_raw"],
             values="value",
             aggfunc="first",
         )
-        wide.columns.name = None
-        wide.index.name = "period"
-        return wide
+
+        result = (
+            _derive_flow_standalones(wide)
+            if statement in _FLOW_STATEMENTS
+            else _rename_stock_columns(wide)
+        )
+
+        result.index = pd.PeriodIndex(result.index, freq="Y")
+        result.index.name = "year"
+
+        sorted_cols = sorted(
+            result.columns,
+            key=lambda t: (t[0], _PERIOD_TYPE_ORDER[t[1]]),
+        )
+        return result.reindex(
+            columns=pd.MultiIndex.from_tuples(
+                sorted_cols, names=["concept", "period_type"]
+            )
+        )
 
     @property
     def income_statement(self) -> pd.DataFrame:
-        """Wide IS table indexed by ``period``, columns = mapped concepts."""
+        """Wide IS table: rows = fiscal year, columns = ``(concept, {Q1,Q2,Q3,Q4,FY})``.
+
+        Flow concepts. ``Q1..Q4`` are standalone-quarter values; ``FY`` is
+        the audited annual. See :meth:`_statement_dataframe` for details.
+        """
         return self._statement_dataframe("IS")
 
     @property
     def balance_sheet(self) -> pd.DataFrame:
-        """Wide BS table indexed by ``period``, columns = mapped concepts."""
+        """Wide BS table: rows = fiscal year, columns = ``(concept, {Q1,Q2,Q3,FY})``.
+
+        Stock concepts (point-in-time snapshots). No ``Q4`` column —
+        IDISC publishes no Q4 filing; the audited annual is the year-end
+        snapshot. See :meth:`_statement_dataframe` for details.
+        """
         return self._statement_dataframe("BS")
 
     @property
     def cash_flow_statement(self) -> pd.DataFrame:
-        """Wide CF table indexed by ``period``, columns = mapped concepts."""
+        """Wide CF table: rows = fiscal year, columns = ``(concept, {Q1,Q2,Q3,Q4,FY})``.
+
+        Flow concepts. ``Q1..Q4`` are standalone-quarter values; ``FY`` is
+        the audited annual. See :meth:`_statement_dataframe` for details.
+        """
         return self._statement_dataframe("CF")
 
     @property

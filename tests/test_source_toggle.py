@@ -43,10 +43,22 @@ def test_explicit_live_source_silent_and_preserved() -> None:
     assert s.source == "live"
 
 
-def test_capex_on_live_raises_not_implemented() -> None:
-    """The v1 live path doesn't have a CapEx surface; .capex must error."""
+def test_statement_on_live_raises_not_implemented() -> None:
+    """v2 statement accessors are dataset-only; live source must error."""
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", DeprecationWarning)
         s = Stock("PTT", source="live")
     with pytest.raises(NotImplementedError):
-        _ = s.capex
+        _ = s.cash_flow_statement
+
+
+def test_capex_property_removed() -> None:
+    """``Stock.capex`` was removed in v2 (see docs/adr/0002).
+
+    Callers reach the concept through its parent statement:
+    ``stock.cash_flow_statement['capex']``.
+    """
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", DeprecationWarning)
+        s = Stock("PTT", source="dataset")
+    assert not hasattr(s, "capex")

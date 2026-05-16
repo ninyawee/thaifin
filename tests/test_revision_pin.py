@@ -31,14 +31,13 @@ def test_set_data_revision_updates_global() -> None:
     assert get_data_revision() == "2026.05"
 
 
-def test_set_data_revision_propagates_to_new_stock(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """A Stock created after a pin uses the pinned revision via ``.capex``."""
-    from thaifin import stock as stock_module
-    from thaifin.data.client import DatasetClient
+def _spy_client_class(captured: dict[str, str]):
+    """Build a ``DatasetClient`` subclass that records the revision used.
 
-    captured: dict[str, str] = {}
+    Returns a minimal row set that satisfies the new
+    ``_statement_dataframe`` query shape (period + concept + value).
+    """
+    from thaifin.data.client import DatasetClient
 
     class _SpyClient(DatasetClient):
         def query(self, sql, revision="main"):  # type: ignore[override]
@@ -46,10 +45,26 @@ def test_set_data_revision_propagates_to_new_stock(
             import pandas as pd
 
             return pd.DataFrame(
-                [{"period": "2025", "value": -159_512_958_954.0}]
+                [
+                    {
+                        "period": "2025",
+                        "concept": "capex",
+                        "value": -159_512_958_954.0,
+                    }
+                ]
             )
 
-    monkeypatch.setattr(stock_module, "DatasetClient", _SpyClient)
+    return _SpyClient
+
+
+def test_set_data_revision_propagates_to_new_stock(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A Stock created after a pin uses the pinned revision when fetching."""
+    from thaifin import stock as stock_module
+
+    captured: dict[str, str] = {}
+    monkeypatch.setattr(stock_module, "DatasetClient", _spy_client_class(captured))
     monkeypatch.setattr(
         stock_module.ThaiSecuritiesDataService,
         "get_stock",
@@ -60,7 +75,7 @@ def test_set_data_revision_propagates_to_new_stock(
 
     set_data_revision("pinned-rev")
     s = stock_module.Stock("PTT", source="dataset")
-    _ = s.capex
+    _ = s.cash_flow_statement
     assert captured["revision"] == "pinned-rev"
 
 
@@ -68,20 +83,9 @@ def test_per_instance_revision_overrides_pin(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     from thaifin import stock as stock_module
-    from thaifin.data.client import DatasetClient
 
     captured: dict[str, str] = {}
-
-    class _SpyClient(DatasetClient):
-        def query(self, sql, revision="main"):  # type: ignore[override]
-            captured["revision"] = revision
-            import pandas as pd
-
-            return pd.DataFrame(
-                [{"period": "2025", "value": -159_512_958_954.0}]
-            )
-
-    monkeypatch.setattr(stock_module, "DatasetClient", _SpyClient)
+    monkeypatch.setattr(stock_module, "DatasetClient", _spy_client_class(captured))
     monkeypatch.setattr(
         stock_module.ThaiSecuritiesDataService,
         "get_stock",
@@ -92,7 +96,7 @@ def test_per_instance_revision_overrides_pin(
 
     set_data_revision("pin-A")
     s = stock_module.Stock("PTT", source="dataset", revision="explicit-B")
-    _ = s.capex
+    _ = s.cash_flow_statement
     assert captured["revision"] == "explicit-B"
 
 

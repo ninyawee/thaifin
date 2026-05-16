@@ -66,9 +66,12 @@ def test_dataset_client_preserves_raw_label(fixture_parquet: Path) -> None:
 def test_stock_capex_via_dataset(
     fixture_parquet: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """``Stock(...).capex`` returns a pd.Series indexed by period."""
-    # Patch DatasetClient inside thaifin.stock so the no-arg construction in
-    # the .capex property uses our local fixture parquet.
+    """``stock.cash_flow_statement['capex']`` round-trips the tracer fixture.
+
+    Replaces the v1 ``Stock.capex`` accessor (removed in v2 per
+    ``docs/adr/0002``). The fixture only has an annual filing, so only
+    the ``FY`` column is populated; Q1..Q4 are NaN.
+    """
     from thaifin import stock as stock_module
 
     class _PinnedClient(DatasetClient):
@@ -77,8 +80,6 @@ def test_stock_capex_via_dataset(
 
     monkeypatch.setattr(stock_module, "DatasetClient", _PinnedClient)
 
-    # Stock.__init__ calls ThaiSecuritiesDataService for `info`; stub it out
-    # so the test doesn't require network access.
     monkeypatch.setattr(
         stock_module.ThaiSecuritiesDataService,
         "get_stock",
@@ -87,31 +88,8 @@ def test_stock_capex_via_dataset(
         ),
     )
 
-    s = stock_module.Stock(
-        "PTT", source="dataset", revision="tracer.0"
-    )
-    series = s.capex
-    assert isinstance(series, pd.Series)
-    assert int(series.iloc[0]) == EXPECTED_CAPEX_VALUE
-    assert series.index.name == "period"
-
-
-def test_stock_capex_live_raises() -> None:
-    """``.capex`` is dataset-only; live source raises NotImplementedError."""
-    from thaifin import stock as stock_module
-
-    # Stub out network call in __init__.
-    import pytest as _pytest
-
-    class _FakeStock(stock_module.Stock):
-        def __init__(self, symbol: str) -> None:
-            self.symbol_upper = symbol.upper()
-            self.language = "en"
-            self.source = "live"
-            self.revision = None
-            self.info = stock_module.SecurityData.model_construct(
-                symbol=symbol
-            )
-
-    with _pytest.raises(NotImplementedError):
-        _ = _FakeStock("PTT").capex
+    s = stock_module.Stock("PTT", source="dataset", revision="tracer.0")
+    capex_df = s.cash_flow_statement["capex"]
+    assert isinstance(capex_df, pd.DataFrame)
+    fy_value = capex_df.loc[pd.Period("2025", freq="Y"), "FY"]
+    assert int(fy_value) == EXPECTED_CAPEX_VALUE
