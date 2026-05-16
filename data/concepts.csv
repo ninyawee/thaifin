@@ -113,11 +113,11 @@ dividends_received,CF,Dividends received,เงินสดรับจากเ
 tax_paid,CF,Income tax paid,เงินสดจ่ายภาษีเงินได้,จ่ายภาษีเงินได้,ifrs-full:IncomeTaxesPaidRefundClassifiedAsOperatingActivities,,negate_if_outflow
 interest_paid,CF,Finance costs paid,เงินสดจ่ายต้นทุนทางการเงิน,จ่ายต้นทุนทางการเงิน,ifrs-full:InterestPaidClassifiedAsOperatingActivities,,negate_if_outflow
 depreciation_amortization,CF,Depreciation and amortization,ค่าเสื่อมราคาและค่าตัดจำหน่าย,,ifrs-full:DepreciationAndAmortisationExpense,,as_reported
-capex,CF,Cash paid for property plant and equipment,เงินสดจ่ายสำหรับที่ดิน อาคารและอุปกรณ์ และอสังหาริมทรัพย์เพื่อการลงทุน,เงินสดจ่ายเพื่อซื้อสินทรัพย์ถาวร,ifrs-full:PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities,,negate_if_outflow
+capex,CF,Cash paid for property plant and equipment,เงินสดจ่ายสำหรับที่ดิน อาคารและอุปกรณ์ และอสังหาริมทรัพย์เพื่อการลงทุน,เงินสดจ่ายเพื่อซื้อสินทรัพย์ถาวร|เงินจ่ายสำหรับที่ดิน อาคารและอุปกรณ์ และอสังหาริมทรัพย์เพื่อการลงทุน,ifrs-full:PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities,,negate_if_outflow
 investing_activities,CF,Net cash from (used in) investing activities,เงินสดสุทธิได้มาจาก(ใช้ไปใน)กิจกรรมลงทุน,เงินสดสุทธิใช้ไปในกิจกรรมลงทุน,ifrs-full:CashFlowsFromUsedInInvestingActivities,,as_reported
 financing_activities,CF,Net cash used in financing activities,เงินสดสุทธิใช้ไปในกิจกรรมจัดหาเงิน,,ifrs-full:CashFlowsFromUsedInFinancingActivities,,as_reported
 proceeds_from_long_term_borrowings,CF,Proceeds from long-term borrowings,เงินสดรับจากการกู้ยืมระยะยาว,,ifrs-full:ProceedsFromBorrowingsClassifiedAsFinancingActivities,,as_reported
-repayment_of_long_term_borrowings,CF,Repayment of long-term borrowings,เงินสดจ่ายคืนเงินกู้ยืมระยะยาว,,ifrs-full:RepaymentsOfBorrowingsClassifiedAsFinancingActivities,,negate_if_outflow
+repayment_of_long_term_borrowings,CF,Repayment of long-term borrowings,เงินสดจ่ายคืนเงินกู้ยืมระยะยาว,จ่ายคืนเงินกู้ยืมระยะยาว,ifrs-full:RepaymentsOfBorrowingsClassifiedAsFinancingActivities,,negate_if_outflow
 lease_payments,CF,Cash paid for lease liabilities,เงินสดจ่ายค่างวดตามสัญญาเช่า,,ifrs-full:CashOutflowForLeases,,negate_if_outflow
 treasury_share_buyback,CF,Cash paid for treasury share buyback,เงินสดจ่ายซื้อหุ้นทุนซื้อคืน,,,,negate_if_outflow
 dividends_paid,CF,Dividends paid,เงินปันผลจ่าย,,ifrs-full:DividendsPaidClassifiedAsFinancingActivities,,negate_if_outflow
@@ -130,13 +130,13 @@ proceeds_from_subsidiary_share_issue,CF,Proceeds from issuance of subsidiary's o
 right_of_use_asset_payments,CF,Cash paid for right-of-use assets,เงินสดจ่ายสำหรับสินทรัพย์สิทธิการใช้,,,,negate_if_outflow
 exploration_and_evaluation_paid,CF,Cash paid for exploration and evaluation,เงินสดจ่ายสำหรับการสำรวจและประเมินค่า,,,,negate_if_outflow
 loans_made_long_term,CF,Cash paid for long-term loans receivable,เงินสดจ่ายสำหรับเงินให้กู้ยืมระยะยาว,,,,negate_if_outflow
-proceeds_from_long_term_loans_receivable,CF,Cash received from long-term loans receivable,เงินสดรับคืนเงินให้กู้ยืมระยะยาว,,,,as_reported
+proceeds_from_long_term_loans_receivable,CF,Cash received from long-term loans receivable,เงินสดรับคืนเงินให้กู้ยืมระยะยาว,รับคืนเงินให้กู้ยืมระยะยาว,,,as_reported
 gas_cylinder_deposits,BS,Gas cylinder deposits (energy-sector specific),เงินมัดจำถังก๊าซ,,,,as_reported
 short_term_borrowings,BS,Short-term borrowings,เงินกู้ยืมระยะสั้น,,,,as_reported
 other_receivables,BS,Other receivables,ลูกหนี้อื่น,,,,as_reported
 other_payables,BS,Other payables,เจ้าหนี้อื่น,,,,as_reported
 exploration_and_evaluation_assets,BS,Exploration and evaluation assets,สินทรัพย์ที่เกิดจากการสำรวจและประเมินค่า,,ifrs-full:ExplorationAndEvaluationAssets,,as_reported
-current_lease_liabilities_v2,BS,Current portion of long-term borrowings,เงินกู้ยืมระยะยาวที่ถึงกำหนดชำระภายในหนึ่งปี,,,,as_reported
+current_lease_liabilities_v2,BS,Current portion of long-term borrowings,เงินกู้ยืมระยะยาวที่ถึงกำหนดชำระภายในหนึ่งปี,เงินกู้ยืมระยะยาวที่ถึงกำหนดชำระภายใน 1 ปี,,,as_reported
 decommissioning_provision_short_term,BS,Short-term decommissioning provision,ประมาณการหนี้สินค่ารื้อถอนระยะสั้น,,,,as_reported
 current_derivative_assets,BS,Current derivative-instrument assets,สินทรัพย์ตราสารอนุพันธ์หมุนเวียน,,,,as_reported
 non_current_derivative_assets,BS,Non-current derivative-instrument assets,สินทรัพย์ตราสารอนุพันธ์ไม่หมุนเวียน,,,,as_reported
@@ -157,17 +157,17 @@ assets_held_for_sale,BS,Assets held for sale,สินทรัพย์ที�
 liabilities_held_for_sale,BS,Liabilities directly associated with assets held for sale,หนี้สินที่เกี่ยวข้องโดยตรงกับสินทรัพย์ที่ถือไว้เพื่อขาย,,,,as_reported
 proceeds_from_subsidiary_disposal,CF,Cash received from disposal of investments in subsidiaries,เงินสดรับจากการขายเงินลงทุนในบริษัทย่อย,,,,as_reported
 proceeds_from_long_term_investment_disposal,CF,Cash received from disposal of long-term investments,เงินสดรับจากการขายเงินลงทุนในสินทรัพย์ทางการเงินระยะยาวอื่น,,,,as_reported
-investment_in_subsidiary_paid,CF,Cash paid for investment in subsidiaries,เงินสดจ่ายสำหรับเงินลงทุนในบริษัทย่อย,,,,negate_if_outflow
+investment_in_subsidiary_paid,CF,Cash paid for investment in subsidiaries,เงินสดจ่ายสำหรับเงินลงทุนในบริษัทย่อย,เงินจ่ายสำหรับเงินลงทุนในบริษัทย่อย,,,negate_if_outflow
 investment_in_long_term_other_paid,CF,Cash paid for long-term other investments,เงินสดจ่ายสำหรับเงินลงทุนในสินทรัพย์ทางการเงินระยะยาวอื่น,,,,negate_if_outflow
 derivative_paid,CF,Cash paid for derivatives,เงินสดจ่ายสำหรับตราสารอนุพันธ์,เงินสดจ่ายตราสารอนุพันธ์,,,negate_if_outflow
 derivative_received,CF,Cash received from derivatives,เงินสดรับจากตราสารอนุพันธ์,,,,as_reported
-change_in_subsidiary_share,CF,Cash paid for change in subsidiary ownership,เงินสดจ่ายจากการเปลี่ยนสัดส่วนเงินลงทุนในบริษัทย่อย,,,,negate_if_outflow
+change_in_subsidiary_share,CF,Cash paid for change in subsidiary ownership,เงินสดจ่ายจากการเปลี่ยนสัดส่วนเงินลงทุนในบริษัทย่อย,เงินสดจ่ายจากการเปลี่ยนแปลงสัดส่วนเงินลงทุนในบริษัทย่อย,,,negate_if_outflow
 discontinued_operations,IS,Profit (loss) from discontinued operations - net of tax,จากการดำเนินงานที่ยกเลิก - สุทธิจากภาษี,จากการดำเนินงานที่ยกเลิก,ifrs-full:ProfitLossFromDiscontinuedOperations,,as_reported
 fx_translation_difference_is,IS,Exchange differences from translation of financial statements,ผลต่างของอัตราแลกเปลี่ยนจากการแปลงค่างบการเงิน,,,,as_reported
 profit_before_tax_cf,CF,Profit before income tax (CF starting point),กำไรก่อนภาษีเงินได้,,,,as_reported
 intangible_asset_cash_paid,CF,Cash paid for intangible assets,เงินสดจ่ายสำหรับสินทรัพย์ไม่มีตัวตน,,,,negate_if_outflow
 business_acquisition_paid,CF,Net cash paid for business combinations,เงินสดจ่ายสุทธิจากการซื้อธุรกิจ,,ifrs-full:CashFlowsFromLosingControlOfSubsidiariesOrOtherBusinessesClassifiedAsInvestingActivities,,negate_if_outflow
-change_in_short_term_loans_from_fi,CF,Change in bank overdrafts and short-term loans from financial institutions,เงินเบิกเกินบัญชีและเงินกู้ยืมระยะสั้นจากสถาบันการเงินเพิ่มขึ้น(ลดลง),,,,as_reported
+change_in_short_term_loans_from_fi,CF,Change in bank overdrafts and short-term loans from financial institutions,เงินเบิกเกินบัญชีและเงินกู้ยืมระยะสั้นจากสถาบันการเงินเพิ่มขึ้น(ลดลง),เงินเบิกเกินบัญชีและเงินกู้ยืมระยะสั้น จากสถาบันการเงินเพิ่มขึ้น(ลดลง),,,as_reported
 change_in_subsidiary_ownership_eq,EQ,Change in ownership interest in subsidiaries (equity-changes view),การเปลี่ยนแปลงส่วนได้เสียในบริษัทย่อย,,,,as_reported
 subsidiary_share_increase_eq,EQ,Subsidiary share capital increase (equity-changes view),การเพิ่มทุนของบริษัทย่อย,,,,as_reported
 available_for_sale_investments,BS,Available-for-sale investments,เงินลงทุนเผื่อขาย,,,,as_reported
@@ -175,5 +175,5 @@ royalty_and_petroleum_remuneration,IS,Royalty and petroleum remuneration,ค่�
 gain_loss_on_derivatives,IS,Gain (loss) on derivatives,กำไร(ขาดทุน)จากตราสารอนุพันธ์,,,,as_reported
 tax_on_hedge_instruments,IS,Income tax relating to cash-flow hedge instruments,ภาษีเงินได้เกี่ยวกับเครื่องมือป้องกันความเสี่ยงกระแสเงินสด,,,,as_reported
 current_lease_liabilities_simple,BS,Lease liabilities due within one year,หนี้สินตามสัญญาเช่าที่ถึงกำหนดชำระภายในหนึ่งปี,,,,as_reported
-tax_on_afs_investments,IS,Income tax relating to available-for-sale investments,ภาษีเงินได้เกี่ยวกับการวัดมูลค่าเงินลงทุนเผื่อขาย,,,,as_reported
+tax_on_afs_investments,IS,Income tax relating to available-for-sale investments,ภาษีเงินได้เกี่ยวกับการวัดมูลค่าเงินลงทุนเผื่อขาย,ภาษีเงินได้เกี่ยวกับผลกำไร(ขาดทุน)จากการวัดมูลค่าเงินลงทุนเผื่อขาย,,,as_reported
 share_of_other_ci_associates_v2,IS,Share of other comprehensive income of associates and JV (positive form),ส่วนแบ่งกำไรเบ็ดเสร็จอื่นในการร่วมค้าและบริษัทร่วม,,,,as_reported
