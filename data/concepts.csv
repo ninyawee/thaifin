@@ -46,7 +46,7 @@ revenue,IS,Revenue from sales and services,รายได้จากการ�
 other_income,IS,Other income,รายได้อื่น,,ifrs-full:OtherIncome,,as_reported
 cogs,IS,Cost of sales and services,ต้นทุนขายและการให้บริการ,,ifrs-full:CostOfSales,,as_reported
 gross_profit,IS,Gross profit,กำไรขั้นต้น,,ifrs-full:GrossProfit,,as_reported
-selling_expenses,IS,Selling and distribution expenses,ค่าใช้จ่ายในการขายและจัดจำหน่าย,ค่าใช้จ่ายในการขายและต้นทุนในการจัดจำหน่าย,ifrs-full:DistributionCosts,,as_reported
+selling_expenses,IS,Selling and distribution expenses,ค่าใช้จ่ายในการขายและจัดจำหน่าย,ค่าใช้จ่ายในการขายและต้นทุนในการจัดจำหน่าย|ค่าใช้จ่ายในการขาย,ifrs-full:DistributionCosts,,as_reported
 admin_expenses,IS,Administrative expenses,ค่าใช้จ่ายในการบริหาร,,ifrs-full:AdministrativeExpense,,as_reported
 royalty_expenses,IS,Royalty expenses,ค่าภาคหลวง,,,,as_reported
 operating_profit,IS,Operating profit,กำไรจากการดำเนินงาน,,ifrs-full:ProfitLossFromOperatingActivities,,as_reported
@@ -81,7 +81,7 @@ investment_property,BS,Investment property,อสังหาริมทรั�
 ppe,BS,Property plant and equipment,ที่ดิน อาคารและอุปกรณ์,ที่ดิน อาคารและอุปกรณ์ สุทธิ,ifrs-full:PropertyPlantAndEquipment,,as_reported
 right_of_use_assets,BS,Right-of-use assets,สินทรัพย์สิทธิการใช้,,ifrs-full:RightofuseAssets,,as_reported
 goodwill,BS,Goodwill,ค่าความนิยม,,ifrs-full:Goodwill,,as_reported
-intangible_assets,BS,Intangible assets other than goodwill,สินทรัพย์ไม่มีตัวตนอื่นนอกจากค่าความนิยม,,ifrs-full:IntangibleAssetsOtherThanGoodwill,,as_reported
+intangible_assets,BS,Intangible assets other than goodwill,สินทรัพย์ไม่มีตัวตนอื่นนอกจากค่าความนิยม,สินทรัพย์ไม่มีตัวตนอื่น,ifrs-full:IntangibleAssetsOtherThanGoodwill,,as_reported
 deferred_tax_assets,BS,Deferred tax assets,สินทรัพย์ภาษีเงินได้รอการตัดบัญชี,,ifrs-full:DeferredTaxAssets,,as_reported
 other_non_current_assets,BS,Other non-current assets,สินทรัพย์ไม่หมุนเวียนอื่น,,,,as_reported
 total_assets,BS,Total assets,รวมสินทรัพย์,,ifrs-full:Assets,,as_reported
@@ -94,7 +94,7 @@ other_current_liabilities,BS,Other current liabilities,หนี้สินห�
 long_term_borrowings,BS,Long-term borrowings,เงินกู้ยืมระยะยาว,,,,as_reported
 non_current_lease_liabilities,BS,Non-current lease liabilities,หนี้สินตามสัญญาเช่า,,ifrs-full:LeaseLiabilities,,as_reported
 deferred_tax_liabilities,BS,Deferred tax liabilities,หนี้สินภาษีเงินได้รอการตัดบัญชี,,ifrs-full:DeferredTaxLiabilities,,as_reported
-employee_benefits_provision,BS,Provision for employee benefits,ประมาณการหนี้สินสำหรับผลประโยชน์พนักงาน,,,,as_reported
+employee_benefits_provision,BS,Provision for employee benefits,ประมาณการหนี้สินสำหรับผลประโยชน์พนักงาน,ภาระผูกพันผลประโยชน์พนักงาน,,,as_reported
 decommissioning_provision_long_term,BS,Long-term decommissioning provision,ประมาณการหนี้สินค่ารื้อถอนระยะยาว,,,,as_reported
 other_non_current_liabilities,BS,Other non-current liabilities,หนี้สินไม่หมุนเวียนอื่น,,,,as_reported
 total_liabilities,BS,Total liabilities,รวมหนี้สิน,,ifrs-full:Liabilities,,as_reported
@@ -102,8 +102,8 @@ paid_up_capital,BS,Issued and paid-up share capital,ทุนออกจำห�
 share_premium,BS,Share premium - ordinary shares,ส่วนเกินมูลค่าหุ้นสามัญ,,ifrs-full:SharePremium,,as_reported
 treasury_shares,BS,Treasury shares,หุ้นทุนซื้อคืน,,ifrs-full:TreasuryShares,,as_reported
 other_equity_components,BS,Other components of equity,องค์ประกอบอื่นของส่วนของผู้ถือหุ้น,,ifrs-full:OtherReserves,,as_reported
-equity_owners_of_parent,BS,Equity attributable to owners of the parent,ส่วนของผู้ถือหุ้นของบริษัทฯ,ส่วนที่เป็นของผู้ถือหุ้นของบริษัทฯ,ifrs-full:EquityAttributableToOwnersOfParent,,as_reported
-non_controlling_interests,BS,Non-controlling interests,ส่วนของผู้มีส่วนได้เสียที่ไม่มีอำนาจควบคุมของบริษัทย่อย,ส่วนที่เป็นของผู้มีส่วนได้เสียที่ไม่มีอำนาจควบคุมของบริษัทย่อย,ifrs-full:NoncontrollingInterests,,as_reported
+equity_owners_of_parent,BS,Equity attributable to owners of the parent,ส่วนของผู้ถือหุ้นของบริษัทฯ,ส่วนที่เป็นของผู้ถือหุ้นของบริษัทฯ|รวมส่วนของบริษัทใหญ่,ifrs-full:EquityAttributableToOwnersOfParent,,as_reported
+non_controlling_interests,BS,Non-controlling interests,ส่วนของผู้มีส่วนได้เสียที่ไม่มีอำนาจควบคุมของบริษัทย่อย,ส่วนที่เป็นของผู้มีส่วนได้เสียที่ไม่มีอำนาจควบคุมของบริษัทย่อย|ส่วนได้เสียที่ไม่มีอำนาจควบคุม,ifrs-full:NoncontrollingInterests,,as_reported
 equity,BS,Total equity,รวมส่วนของผู้ถือหุ้น,รวมส่วนของเจ้าของ,ifrs-full:Equity,,as_reported
 total_liabilities_and_equity,BS,Total liabilities and equity,รวมหนี้สินและส่วนของผู้ถือหุ้น,,ifrs-full:EquityAndLiabilities,,as_reported
 ocf,CF,Net cash from operating activities,เงินสดสุทธิได้มาจากกิจกรรมดำเนินงาน,,ifrs-full:CashFlowsFromUsedInOperatingActivities,,as_reported
@@ -153,12 +153,12 @@ other_current_financial_assets,BS,Other current financial assets,สินทร
 other_non_current_financial_assets,BS,Other non-current financial assets,สินทรัพย์ทางการเงินไม่หมุนเวียนอื่น,,,,as_reported
 other_current_financial_liabilities,BS,Other current financial liabilities,หนี้สินทางการเงินหมุนเวียนอื่น,,,,as_reported
 other_non_current_financial_liabilities,BS,Other non-current financial liabilities,หนี้สินทางการเงินไม่หมุนเวียนอื่น,,,,as_reported
-assets_held_for_sale,BS,Assets held for sale,สินทรัพย์ที่ถือไว้เพื่อขาย,,ifrs-full:NoncurrentAssetsHeldForSale,,as_reported
+assets_held_for_sale,BS,Assets held for sale,สินทรัพย์ที่ถือไว้เพื่อขาย,สินทรัพย์ไม่หมุนเวียนที่ถือไว้เพื่อขาย,ifrs-full:NoncurrentAssetsHeldForSale,,as_reported
 liabilities_held_for_sale,BS,Liabilities directly associated with assets held for sale,หนี้สินที่เกี่ยวข้องโดยตรงกับสินทรัพย์ที่ถือไว้เพื่อขาย,,,,as_reported
 proceeds_from_subsidiary_disposal,CF,Cash received from disposal of investments in subsidiaries,เงินสดรับจากการขายเงินลงทุนในบริษัทย่อย,,,,as_reported
-proceeds_from_long_term_investment_disposal,CF,Cash received from disposal of long-term investments,เงินสดรับจากการขายเงินลงทุนในสินทรัพย์ทางการเงินระยะยาวอื่น,,,,as_reported
+proceeds_from_long_term_investment_disposal,CF,Cash received from disposal of long-term investments,เงินสดรับจากการขายเงินลงทุนในสินทรัพย์ทางการเงินระยะยาวอื่น,เงินรับจากการขายเงินลงทุนระยะยาวอื่น,,,as_reported
 investment_in_subsidiary_paid,CF,Cash paid for investment in subsidiaries,เงินสดจ่ายสำหรับเงินลงทุนในบริษัทย่อย,เงินจ่ายสำหรับเงินลงทุนในบริษัทย่อย,,,negate_if_outflow
-investment_in_long_term_other_paid,CF,Cash paid for long-term other investments,เงินสดจ่ายสำหรับเงินลงทุนในสินทรัพย์ทางการเงินระยะยาวอื่น,,,,negate_if_outflow
+investment_in_long_term_other_paid,CF,Cash paid for long-term other investments,เงินสดจ่ายสำหรับเงินลงทุนในสินทรัพย์ทางการเงินระยะยาวอื่น,เงินจ่ายสำหรับเงินลงทุนระยะยาวอื่น,,,negate_if_outflow
 derivative_paid,CF,Cash paid for derivatives,เงินสดจ่ายสำหรับตราสารอนุพันธ์,เงินสดจ่ายตราสารอนุพันธ์,,,negate_if_outflow
 derivative_received,CF,Cash received from derivatives,เงินสดรับจากตราสารอนุพันธ์,,,,as_reported
 change_in_subsidiary_share,CF,Cash paid for change in subsidiary ownership,เงินสดจ่ายจากการเปลี่ยนสัดส่วนเงินลงทุนในบริษัทย่อย,เงินสดจ่ายจากการเปลี่ยนแปลงสัดส่วนเงินลงทุนในบริษัทย่อย,,,negate_if_outflow
@@ -166,7 +166,7 @@ discontinued_operations,IS,Profit (loss) from discontinued operations - net of t
 fx_translation_difference_is,IS,Exchange differences from translation of financial statements,ผลต่างของอัตราแลกเปลี่ยนจากการแปลงค่างบการเงิน,,,,as_reported
 profit_before_tax_cf,CF,Profit before income tax (CF starting point),กำไรก่อนภาษีเงินได้,,,,as_reported
 intangible_asset_cash_paid,CF,Cash paid for intangible assets,เงินสดจ่ายสำหรับสินทรัพย์ไม่มีตัวตน,,,,negate_if_outflow
-business_acquisition_paid,CF,Net cash paid for business combinations,เงินสดจ่ายสุทธิจากการซื้อธุรกิจ,,ifrs-full:CashFlowsFromLosingControlOfSubsidiariesOrOtherBusinessesClassifiedAsInvestingActivities,,negate_if_outflow
+business_acquisition_paid,CF,Net cash paid for business combinations,เงินสดจ่ายสุทธิจากการซื้อธุรกิจ,เงินจ่ายเพื่อซื้อธุรกิจ,ifrs-full:CashFlowsFromLosingControlOfSubsidiariesOrOtherBusinessesClassifiedAsInvestingActivities,,negate_if_outflow
 change_in_short_term_loans_from_fi,CF,Change in bank overdrafts and short-term loans from financial institutions,เงินเบิกเกินบัญชีและเงินกู้ยืมระยะสั้นจากสถาบันการเงินเพิ่มขึ้น(ลดลง),เงินเบิกเกินบัญชีและเงินกู้ยืมระยะสั้น จากสถาบันการเงินเพิ่มขึ้น(ลดลง),,,as_reported
 change_in_subsidiary_ownership_eq,EQ,Change in ownership interest in subsidiaries (equity-changes view),การเปลี่ยนแปลงส่วนได้เสียในบริษัทย่อย,,,,as_reported
 subsidiary_share_increase_eq,EQ,Subsidiary share capital increase (equity-changes view),การเพิ่มทุนของบริษัทย่อย,,,,as_reported
