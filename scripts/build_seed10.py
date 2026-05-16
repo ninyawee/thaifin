@@ -54,6 +54,7 @@ _BROWSER_UA = (
 import httpx as _httpx_mod  # noqa: E402
 
 _orig_httpx_client_init = _httpx_mod.Client.__init__
+_orig_httpx_client_get = _httpx_mod.Client.get
 
 
 def _patched_httpx_client_init(self, *args, **kwargs):  # type: ignore[no-untyped-def]
@@ -74,7 +75,28 @@ def _patched_httpx_client_init(self, *args, **kwargs):  # type: ignore[no-untype
     _orig_httpx_client_init(self, *args, **kwargs)
 
 
+# Polite per-request delay against the SEC IDISC host. The WAF rate-limit
+# triggers after a few hundred fast requests; a small inter-request delay
+# keeps us under it.
+_SEC_HOST = "market.sec.or.th"
+_SEC_REQUEST_DELAY = float(os.environ.get("SEC_REQUEST_DELAY", "0.5"))
+import time as _time_mod  # noqa: E402
+
+_last_sec_request_at: float = 0.0
+
+
+def _patched_httpx_client_get(self, url, *args, **kwargs):  # type: ignore[no-untyped-def]
+    global _last_sec_request_at
+    if _SEC_HOST in str(url):
+        elapsed = _time_mod.monotonic() - _last_sec_request_at
+        if elapsed < _SEC_REQUEST_DELAY:
+            _time_mod.sleep(_SEC_REQUEST_DELAY - elapsed)
+        _last_sec_request_at = _time_mod.monotonic()
+    return _orig_httpx_client_get(self, url, *args, **kwargs)
+
+
 _httpx_mod.Client.__init__ = _patched_httpx_client_init  # type: ignore[assignment]
+_httpx_mod.Client.get = _patched_httpx_client_get  # type: ignore[assignment]
 
 import pandas as pd
 import pyarrow as pa
@@ -426,6 +448,11 @@ def main() -> int:
         default=[],
         help="Symbols to skip (already built / known failures).",
     )
+    parser.add_argument(
+        "--reuse-existing",
+        action="store_true",
+        help="Reuse already-built per-symbol parquets if present (skip build).",
+    )
     args = parser.parse_args()
 
     _setup_logging()
@@ -445,39 +472,58 @@ def main() -> int:
 
     summaries: list[dict] = []
     sym_dirs: list[Path] = []
+
+    def _reuse(sym: str) -> bool:
+        """Read the per-symbol parquet from a previous run and append a summary."""
+        d = per_sym_dir / sym
+        if not (d / "financial_lines.parquet").exists():
+            return False
+        sym_dirs.append(d)
+        t = pq.read_table(d / "financial_lines.parquet")
+        df = t.to_pandas()
+        n_rows = len(df)
+        n_mapped = int(df["concept"].notna().sum()) if n_rows else 0
+        n_filings = int(df["filing_id"].nunique()) if n_rows else 0
+        # filings.parquet has every filing for the symbol (including 0-row ones)
+        if (d / "filings.parquet").exists():
+            ft = pq.read_table(d / "filings.parquet")
+            n_filings = max(n_filings, ft.num_rows)
+        summaries.append(
+            {
+                "symbol": sym,
+                "filings_total": n_filings,
+                "filings_parsed": n_filings,
+                "filings_skipped": 0,
+                "financial_lines_total": n_rows,
+                "financial_lines_mapped": n_mapped,
+                "concept_coverage_ratio": (n_mapped / n_rows) if n_rows else 0.0,
+                "auditor_reports_total": pq.read_metadata(
+                    d / "auditor_reports.parquet"
+                ).num_rows
+                if (d / "auditor_reports.parquet").exists()
+                else 0,
+                "notes_total": pq.read_metadata(d / "notes_text.parquet").num_rows
+                if (d / "notes_text.parquet").exists()
+                else 0,
+                "reused": True,
+            }
+        )
+        return True
+
     for i, sym in enumerate(args.symbols, 1):
         if sym in args.skip_symbols:
-            logger.info("[%d/%d] %s SKIP (per --skip-symbols)", i, len(args.symbols), sym)
-            # Still try to read parquet if a previous run wrote one
-            d = per_sym_dir / sym
-            if (d / "financial_lines.parquet").exists():
-                sym_dirs.append(d)
-                # Reconstruct a summary from the existing parquet.
-                t = pq.read_table(d / "financial_lines.parquet")
-                df = t.to_pandas()
-                n_rows = len(df)
-                n_mapped = int(df["concept"].notna().sum()) if n_rows else 0
-                n_filings = int(df["filing_id"].nunique()) if n_rows else 0
-                summaries.append(
-                    {
-                        "symbol": sym,
-                        "filings_total": n_filings,
-                        "filings_parsed": n_filings,
-                        "filings_skipped": 0,
-                        "financial_lines_total": n_rows,
-                        "financial_lines_mapped": n_mapped,
-                        "concept_coverage_ratio": (n_mapped / n_rows) if n_rows else 0.0,
-                        "auditor_reports_total": pq.read_metadata(
-                            d / "auditor_reports.parquet"
-                        ).num_rows
-                        if (d / "auditor_reports.parquet").exists()
-                        else 0,
-                        "notes_total": pq.read_metadata(d / "notes_text.parquet").num_rows
-                        if (d / "notes_text.parquet").exists()
-                        else 0,
-                        "skipped_reused": True,
-                    }
-                )
+            logger.info(
+                "[%d/%d] %s SKIP (per --skip-symbols)", i, len(args.symbols), sym
+            )
+            _reuse(sym)
+            continue
+        if args.reuse_existing and _reuse(sym):
+            logger.info(
+                "[%d/%d] %s REUSE existing per-symbol parquets",
+                i,
+                len(args.symbols),
+                sym,
+            )
             continue
         logger.info("[%d/%d] %s build", i, len(args.symbols), sym)
         sym_out, summary = _build_symbol(
