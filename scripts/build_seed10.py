@@ -42,6 +42,40 @@ def _ipv4_only_getaddrinfo(*args, **kwargs):  # type: ignore[no-untyped-def]
 
 socket.getaddrinfo = _ipv4_only_getaddrinfo  # type: ignore[assignment]
 
+
+# Patch httpx.Client to send a browser User-Agent by default. SEC IDISC's
+# WAF rejects ``python-httpx/*`` and ``thaifin/2.0`` requests after a low
+# request volume, returning a "Request Rejected" stub page (HTTP 200 with
+# ~250-byte body) — discovery silently sees 0 filings.
+_BROWSER_UA = (
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+    "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+)
+import httpx as _httpx_mod  # noqa: E402
+
+_orig_httpx_client_init = _httpx_mod.Client.__init__
+
+
+def _patched_httpx_client_init(self, *args, **kwargs):  # type: ignore[no-untyped-def]
+    headers = kwargs.get("headers") or {}
+    if isinstance(headers, dict):
+        headers = dict(headers)
+    else:
+        headers = dict(headers.items())
+    # Override UA whether the caller set one or not — `thaifin/2.0` triggers
+    # the WAF too.
+    headers["User-Agent"] = _BROWSER_UA
+    headers.setdefault(
+        "Accept",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    )
+    headers.setdefault("Accept-Language", "th-TH,th;q=0.9,en;q=0.8")
+    kwargs["headers"] = headers
+    _orig_httpx_client_init(self, *args, **kwargs)
+
+
+_httpx_mod.Client.__init__ = _patched_httpx_client_init  # type: ignore[assignment]
+
 import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
