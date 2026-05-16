@@ -128,7 +128,7 @@ cash_end_of_period,CF,Cash and cash equivalents at the end of the period,เง�
 fx_translation_difference,CF,Exchange differences on translation of financial statements,ผลต่างจากการแปลงค่างบการเงิน,,ifrs-full:ExchangeDifferencesOnTranslationOfForeignOperationsBeforeTax,,as_reported
 proceeds_from_subsidiary_share_issue,CF,Proceeds from issuance of subsidiary's ordinary shares,เงินสดรับจากการออกหุ้นสามัญของบริษัทย่อย,,,,as_reported
 right_of_use_asset_payments,CF,Cash paid for right-of-use assets,เงินสดจ่ายสำหรับสินทรัพย์สิทธิการใช้,,,,negate_if_outflow
-exploration_and_evaluation_paid,CF,Cash paid for exploration and evaluation,เงินสดจ่ายสำหรับการสำรวจและประเมินค่า,,,,negate_if_outflow
+exploration_and_evaluation_paid,CF,Cash paid for exploration and evaluation,เงินสดจ่ายสำหรับการสำรวจและประเมินค่า,เงินจ่ายสำหรับการสำรวจและประเมินค่า,,,negate_if_outflow
 loans_made_long_term,CF,Cash paid for long-term loans receivable,เงินสดจ่ายสำหรับเงินให้กู้ยืมระยะยาว,,,,negate_if_outflow
 proceeds_from_long_term_loans_receivable,CF,Cash received from long-term loans receivable,เงินสดรับคืนเงินให้กู้ยืมระยะยาว,รับคืนเงินให้กู้ยืมระยะยาว,,,as_reported
 gas_cylinder_deposits,BS,Gas cylinder deposits (energy-sector specific),เงินมัดจำถังก๊าซ,,,,as_reported
@@ -193,3 +193,11 @@ net_profit_nci_continuing_ops,IS,Profit from continuing operations attributable 
 eps_basic_continuing_ops,IS,Basic EPS from continuing operations,กำไรต่อหุ้นขั้นพื้นฐาน จากการดำเนินงานต่อเนื่อง,,ifrs-full:BasicEarningsPerShareFromContinuingOperations,,as_reported
 proceeds_from_short_term_borrowings_gross,CF,Cash received from short-term borrowings (gross),เงินสดรับจากการกู้ยืมระยะสั้น,,ifrs-full:ProceedsFromShorttermBorrowings,,as_reported
 gain_loss_fvtoci_debt_investments,IS,Gain (loss) on debt investments at FVOCI,กำไร(ขาดทุน)จากเงินลงทุนในตราสารหนี้ที่วัดมูลค่าด้วย มูลค่ายุติธรรมผ่านกำไรขาดทุนเบ็ดเสร็จอื่น,ขาดทุนจากเงินลงทุนในตราสารหนี้ที่วัดมูลค่าด้วย มูลค่ายุติธรรมผ่านกำไรขาดทุนเบ็ดเสร็จอื่น,ifrs-full:GainsLossesOnInvestmentsInDebtInstrumentsMeasuredAtFairValueThroughOtherComprehensiveIncome,,as_reported
+total_comprehensive_income_continuing_ops,IS,Total comprehensive income from continuing operations,กำไรเบ็ดเสร็จสำหรับงวดจากการดำเนินงานต่อเนื่อง,,ifrs-full:ComprehensiveIncomeFromContinuingOperations,,as_reported
+total_comprehensive_income_discontinued_ops,IS,Total comprehensive income from discontinued operations,กำไรเบ็ดเสร็จสำหรับงวดจากการดำเนินงานที่ยกเลิก - สุทธิจากภาษี,,ifrs-full:ComprehensiveIncomeFromDiscontinuedOperations,,as_reported
+cash_paid_for_afs_investments,CF,Cash paid for available-for-sale investments,เงินจ่ายสำหรับเงินลงทุนเผื่อขาย,,ifrs-full:PaymentsForAvailableForSaleFinancialAssets,,negate_if_outflow
+proceeds_from_associate_disposal,CF,Cash received from disposal of investments in associates,เงินรับจากการขายเงินลงทุนในบริษัทร่วม,,ifrs-full:ProceedsFromSalesOfInvestmentsInAssociates,,as_reported
+repayment_of_short_term_borrowings,CF,Repayment of short-term borrowings,จ่ายคืนเงินกู้ยืมระยะสั้น,,ifrs-full:RepaymentsOfShorttermBorrowings,,negate_if_outflow
+loans_made_short_term,CF,Cash paid for short-term loans receivable,เงินจ่ายสำหรับเงินให้กู้ยืมระยะสั้น,,ifrs-full:ProceedsFromShorttermBorrowings,,negate_if_outflow
+proceeds_from_afs_investment_disposal,CF,Cash received from disposal of available-for-sale investments,เงินรับจากการขายเงินลงทุนเผื่อขาย,,ifrs-full:ProceedsFromSalesOfAvailableForSaleFinancialAssets,,as_reported
+other_comprehensive_income_eq,EQ,Other comprehensive income (equity-changes view),กำไร(ขาดทุน)เบ็ดเสร็จอื่นสำหรับงวด,กำไรเบ็ดเสร็จอื่นสำหรับงวด|ขาดทุนเบ็ดเสร็จอื่นสำหรับงวด,ifrs-full:OtherComprehensiveIncome,,as_reported
