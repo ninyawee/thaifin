@@ -77,7 +77,24 @@ def _read_member(zip_path: Path, name_prefix: str) -> bytes | None:
         ("กำไรขาดทุน Accum", "IS"),
         ("OCI Accum", "IS"),
         ("งบกระแสเงินสด", "CF"),
-        # Unknown sheet
+        # Generic short-code fallbacks for CPALL / SCB / BDMS (issue #24)
+        ("BS 3-5", "BS"),
+        ("BS Conso-3-5", "BS"),
+        ("BS&PL Thai", "BS"),
+        ("BS", "BS"),
+        ("PL 3M 6-8", "IS"),
+        ("PL (3M)", "IS"),
+        ("PL-T (3)", "IS"),
+        ("PL", "IS"),
+        ("CF 12-15", "CF"),
+        ("CF", "CF"),
+        # Short-code regex must not greedy-match other prefixes.
+        ("BSE", None),
+        ("PLN", None),
+        ("CFA", None),
+        # Unknown sheet — ADVANC's SFP/SCI/SCE/SCF stays unrecognised.
+        ("SFP(P.3-5)", None),
+        ("SCI (3ด) P.7", None),
         ("Sheet1", None),
         ("Cover", None),
     ],
