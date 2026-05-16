@@ -370,6 +370,21 @@ class Stock:
         return self._statement_dataframe("CF")
 
     @property
+    def capex(self) -> pd.Series:
+        """Capital expenditure series (PRD #11 headline metric).
+
+        Convenience accessor: returns the ``(capex, FY)`` annual time
+        series from :attr:`cash_flow_statement` as a flat
+        ``pd.Series`` indexed by fiscal year. For quarter-level values,
+        use ``self.cash_flow_statement[('capex', q)]`` directly
+        (``q`` in ``{'Q1','Q2','Q3','Q4','FY'}``).
+        """
+        cf = self.cash_flow_statement
+        if ("capex", "FY") not in cf.columns:
+            return pd.Series(dtype="float64", name="capex")
+        return cf[("capex", "FY")].rename("capex")
+
+    @property
     def notes(self) -> pd.DataFrame:
         """Notes markdown keyed by ``period``.
 
