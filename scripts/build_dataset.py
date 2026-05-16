@@ -179,8 +179,8 @@ def _write_concepts(concepts_csv: Path, out: Path) -> None:
 # --- HuggingFace push ------------------------------------------------------
 
 
-def _publish(out_dir: Path) -> None:
-    """Upload all five parquets and tag the commit as ``v0.ptt``."""
+def _publish(out_dir: Path, revision_tag: str = HF_REVISION_TAG) -> None:
+    """Upload all five parquets and tag the commit with ``revision_tag``."""
     from huggingface_hub import HfApi
 
     token = os.environ.get("HF_TOKEN")
@@ -207,20 +207,20 @@ def _publish(out_dir: Path) -> None:
             path_in_repo=name,
             repo_id=HF_REPO_ID,
             repo_type="dataset",
-            commit_message=f"v0.ptt: {name}",
+            commit_message=f"{revision_tag}: {name}",
         )
 
     try:
         api.delete_tag(
-            repo_id=HF_REPO_ID, tag=HF_REVISION_TAG, repo_type="dataset"
+            repo_id=HF_REPO_ID, tag=revision_tag, repo_type="dataset"
         )
     except Exception:
         pass
     api.create_tag(
         repo_id=HF_REPO_ID,
-        tag=HF_REVISION_TAG,
+        tag=revision_tag,
         repo_type="dataset",
-        tag_message="thaifin v0 dataset (PTT only)",
+        tag_message=f"thaifin {revision_tag} dataset",
     )
 
 
@@ -331,6 +331,7 @@ def build(
     cache_dir: Path | None = None,
     cache_only: bool = False,
     fetch_timeout: float = 30.0,
+    upload_revision: str = HF_REVISION_TAG,
 ) -> dict:
     """Run the full pipeline for ``symbol`` and return a summary dict.
 
@@ -453,8 +454,8 @@ def build(
     logger.info("[5/6] summary: %s", json.dumps({k: v for k, v in summary.items() if k != "skipped_details"}, ensure_ascii=False, indent=2))
 
     if upload:
-        logger.info("[6/6] upload to HF as %s", HF_REVISION_TAG)
-        _publish(out_dir)
+        logger.info("[6/6] upload to HF as %s", upload_revision)
+        _publish(out_dir, revision_tag=upload_revision)
     else:
         logger.info("[6/6] --no-upload set; skipping HF push")
 
@@ -500,6 +501,11 @@ def main() -> None:
         default=30.0,
         help="Per-zip HTTP timeout in seconds (default: 30)",
     )
+    parser.add_argument(
+        "--upload-revision",
+        default=HF_REVISION_TAG,
+        help=f"HF tag to upload under (default: {HF_REVISION_TAG})",
+    )
     args = parser.parse_args()
 
     _setup_logging()
@@ -511,6 +517,7 @@ def main() -> None:
         upload=not args.no_upload,
         cache_only=args.cache_only,
         fetch_timeout=args.fetch_timeout,
+        upload_revision=args.upload_revision,
     )
     print(json.dumps(summary, ensure_ascii=False, indent=2))
 
