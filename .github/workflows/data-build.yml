@@ -1,0 +1,195 @@
+# Build & publish thaifin dataset
+#
+# Slice #18 of PRD #11 — monthly cron + HF auto-publish + revision tagging +
+# coverage gate. Wires the local pipeline (slices #15/16/17) into a sharded
+# matrix that fits the GitHub Actions 6-hour per-job cap.
+#
+# CROSS-LANE ASSUMPTIONS (refine at merge time if Agent C/E's CLIs differ):
+#   - scripts/backfill.py (Agent E, slice #17) accepts:
+#       --letter <0-9A-Z>
+#       --out-dir <path>
+#       --state-file data/state.json
+#       --cleanup-zips
+#     and emits per-shard parquets (financial_lines, auditor_reports,
+#     notes_text, filings, concepts) under <out-dir>/.
+#   - scripts/build_dataset.py (Agent C, slice #16) accepts:
+#       --symbol <SYM> --out-dir <path>
+#     for single-symbol use (not invoked from this workflow, kept for parity).
+#   - The HF dataset repo id is `ninyawee/thaifin-financials` (matches tracer).
+#
+# If signatures differ at merge time, only the `run:` blocks below need
+# updating — the matrix shape, artifact wiring, and gate logic stay the same.
+
+name: Build & publish thaifin dataset
+
+on:
+  schedule:
+    - cron: '0 2 1 * *'   # 02:00 UTC, day 1 each month
+  workflow_dispatch:
+    inputs:
+      letters:
+        description: "Comma-separated letters to backfill (default: all 36). Currently informational; matrix runs all 36."
+        default: "0,1,2,3,4,5,6,7,8,9,A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z"
+        required: false
+      dry_run:
+        description: "Build locally but skip HF publish + state commit"
+        type: boolean
+        default: false
+      max_regression_pp:
+        description: "Coverage regression tolerance, percentage points"
+        default: "1.0"
+        required: false
+
+permissions:
+  contents: write   # needed to commit data/state.json after a successful run
+
+concurrency:
+  group: data-build
+  cancel-in-progress: false   # don't cancel mid-build; partial uploads are bad
+
+jobs:
+  shard:
+    name: Shard ${{ matrix.letter }}
+    strategy:
+      fail-fast: false   # one bad letter shouldn't kill the other 35
+      matrix:
+        letter: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+                 A, B, C, D, E, F, G, H, I, J,
+                 K, L, M, N, O, P, Q, R, S, T,
+                 U, V, W, X, Y, Z]
+    runs-on: ubuntu-latest
+    timeout-minutes: 350   # ~5h50m, just under the 6h hard cap
+    env:
+      LETTER: ${{ matrix.letter }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+
+      - name: Set up Python
+        run: uv python install 3.11
+
+      - name: Install libreoffice (for legacy XLS/DOC conversion)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libreoffice-core libreoffice-calc libreoffice-writer
+
+      - name: Install python deps
+        run: uv sync
+
+      - name: Restore state cache for shard
+        uses: actions/cache@v4
+        with:
+          path: data/state.json
+          key: state-${{ matrix.letter }}-${{ github.run_id }}
+          restore-keys: |
+            state-${{ matrix.letter }}-
+
+      - name: Backfill shard
+        run: |
+          uv run python scripts/backfill.py \
+            --letter "$LETTER" \
+            --out-dir shard-output \
+            --state-file data/state.json \
+            --cleanup-zips
+
+      - name: Show shard contents
+        if: always()
+        run: |
+          echo "=== shard-output/ ==="
+          ls -lh shard-output/ || true
+          du -sh shard-output/ || true
+
+      - name: Upload shard artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: shard-${{ matrix.letter }}
+          path: shard-output/
+          retention-days: 7
+          if-no-files-found: warn
+
+  aggregate-and-publish:
+    name: Aggregate, gate, publish
+    needs: shard
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      DRY_RUN: ${{ inputs.dry_run }}
+      MAX_REGRESSION_PP: ${{ inputs.max_regression_pp || '1.0' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Need a token that can push back to the repo for the state commit
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+
+      - name: Set up Python
+        run: uv python install 3.11
+
+      - name: Install python deps
+        run: uv sync
+
+      - name: Download all shard artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: all-shards/
+          # No `name:` — downloads ALL artifacts (one per letter shard).
+
+      - name: Aggregate per-shard parquets
+        run: |
+          uv run python scripts/aggregate_shards.py \
+            --in-dir all-shards/ \
+            --out-dir final/
+
+      - name: Compute revision tag
+        id: tag
+        run: |
+          rev="$(date -u +%Y.%m)"
+          echo "rev=$rev" >> "$GITHUB_OUTPUT"
+          echo "Revision tag: $rev"
+
+      - name: Coverage gate (compare to previous HF revision)
+        if: ${{ inputs.dry_run != true }}
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          uv run python scripts/coverage_gate.py \
+            --new final/financial_lines.parquet \
+            --previous-revision main \
+            --max-regression-pp "$MAX_REGRESSION_PP"
+
+      - name: Publish revision to HuggingFace
+        id: publish
+        if: ${{ inputs.dry_run != true }}
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          REVISION: ${{ steps.tag.outputs.rev }}
+        run: |
+          uv run python scripts/publish_revision.py \
+            --in-dir final/ \
+            --revision "$REVISION"
+
+      - name: Commit updated state.json
+        if: ${{ inputs.dry_run != true && success() }}
+        env:
+          REVISION: ${{ steps.tag.outputs.rev }}
+        run: |
+          # Aggregate already merged per-shard state into data/state.json.
+          git config user.name "thaifin-bot"
+          git config user.email "thaifin-bot@users.noreply.github.com"
+          git add data/state.json
+          if git diff --staged --quiet; then
+            echo "No state changes to commit."
+          else
+            git commit -m "chore(data): update state.json after revision $REVISION"
+            git push
+          fi

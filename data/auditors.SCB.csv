@@ -1,0 +1,27 @@
+# thaifin auditor registry — SCB scout staging (v0)
+#
+# Schema matches data/auditors.csv:
+#   firm_id, canonical_en, canonical_th, parent_firm, aliases_en, aliases_th, is_government
+#
+# Sample sources:
+#   22062377                          → SCB 2022Q1 (still bank entity, reviewed)
+#   23016979                          → SCBX FY2022 (audited, restructure year)
+#   1706FIN200220241653550737T        → SCBX FY2023 (audited)
+#   1706FIN190220251132070328T        → SCBX FY2024 (audited)
+#   1706FIN190220261234280476T        → SCBX FY2025 (audited)
+#   1706FIN141120251632000394T        → SCBX 2025Q3 (reviewed)
+#   1706FIN130520261402470059T        → SCBX 2026Q1 (reviewed)
+#
+# Findings:
+#   * KPMG Phoomchai Audit Ltd. (เคพีเอ็มจี ภูมิไชย สอบบัญชี) signed every sampled SCB / SCBX
+#     filing observed (2022Q1 → 2026Q1). No auditor switch detected within the sampled window;
+#     the same firm survived the SCB-bank → SCBX-holding entity migration in 2022.
+#   * The same partner — Orawan Chunhakitpaisarn (อรวรรณ ชุณหกิจไพศาล), CPA reg #6105 —
+#     signed every report in the sample. Recorded here for the auditor_signatures table once
+#     that schema is finalized; partner names are NOT firm rows.
+#   * No joint audits observed; KPMG signs solo across all 7 filings.
+#   * Pre-2022 audit history (SCB the bank, before the SCBX restructure) is NOT visible in the
+#     SEC IDISC fs-norm endpoint — see scout-SCB.md anomaly log.
+#
+firm_id,canonical_en,canonical_th,parent_firm,aliases_en,aliases_th,is_government
+kpmg_phoomchai,KPMG Phoomchai Audit Ltd.,บริษัท เคพีเอ็มจี ภูมิไชย สอบบัญชี จำกัด,kpmg_global,,,false

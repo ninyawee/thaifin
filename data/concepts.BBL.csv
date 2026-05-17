@@ -1,0 +1,89 @@
+# thaifin concept dictionary — BBL scout staging (v0.1)
+#
+# Symbol: BBL (Bangkok Bank Public Company Limited / ธนาคารกรุงเทพ จำกัด (มหาชน))
+# Industry: bank
+# Sample sweep: filings 1997, 1999, 2005, 2010, 2018, 2025 (annual) + 2026Q1 (interim)
+#
+# Two-row format:
+#   1. New rows (proposed concepts) carry the full 8-column shape from data/concepts.csv
+#      plus an empty `aliases_th_to_append` column.
+#   2. Alias-only extensions for EXISTING data/concepts.csv concepts populate
+#      `aliases_th_to_append` (pipe-separated) and leave `label_en`/`label_th`/etc empty.
+#      The coordinator merges these into the canonical row's aliases_th.
+#
+# Sources cited per row in inline comments above the row.
+# Sheet names: 'งบฐานะการเงิน' (BS), 'งบกำไรขาดทุนเบ็ดเสร็จ' (IS), 'งบกระแสเงินสด' (CF),
+# 'ปป-รวม'/'ปป-เฉพาะ' (EQchg).
+#
+# ============================================================================
+# Section A: NEW concepts (banking-specific) — propose new rows
+# ============================================================================
+concept,statement,label_en,label_th,aliases_th,xbrl_ref,applicable_industries,sign_convention,aliases_th_to_append
+# BBL 2025 IS R7 / 2010 IS R8 — interest income (banks' top-line)
+interest_income,IS,Interest income,รายได้ดอกเบี้ย,รายได้ดอกเบี้ยและเงินปันผล,ifrs-full:InterestIncomeOnDepositsClassifiedAsInvestingActivities,bank,as_reported,
+# BBL 2025 IS R8 / 2010 IS R13 — interest expense
+interest_expense,IS,Interest expense,ค่าใช้จ่ายดอกเบี้ย,,ifrs-full:InterestExpense,bank,as_reported,
+# BBL 2010 IS R19 — net interest income (post-provision is a different concept)
+net_interest_income,IS,Net interest income,รายได้ดอกเบี้ยสุทธิ,รายได้ดอกเบี้ยและเงินปันผลสุทธิ,,bank,as_reported,
+# BBL 2025 IS R10 — fees and service income (banks' second leg)
+fee_and_service_income,IS,Fees and service income,รายได้ค่าธรรมเนียมและบริการ,ค่าธรรมเนียมและบริการ,,bank|insurance,as_reported,
+# BBL 2025 IS R11 — fee/service expense
+fee_and_service_expense,IS,Fees and service expense,ค่าใช้จ่ายค่าธรรมเนียมและบริการ,,,bank|insurance,as_reported,
+# BBL 2025 IS R28 — modern IFRS-9 expected credit loss line (replaced provision-for-bad-debt in ~2020)
+expected_credit_loss,IS,Expected credit loss,ผลขาดทุนด้านเครดิตที่คาดว่าจะเกิดขึ้น,,ifrs-full:ImpairmentLossRecognisedInProfitOrLossLoansAndAdvances,bank,as_reported,
+# BBL 2010 IS R20 / 2018 IS R27 — pre-IFRS9 provision (kept as separate concept; LL provision is the legacy term)
+loan_loss_provision,IS,Loan loss provision (pre-IFRS9),หนี้สูญและหนี้สงสัยจะสูญ,หนี้สูญ หนี้สงสัยจะสูญ และขาดทุนจากการด้อยค่า,,bank,as_reported,
+# BBL 2025 IS R15 — gain on investments (banking-specific recurring item)
+gain_on_investments,IS,Net gain on investments,กำไรสุทธิจากเงินลงทุน,กำไรจากเงินลงทุน,,bank|insurance,as_reported,
+# BBL 2025 BS R55 / 2010 BS R57 — customer deposits
+deposits_from_customers,BS,Deposits from customers,เงินรับฝาก,,ifrs-full:DepositsFromCustomers,bank,as_reported,
+# BBL 2025 BS R14 — loans to customers (net)
+loans_to_customers,BS,Loans to customers and accrued interest receivable (net),เงินให้สินเชื่อแก่ลูกหนี้และดอกเบี้ยค้างรับสุทธิ,เงินให้สินเชื่อ,,bank,as_reported,
+# BBL 2025 BS R9 — interbank assets
+interbank_assets,BS,Interbank and money market items (asset),รายการระหว่างธนาคารและตลาดเงินสุทธิ,รายการระหว่างธนาคารและตลาดเงิน,,bank,as_reported,
+# BBL 2025 BS R56 — interbank liabilities
+interbank_liabilities,BS,Interbank and money market items (liability),รายการระหว่างธนาคารและตลาดเงิน,,,bank,as_reported,
+# BBL 2025 BS R12 — investments (net)
+investments_net,BS,Investments (net),เงินลงทุนสุทธิ,,,bank|insurance,as_reported,
+# BBL 2025 BS R60 — debt issued and borrowings
+debt_issued_and_borrowings,BS,Debt issued and borrowings,ตราสารหนี้ที่ออกและเงินกู้ยืม,เงินกู้ยืม,ifrs-full:Borrowings,bank,as_reported,
+# BBL 2010 BS R28 — non-performing loan provision (pre-IFRS9)
+allowance_for_doubtful_accounts,BS,Allowance for doubtful accounts,ค่าเผื่อหนี้สงสัยจะสูญ,หัก ค่าเผื่อหนี้สงสัยจะสูญ,,bank,as_reported,
+# BBL 2025 CF R25 — interest paid (operating, banking layout)
+interest_paid_bank,CF,Cash paid for interest (banking layout),เงินสดจ่ายดอกเบี้ย,,ifrs-full:InterestPaidClassifiedAsOperatingActivities,bank,negate_if_outflow,
+# BBL 2025 CF R24 — interest received (operating)
+interest_received,CF,Cash received from interest,เงินสดรับดอกเบี้ย,เงินสดรับจากดอกเบี้ยและเงินปันผล,ifrs-full:InterestReceivedClassifiedAsOperatingActivities,bank|insurance,as_reported,
+# BBL 2025 CF R26 — dividends received
+dividends_received,CF,Cash received from dividends,เงินสดรับเงินปันผล,,ifrs-full:DividendsReceivedClassifiedAsOperatingActivities,bank|insurance,as_reported,
+# BBL 2025 CF R68 — capex (BBL uses 'อาคาร และอุปกรณ์' phrasing, omits 'ที่ดิน' since banks rarely buy land)
+# NOTE: this differs slightly from the canonical capex row's label — recorded here as alias addition below
+# BBL 2025 IS R29 / 2010 IS R43 — pre-tax operating profit (banks use this as the headline)
+profit_before_tax_bank,IS,Profit from operations before income tax,กำไรจากการดำเนินงานก่อนภาษีเงินได้,กำไรก่อนภาษีเงินได้,ifrs-full:ProfitLossBeforeTax,bank,as_reported,
+# BBL 2025 IS R31 — net profit (banks use 'กำไรสุทธิ' instead of 'กำไรสำหรับปี')
+net_profit_bank,IS,Net profit,กำไรสุทธิ,,ifrs-full:ProfitLoss,bank,as_reported,
+# BBL 2025 BS R74 — other components of equity (post-IFRS9, replaces fair-value reserve etc.)
+other_equity_components,BS,Other components of equity,องค์ประกอบอื่นของส่วนของเจ้าของ,,ifrs-full:OtherReserves,bank,as_reported,
+# BBL 2025 BS R81 — non-controlling interests (banking subsidiaries)
+non_controlling_interests,BS,Non-controlling interests,ส่วนได้เสียที่ไม่มีอำนาจควบคุม,ส่วนของผู้ถือหุ้นส่วนน้อย,ifrs-full:NoncontrollingInterests,,as_reported,
+#
+# ============================================================================
+# Section B: Alias extensions for EXISTING concepts (data/concepts.csv)
+# Use `aliases_th_to_append` only — coordinator merges into canonical row.
+# ============================================================================
+# BBL uses 'รวมส่วนของเจ้าของ' (already in data/concepts.csv aliases_th).
+# BBL uses 'รวมหนี้สิน' verbatim — already canonical.
+# BBL uses 'รวมสินทรัพย์' verbatim — already canonical.
+# BBL 2010 BS R30 / 2018 BS R23 — PPE: 'ที่ดิน อาคารและอุปกรณ์สุทธิ' already in aliases.
+# BBL 2025 BS R8 — cash: BBL uses bare 'เงินสด' (no 'รายการเทียบเท่าเงินสด' modifier — banks don't carry cash equivalents the same way).
+cash,,,,,,,,เงินสด
+# BBL 2018 BS R69 / 2025 BS R73 — paid-up capital: BBL uses 'ส่วนเกินมูลค่าหุ้นสามัญ' for share premium and 'ทุนที่ออกและชำระแล้ว' for paid-up capital (canonical alias 'ทุนที่ออกและชำระแล้ว' already covers it).
+# BBL 2025 CF R68 — capex line uses different phrasing (banks omit 'ที่ดิน' since they rarely buy land)
+capex,,,,,,,,เงินสดจ่ายในการซื้ออาคาร และอุปกรณ์|เงินสดจ่ายในการซื้อที่ดิน อาคาร อุปกรณ์และสิทธิการเช่า
+# BBL 2025 CF R78 — dividends paid: same canonical, no new alias needed
+# BBL 2025 CF R79 — dividends paid to NCI (subsidiary minority distribution); separate concept proposed
+# BBL 2010 CF R12 — depreciation: 'ค่าเสื่อมราคาและรายจ่ายตัดบัญชี' is a common banking variant of dep+amort
+depreciation_amortization,,,,,,,,ค่าเสื่อมราคาและรายจ่ายตัดบัญชี
+# BBL 2025 CF R27 — tax paid: BBL uses 'เงินสดจ่ายภาษีเงินได้' (already canonical).
+# BBL 2025 IS R89 — eps: BBL uses bare 'กำไรต่อหุ้นขั้นพื้นฐาน (บาท)' — already an alias.
+# BBL operating-profit equivalent is 'กำไรจากการดำเนินงานก่อนภาษีเงินได้' (proposed as bank-specific concept, NOT an alias for operating_profit since semantics differ for banks).
+# BBL 2025 CF R32-R37 — operating asset changes use 'สินทรัพย์ดำเนินงาน (เพิ่มขึ้น) ลดลง' header — no canonical concept currently

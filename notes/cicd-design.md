@@ -15,7 +15,7 @@ This document records the design decisions and the implementation outline. See `
 | 1 | Primary motivation | (c) Research-grade redistributable dataset |
 | 2 | Schema | Tagged long-format (one row per concept × period) |
 | 3 | Concept dictionary | Hybrid: ~120 curated concepts + optional XBRL ref |
-| 4 | Distribution | HuggingFace Datasets — `hf.co/datasets/thaifin/financials` |
+| 4 | Distribution | HuggingFace Datasets — `hf.co/datasets/ninyawee/thaifin-financials` |
 | 5 | Library access | DuckDB streaming over HTTP + session lru_cache + opt-in `download_dataset()` |
 | 6 | Existing API | Source toggle: `Stock(symbol, source="dataset"\|"live")`, default `"dataset"` |
 | 7 | Cadence | Monthly cron (1st of month, 02:00 UTC) + `workflow_dispatch` |
@@ -60,7 +60,8 @@ This document records the design decisions and the implementation outline. See `
 │     filings.parquet          (~2 MB, the index/state)              │
 │                                                                    │
 │  8. Push to HuggingFace                                            │
-│     huggingface_hub upload to hf.co/datasets/thaifin/financials    │
+│     huggingface_hub upload to                                      │
+│     hf.co/datasets/ninyawee/thaifin-financials                     │
 │     git-tag revision: 2026.05, 2026.06, ...                        │
 └────────────────────────────────────────────────────────────────────┘
 ```

@@ -1,0 +1,51 @@
+# thaifin auditor registry — STAGING from SCC scout (per-symbol overlay)
+#
+# Symbol: SCC (Siam Cement Group)
+# Sample windows inspected: 1997, 2003, 2010, 2015, 2024 annual; 2026Q1 quarterly
+#
+# Findings:
+#   * KPMG Phoomchai Audit Ltd. (บริษัท เคพีเอ็มจี ภูมิไชย สอบบัญชี จำกัด) audits
+#     SCC for the entire window 2003–2026Q1 (verified across 5 of 6 sampled filings).
+#     Same firm; partners ROTATE per Thai SEC mandatory rotation rules.
+#   * 1997 sign-off carries only the partner's name + CPA license # (1724); NO firm
+#     name appears in the body of that pre-2003 ad-hoc filing. CPA #1724
+#     historically maps to "Peat Marwick Suthee" / KPMG's Thai predecessor in
+#     the late-1990s era — but this could not be verified verbatim from the
+#     filing itself and so is left as a separate "unattested" row below.
+#   * No auditor switches observed across 1997 → 2026 (full 29-year window) — so
+#     for SCC, there is one and only one firm to register: KPMG Phoomchai.
+#
+# Schema (mirrors data/auditors.csv):
+#   firm_id, canonical_en, canonical_th, parent_firm, aliases_en, aliases_th, is_government
+# Plus per-scout extras (commented columns at end of each row, # ignored by CSV reader):
+#   #signing_partners — observed (partner name, CPA#, period) tuples
+#   #signing_dates    — partner sign-off dates verbatim
+#
+# Lines below are CSV; comments starting with # are ignored.
+firm_id,canonical_en,canonical_th,parent_firm,aliases_en,aliases_th,is_government
+kpmg_phoomchai,KPMG Phoomchai Audit Ltd.,บริษัท เคพีเอ็มจี ภูมิไชย สอบบัญชี จำกัด,kpmg_global,KPMG Phoomchai|KPMG Phoomchai Audit,เคพีเอ็มจี ภูมิไชย,false
+# === Signing-partner inventory (sub-table; unsupported by current schema; here for downstream curator) ===
+# columns: symbol, period, partner_name_th, cpa_license, signing_date, opinion_type, firm_id_inferred
+# SCC,1997,นายธวัช ภูษิตโภยไคย,1724,19 กุมภาพันธ์ 2541,unqualified_with_emphasis,kpmg_phoomchai_predecessor_unattested
+# SCC,2003,นายวิเชียร ธรรมตระกูล,3183,12 กุมภาพันธ์ 2547,unqualified,kpmg_phoomchai
+# SCC,2010,สุพจน์ สิงห์เสน่ห์,2826,23 กุมภาพันธ์ 2554,unqualified,kpmg_phoomchai
+# SCC,2015,วินิจ ศิลามงคล,3378,17 กุมภาพันธ์ 2559,unqualified,kpmg_phoomchai
+# SCC,2024,สุรีย์รัตน์ ทองอรุณแสง,4409,20 กุมภาพันธ์ 2568,unqualified,kpmg_phoomchai
+# SCC,2026Q1,สุรีย์รัตน์ ทองอรุณแสง,4409,13 พฤษภาคม 2569,unqualified_review,kpmg_phoomchai
+# === Concentration-risk note vs other scouts ===
+# SCC's auditor (kpmg_phoomchai) MAY overlap with BBL/SCB/AOT/CPALL — flagged
+# for cross-scout dedup. KPMG Phoomchai is a Big-4 affiliate so concentration is
+# expected (Big 4 audit ~70% of SET100). When merging scouts, dedup by firm_id.
+# === Anomaly: 1997 missing firm name ===
+# The 1997 t98 filings end the auditor section with ONLY:
+#   (นายธวัช  ภูษิตโภยไคย)
+#   ผู้สอบบัญชีรับอนุญาต
+#   ทะเบียนเลขที่ 1724
+#   กรุงเทพมหานคร
+#   19 กุมภาพันธ์ 2541
+# No firm header, no firm signature block — the partner signed in his individual
+# capacity per the filing. CPA #1724 is historically tied to KPMG Peat Marwick
+# Suthee Ltd. ("เคพีเอ็มจี พีท มาร์วิค สุธี") but this is an external lookup,
+# not a verbatim citation from the filing. DO NOT add a row for the
+# Peat-Marwick-era predecessor without finding a filing where the firm is named
+# verbatim.

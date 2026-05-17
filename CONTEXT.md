@@ -23,12 +23,25 @@ Confidence level of a filing. `audited` (ตรวจสอบ, annual filings) 
 Reporting scope. `consolidated` (รวม, parent + subsidiaries) or `company` (เดี่ยว, parent only). A filing typically contains both columns side-by-side.
 
 **Period**:
-The fiscal period a filing reports. Quarterly → `YYYYQq` (e.g. `2025Q4`). Annual → `YYYY`. Fiscal-year-end is per company.
+The fiscal period a filing reports. Quarterly → `YYYYQq` (e.g. `2025Q3`). Annual → `YYYY`. Fiscal-year-end is per company.
+
+Thai SEC IDISC publishes **three quarterly filings (Q1, Q2, Q3)** plus **one annual filing per year** — there is no separate Q4 filing. The audited annual is the year-end anchor; any standalone-Q4 value must be derived from `annual − Q3-YTD`.
+
+**YTD value (as-stored)**:
+The raw line-item value as it appears in a quarterly filing's IS/CF — cumulative year-to-date through the filing's quarter (Q1 = 3M, Q2 = 6M, Q3 = 9M). BS line items are point-in-time and unaffected.
+_Avoid_: "cumulative" alone (ambiguous), "running total".
+
+**Standalone-quarter value (derived)**:
+The flow attributable to one quarter alone, derived from YTD values as `Q1 = Q1_YTD`, `Q2 = Q2_YTD − Q1_YTD`, `Q3 = Q3_YTD − Q2_YTD`, `Q4 = annual − Q3_YTD`. The consumer-facing default for IS/CF concepts. BS concepts are stock measures and need no derivation.
+_Avoid_: "delta-quarter", "Q-on-Q" (means something else).
+
+**Flow vs stock concept**:
+Classification of a **Concept** by whether its period value is an interval flow or a point-in-time balance. Derived structurally from **Statement type**: `IS` and `CF` are **flow**; `BS` and `EQ` are **stock**. Flow concepts get standalone-quarter derivation (including a derived `Q4` column = `FY − Q3_YTD`); stock concepts use per-filing snapshots and have no `Q4` column (there is no Q4 filing).
 
 ### Artifact & schema
 
 **Dataset / Artifact** (interchangeable):
-The published, versioned bundle of parquet files (plus raw mirrors) derived from filings. Hosted on HuggingFace Datasets at `hf.co/datasets/thaifin/financials` (canonical) with revisions tagged per build (e.g., `2026.q1`). Distributed independently of the Python library.
+The published, versioned bundle of parquet files (plus raw mirrors) derived from filings. Hosted on HuggingFace Datasets at `hf.co/datasets/ninyawee/thaifin-financials` (canonical) with revisions tagged per build (e.g., `2026.05`). Distributed independently of the Python library.
 _Avoid_: "database", "snapshot" (reserved for a specific point-in-time copy of one company's history).
 
 **Revision** (HF terminology, reused here):
@@ -82,5 +95,7 @@ The auditor's signed opinion on a filing. Structured into one row per filing wit
 > **Library user:** "I'll filter `financial_lines` where `symbol = 'PTT'`, `concept = 'capex'`, `consolidation = 'consolidated'`, then group by **Period**."
 > **Researcher:** "Audited values only — I don't trust the reviewed Q1–Q3."
 > **Library user:** "Add `audit_basis = 'audited'` — that filters to annual filings only, which gives FY totals but not quarter-level CapEx."
+> **Researcher:** "And the quarterly figures from the reviewed filings — those are each quarter alone, right?"
+> **Library user:** "Not as stored — IDISC quarterlies record CF and IS line items YTD. The library exposes them as standalone-quarter values by default (deriving Q4 = annual − Q3-YTD)."
 > **Researcher:** "Right, and I need the going-concern flag for each year too."
 > **Library user:** "That's in `auditor_reports`, joined on `(symbol, period)`."

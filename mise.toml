@@ -1,0 +1,98 @@
+[tasks.models]
+description = "Generate Pydantic models from JSON schemas"
+run = [
+    "datamodel-codegen --input stock.json --output stock_model.py",
+    "datamodel-codegen --input list.json --output list_model.py",
+]
+
+[tasks.docs]
+description = "Generate API documentation with pdoc"
+run = "pdoc ./thaifin/ -o ./docs/"
+
+# v2 autonomy loop — see docs/specs/v2-autonomy-loop.md
+
+[tasks."autonomy:start"]
+description = "Launch the autonomous SET100 grind in a fresh `claude -p` supervisor session"
+shell = "bash -c"
+usage = '''
+flag "--leaders <list>" default="PTTGC,KTB,CPF,LH,BH,DELTA,GULF,BLA,AOT,CPN,ADVANC" help="Comma-separated industry-leader symbols (L4 priority order)"
+flag "--queue <queue>" default="set100" help="Symbol-list file under data/ (without _symbols.txt suffix): set100 | setmai"
+flag "--usd-cap <n>" default="200" help="Cost tripwire in USD"
+flag "--time-cap <duration>" default="48h" help="Wall-clock soft cap (e.g. 24h, 48h)"
+'''
+run = '''
+set -euo pipefail
+RUN_TS=$(date -u +%Y-%m-%dT%H-%M-%SZ)
+mkdir -p runs/$RUN_TS/workers runs/$RUN_TS/incidents
+mkdir -p proposals/pending proposals/applied proposals/rejected
+PROMPT_FILE=scripts/autonomy/supervisor_prompt.md
+test -f "$PROMPT_FILE" || { echo "supervisor prompt missing: $PROMPT_FILE" >&2; exit 1; }
+test -f "data/${usage_queue}_symbols.txt" || { echo "queue file missing: data/${usage_queue}_symbols.txt" >&2; exit 1; }
+echo "Run timestamp: $RUN_TS"
+echo "Leaders:    $usage_leaders"
+echo "Queue:      data/${usage_queue}_symbols.txt"
+echo "USD cap:    \$$usage_usd_cap"
+echo "Time cap:   $usage_time_cap"
+{
+  cat "$PROMPT_FILE"
+  printf '\n\n## Run-specific parameters\n- RUN_TS: %s\n- Leaders: %s\n- Queue source: data/%s_symbols.txt\n- USD cap: %s\n- Time cap: %s\n- Branch: feat/v2-dataset-pipeline\n' \
+    "$RUN_TS" "$usage_leaders" "$usage_queue" "$usage_usd_cap" "$usage_time_cap"
+} > runs/$RUN_TS/supervisor_prompt.rendered.md
+fnox exec -- nohup claude -p "$(cat runs/$RUN_TS/supervisor_prompt.rendered.md)" \
+  > runs/$RUN_TS/supervisor.log 2>&1 &
+echo $! > runs/$RUN_TS/supervisor.pid
+echo "Supervisor launched. PID=$(cat runs/$RUN_TS/supervisor.pid). Log: runs/$RUN_TS/supervisor.log"
+'''
+
+[tasks."autonomy:status"]
+description = "Print the latest run's dashboard"
+shell = "bash -c"
+run = '''
+set -e
+RUN=$(ls -1t runs/ 2>/dev/null | head -1)
+[ -n "$RUN" ] || { echo "no runs yet"; exit 0; }
+echo "== runs/$RUN =="
+[ -f runs/$RUN/dashboard.md ] && cat runs/$RUN/dashboard.md || echo "(dashboard not yet written)"
+echo
+echo "== state.json summary =="
+[ -f runs/$RUN/state.json ] && jq '{started_at, cost_usd_so_far, workers_active, symbols: (.symbols | to_entries | map({sym: .key, st: .value.status, cov: .value.coverage_history[-1]?, cycles: .value.cycles_done}))}' runs/$RUN/state.json || echo "(state.json not yet written)"
+'''
+
+[tasks."autonomy:pause"]
+description = "Graceful drain — supervisor stops dequeuing on next poll"
+shell = "bash -c"
+run = '''
+RUN=$(ls -1t runs/ 2>/dev/null | head -1)
+[ -n "$RUN" ] || { echo "no runs"; exit 1; }
+touch runs/$RUN/PAUSE
+echo "PAUSE sentinel set: runs/$RUN/PAUSE"
+'''
+
+[tasks."autonomy:resume"]
+description = "Clear PAUSE; supervisor picks up on next poll"
+shell = "bash -c"
+run = '''
+RUN=$(ls -1t runs/ 2>/dev/null | head -1)
+[ -n "$RUN" ] || { echo "no runs"; exit 1; }
+rm -f runs/$RUN/PAUSE
+echo "PAUSE cleared"
+[ -f runs/$RUN/supervisor.pid ] && kill -0 $(cat runs/$RUN/supervisor.pid) 2>/dev/null \
+  && echo "Supervisor PID $(cat runs/$RUN/supervisor.pid) is alive" \
+  || echo "Supervisor not running — restart with: mise run autonomy:start ..."
+'''
+
+[tasks."autonomy:kill"]
+description = "Hard kill (use after pause fails to drain)"
+shell = "bash -c"
+run = '''
+RUN=$(ls -1t runs/ 2>/dev/null | head -1)
+[ -n "$RUN" ] || { echo "no runs"; exit 1; }
+[ -f runs/$RUN/supervisor.pid ] && kill $(cat runs/$RUN/supervisor.pid) 2>/dev/null && echo "killed supervisor" || true
+for hb in runs/$RUN/workers/*.heartbeat 2>/dev/null; do
+  [ -f "$hb" ] || continue
+  echo "stale worker heartbeat: $(basename "$hb" .heartbeat)"
+done
+'''
+
+[tools]
+"pipx:hf" = "latest"

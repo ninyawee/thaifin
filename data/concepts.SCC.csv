@@ -1,0 +1,86 @@
+# thaifin concept dictionary — STAGING from SCC scout (per-symbol overlay)
+#
+# Symbol: SCC (Siam Cement Group / บริษัท ปูนซิเมนต์ไทย จำกัด (มหาชน))
+# Industry: industrial (cement + chemicals + packaging conglomerate)
+# Sample windows inspected:
+#   - 1997 annual (audited, both consolidations) — t98 plain-text TIS-620 ad-hoc filing
+#   - 2003 annual (audited, consolidated)         — sccTn.doc 3-doc layout
+#   - 2010 annual (audited, consolidated)         — XLS, 3 sheets, Thai-named tabs (BS+IS combined)
+#   - 2015 annual (audited, consolidated)         — XLS, 3 numbered sheets
+#   - 2024 annual (audited, consolidated)         — XLSX, 5 numbered sheets (EQ split per-year)
+#   - 2026Q1 quarterly (reviewed, company)        — XLS, 4 numbered sheets
+#
+# Conventions follow data/concepts.csv v0.1.
+# Three categories of rows below:
+#   (a) ALIAS_APPEND  — existing v0 concept, NEW Thai phrasing observed in SCC. Action: extend
+#                       aliases_th of the canonical row in data/concepts.csv.
+#   (b) NEW_CONCEPT   — concept not in v0, high-value for industrial/conglomerate analysis.
+#   (c) NOTE          — observation that doesn't directly require a row change but is worth
+#                       recording (e.g., sign-convention surprises).
+#
+# Lines below are CSV; comments starting with # are ignored.
+action,concept,statement,label_en,label_th,aliases_th_to_append,xbrl_ref,applicable_industries,sign_convention,source_citation
+# === (a) ALIAS_APPEND for existing v0 concepts ===
+ALIAS_APPEND,revenue,IS,Revenue from sales,รายได้จากการขาย,รายได้จากการขาย|ขายสุทธิ,ifrs-full:Revenue,,as_reported,SCC 2024 sheet 2 row 6 (รายได้จากการขาย); SCC 2010 sheet งบดุล-งบกำไรขาดทุน row 97 (ขายสุทธิ)
+ALIAS_APPEND,cogs,IS,Cost of sales,ต้นทุนขาย,ต้นทุนขาย,ifrs-full:CostOfSales,,as_reported,SCC 2024 sheet 2 row 7 (ต้นทุนขาย); SCC 2010 sheet งบดุล-งบกำไรขาดทุน row 98 (ต้นทุนขาย)
+ALIAS_APPEND,selling_expenses,IS,Distribution costs,ต้นทุนในการจัดจำหน่าย,ต้นทุนในการจัดจำหน่าย|ค่าใช้จ่ายในการขาย,ifrs-full:DistributionCosts,,as_reported,SCC 2024 sheet 2 row 13 (ต้นทุนในการจัดจำหน่าย); SCC 2010 sheet งบดุล-งบกำไรขาดทุน row 104 (ค่าใช้จ่ายในการขาย)
+ALIAS_APPEND,operating_profit,IS,Operating profit,กำไรจากการดำเนินงาน,กำไรจากการดำเนินงาน,ifrs-full:ProfitLossFromOperatingActivities,,as_reported,SCC 2024 sheet 2 row 18; SCC 2010 sheet งบดุล-งบกำไรขาดทุน row 109
+ALIAS_APPEND,ebit,IS,Profit before finance costs and income tax,กำไรก่อนต้นทุนทางการเงินและภาษีเงินได้,กำไรก่อนต้นทุนทางการเงินและภาษีเงินได้,,,as_reported,SCC 2010 sheet งบดุล-งบกำไรขาดทุน row 114
+ALIAS_APPEND,income_tax_expense,IS,Income tax expense,ค่าใช้จ่ายภาษีเงินได้,ภาษีเงินได้,ifrs-full:IncomeTaxExpenseContinuingOperations,,as_reported,SCC 2010 sheet งบดุล-งบกำไรขาดทุน row 119 (ภาษีเงินได้); SCC 2024 sheet 2 row 24 (ค่าใช้จ่ายภาษีเงินได้)
+ALIAS_APPEND,net_profit,IS,Profit for the period,กำไรสำหรับปี,กำไรสำหรับปี|กำไรสุทธิ|กำไรสำหรับงวด,ifrs-full:ProfitLoss,,as_reported,SCC 2024 sheet 2 row 25 (กำไรสำหรับปี); SCC 2010 sheet งบดุล-งบกำไรขาดทุน row 120 (กำไรสุทธิ); SCC 2026Q1 sheet 4 row 8 (กำไรสำหรับงวด)
+ALIAS_APPEND,eps_basic,IS,Basic earnings per share,กำไรต่อหุ้นขั้นพื้นฐาน,กำไรต่อหุ้นขั้นพื้นฐาน (บาท),ifrs-full:BasicEarningsLossPerShare,,as_reported,SCC 2010 row 128 (heading 127); SCC 2024 sheet 2 row 32
+ALIAS_APPEND,cash,BS,Cash and cash equivalents,เงินสดและรายการเทียบเท่าเงินสด,เงินสดและรายการเทียบเท่าเงินสด|เงินสดและเงินฝากสถาบันการเงิน,ifrs-full:CashAndCashEquivalents,,as_reported,SCC 2024 sheet 1 row 7; SCC 2010 sheet งบดุล-งบกำไรขาดทุน row 7; SCC 2003 scct2.docx Table 0 R3 (เงินสดและเงินฝากสถาบันการเงิน — pre-IFRS phrasing)
+ALIAS_APPEND,ppe,BS,Property plant and equipment,ที่ดิน อาคารและอุปกรณ์,ที่ดิน อาคารและอุปกรณ์,ifrs-full:PropertyPlantAndEquipment,,as_reported,SCC 2024 sheet 1 row 23; SCC 2010 sheet งบดุล-งบกำไรขาดทุน row 23; SCC 2003 scct2 Table 0 R18
+ALIAS_APPEND,total_assets,BS,Total assets,รวมสินทรัพย์,รวมสินทรัพย์,ifrs-full:Assets,,as_reported,SCC 2024 sheet 1 row 30; SCC 2010 sheet งบดุล-งบกำไรขาดทุน row 29
+ALIAS_APPEND,total_liabilities,BS,Total liabilities,รวมหนี้สิน,รวมหนี้สิน,ifrs-full:Liabilities,,as_reported,SCC 2024 sheet 1 row 58; SCC 2010 sheet งบดุล-งบกำไรขาดทุน row 58
+ALIAS_APPEND,equity,BS,Total equity,รวมส่วนของผู้ถือหุ้น,รวมส่วนของผู้ถือหุ้น,ifrs-full:Equity,,as_reported,SCC 2024 sheet 1 row 83; SCC 2010 sheet งบดุล-งบกำไรขาดทุน row 87
+ALIAS_APPEND,paid_up_capital,BS,Issued and paid-up share capital,ทุนที่ออกและชำระแล้ว,ทุนที่ออกและชำระแล้ว,ifrs-full:IssuedCapital,,as_reported,SCC 2024 sheet 1 row 70-71; SCC 2010 sheet งบดุล-งบกำไรขาดทุน row 69
+ALIAS_APPEND,ocf,CF,Net cash from operating activities,เงินสดสุทธิได้มาจากกิจกรรมดำเนินงาน,กระแสเงินสดสุทธิได้มาจากกิจกรรมดำเนินงาน|เงินสดสุทธิได้มาจากกิจกรรมดำเนินงาน,ifrs-full:CashFlowsFromUsedInOperatingActivities,,as_reported,SCC 2024 sheet 5 row 45 (กระแสเงินสด...); SCC 2010 sheet งบกระแสเงินสด row 51 (เงินสด...)
+ALIAS_APPEND,capex,CF,Cash paid for property plant and equipment,เงินสดจ่ายเพื่อซื้อที่ดิน อาคารและอุปกรณ์,เงินสดจ่ายเพื่อซื้อที่ดิน อาคารและอุปกรณ์|ซื้อที่ดิน อาคารและอุปกรณ์,ifrs-full:PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities,,negate_if_outflow,SCC 2024 sheet 5 row 55 (เงินสดจ่ายเพื่อซื้อที่ดิน อาคารและอุปกรณ์ -26662674); SCC 2010 sheet งบกระแสเงินสด row 65 (ซื้อที่ดิน อาคารและอุปกรณ์ -13719981 — value POSITIVE in cell but outflow per context)
+ALIAS_APPEND,investing_activities,CF,Net cash from (used in) investing activities,กระแสเงินสดสุทธิใช้ไปในกิจกรรมลงทุน,กระแสเงินสดสุทธิใช้ไปในกิจกรรมลงทุน|เงินสดสุทธิได้มาจาก (ใช้ไปใน) กิจกรรมลงทุน,ifrs-full:CashFlowsFromUsedInInvestingActivities,,as_reported,SCC 2024 sheet 5 row 62; SCC 2010 sheet งบกระแสเงินสด row 71
+ALIAS_APPEND,financing_activities,CF,Net cash used in financing activities,กระแสเงินสดสุทธิใช้ไปในกิจกรรมจัดหาเงิน,กระแสเงินสดสุทธิใช้ไปในกิจกรรมจัดหาเงิน,ifrs-full:CashFlowsFromUsedInFinancingActivities,,as_reported,SCC 2024 sheet 5 row 91
+ALIAS_APPEND,tax_paid,CF,Income tax paid,จ่ายภาษีเงินได้,จ่ายภาษีเงินได้|จ่ายภาษีเงินได้สำหรับปี,ifrs-full:IncomeTaxesPaidRefundClassifiedAsOperatingActivities,,negate_if_outflow,SCC 2024 sheet 5 row 43 (จ่ายภาษีเงินได้ -4524358); SCC 2010 sheet งบกระแสเงินสด row 49
+ALIAS_APPEND,interest_paid,CF,Finance costs paid,จ่ายดอกเบี้ยและต้นทุนทางการเงินอื่น,จ่ายดอกเบี้ยและต้นทุนทางการเงินอื่น,ifrs-full:InterestPaidClassifiedAsOperatingActivities,,negate_if_outflow,SCC 2024 sheet 5 row 88 (จ่ายดอกเบี้ยและต้นทุนทางการเงินอื่น -13197133)
+ALIAS_APPEND,dividends_paid,CF,Dividends paid,รวมจ่ายเงินปันผล,รวมจ่ายเงินปันผล|จ่ายเงินปันผลให้ผู้ถือหุ้นของบริษัท|เงินปันผล,ifrs-full:DividendsPaidClassifiedAsFinancingActivities,,negate_if_outflow,SCC 2024 sheet 5 row 87 (รวมจ่ายเงินปันผล -10167321); SCC 2010 reference row 33 (เงินปันผล)
+ALIAS_APPEND,depreciation_amortization,CF,Depreciation and amortization,ค่าเสื่อมราคาและค่าตัดจำหน่าย,ค่าเสื่อมราคาและค่าตัดจำหน่าย,ifrs-full:DepreciationAndAmortisationExpense,,as_reported,SCC 2024 sheet 5 row 10; SCC 2010 sheet งบกระแสเงินสด row 9
+# === (b) NEW_CONCEPT proposals — industrial / conglomerate / cross-industry ===
+NEW_CONCEPT,inventory,BS,Inventories,สินค้าคงเหลือ,,ifrs-full:Inventories,,as_reported,SCC 2024 sheet 1 row 11 (73301567); SCC 2010 sheet งบดุล-งบกำไรขาดทุน row 13 (36917404); SCC 2003 scct2 Table 0 R9 (20227493) — material for cement industry
+NEW_CONCEPT,trade_receivables,BS,Trade and other current receivables,ลูกหนี้การค้าและลูกหนี้หมุนเวียนอื่น,ลูกหนี้การค้าและลูกหนี้อื่น,ifrs-full:TradeAndOtherCurrentReceivables,,as_reported,SCC 2024 sheet 1 row 9 (71538729); SCC 2015 sheet 1 (ลูกหนี้การค้าและลูกหนี้อื่น)
+NEW_CONCEPT,trade_payables,BS,Trade and other current payables,เจ้าหนี้การค้าและเจ้าหนี้หมุนเวียนอื่น,,ifrs-full:TradeAndOtherCurrentPayables,,as_reported,SCC 2024 sheet 1 row 40 (58093525)
+NEW_CONCEPT,short_term_borrowings,BS,Short-term borrowings from financial institutions,เงินเบิกเกินบัญชีและเงินกู้ยืมระยะสั้นจากสถาบันการเงิน,,ifrs-full:ShorttermBorrowings,,as_reported,SCC 2024 sheet 1 row 39 (85169988); SCC 2010 sheet งบดุล-งบกำไรขาดทุน row 38 (8666479)
+NEW_CONCEPT,long_term_debt,BS,Long-term borrowings,เงินกู้ยืมระยะยาว,หนี้สินระยะยาว,ifrs-full:LongtermBorrowings,,as_reported,SCC 2024 sheet 1 row 50 (19556169); SCC 2010 sheet งบดุล-งบกำไรขาดทุน row 52 (หนี้สินระยะยาว 27643146)
+NEW_CONCEPT,debentures,BS,Debentures (corporate bonds outstanding),หุ้นกู้,,,industrial,as_reported,SCC 2024 sheet 1 row 52 (164229599); SCC 2010 row 53 (84853756) — common in large industrials with capital-market access
+NEW_CONCEPT,goodwill,BS,Goodwill,ค่าความนิยม,,ifrs-full:Goodwill,,as_reported,SCC 2024 sheet 1 row 24 (45780468) — material for conglomerate from M&A
+NEW_CONCEPT,intangible_assets,BS,Other intangible assets,สินทรัพย์ไม่มีตัวตนอื่น,สินทรัพย์ไม่มีตัวตน,ifrs-full:IntangibleAssetsOtherThanGoodwill,,as_reported,SCC 2024 sheet 1 row 25 (20714221); SCC 2010 sheet งบดุล-งบกำไรขาดทุน row 24 (สินทรัพย์ไม่มีตัวตน)
+NEW_CONCEPT,investments_in_associates_and_jv,BS,Investments in associates and joint ventures,เงินลงทุนในการร่วมค้าและบริษัทร่วม,เงินลงทุนในบริษัทร่วม|เงินลงทุนในกิจการที่ควบคุมร่วมกัน,ifrs-full:InvestmentsInAssociatesAndJointVentures,,as_reported,SCC 2024 sheet 1 row 19 (138513986); SCC 2010 row 18-19 (เงินลงทุนในบริษัทร่วม 39750575 / เงินลงทุนในกิจการที่ควบคุมร่วมกัน 957569) — heart of conglomerate model
+NEW_CONCEPT,non_controlling_interest,BS,Non-controlling interests (minority interest),ส่วนได้เสียที่ไม่มีอำนาจควบคุม,ส่วนของผู้ถือหุ้นส่วนน้อย|ผลประโยชน์ของผู้ถือหุ้นส่วนน้อย,ifrs-full:NoncontrollingInterests,,as_reported,SCC 2024 sheet 1 row 82 (66892902); SCC 2010 row 84 (ส่วนของผู้ถือหุ้นส่วนน้อย — pre-2013 phrasing) — required for any group with subsidiaries
+NEW_CONCEPT,share_of_profit_associates,IS,Share of profit (loss) of associates and joint ventures,ส่วนแบ่งกำไรของการร่วมค้าและบริษัทร่วมตามวิธีส่วนได้เสีย,ส่วนแบ่งกำไรจากเงินลงทุนในบริษัทร่วมและกิจการที่ควบคุมร่วมกัน,ifrs-full:ShareOfProfitLossOfAssociatesAndJointVenturesAccountedForUsingEquityMethod,,as_reported,SCC 2024 sheet 2 row 21 (6529620); SCC 2010 row 113 (8390035) — central to conglomerate IS
+NEW_CONCEPT,nci_profit,IS,Profit attributable to non-controlling interests,ส่วนที่เป็นของส่วนได้เสียที่ไม่มีอำนาจควบคุม,ส่วนที่เป็นของผู้ถือหุ้นส่วนน้อย,ifrs-full:ProfitLossAttributableToNoncontrollingInterests,,as_reported,SCC 2024 sheet 2 row 29 (-2519982); SCC 2010 row 124
+NEW_CONCEPT,parent_profit,IS,Profit attributable to owners of the parent,ส่วนที่เป็นของผู้ถือหุ้นของบริษัท,ส่วนที่เป็นของผู้ถือหุ้นบริษัทใหญ่,ifrs-full:ProfitLossAttributableToOwnersOfParent,,as_reported,SCC 2024 sheet 2 row 28 (6341638); SCC 2010 row 123
+NEW_CONCEPT,other_income,IS,Other income,รายได้อื่น,,ifrs-full:OtherIncome,,as_reported,SCC 2024 sheet 2 row 10 (15501608); SCC 2010 row 101 (6383775)
+NEW_CONCEPT,total_comprehensive_income,IS,Total comprehensive income,กำไรขาดทุนเบ็ดเสร็จรวมสำหรับปี,,ifrs-full:ComprehensiveIncome,,as_reported,SCC 2024 sheet 2 row 67 (-9987037)
+NEW_CONCEPT,fx_translation_oci,IS,Exchange differences on translation,ผลต่างของอัตราแลกเปลี่ยนจากการแปลงค่างบการเงิน,,ifrs-full:GainsLossesOnExchangeDifferencesOnTranslationNetOfTax,,as_reported,SCC 2024 sheet 2 row 46 (-7752898) — material for multinational conglomerate
+NEW_CONCEPT,cash_paid_acquire_subsidiaries,CF,Cash paid to acquire subsidiaries (net of cash acquired),เงินสดจ่ายเพื่อซื้อบริษัทย่อยสุทธิจากเงินสดที่ได้มา,เงินสดรับ (จ่าย) สุทธิจากการได้มาซึ่งบริษัทย่อย,ifrs-full:CashFlowsUsedInObtainingControlOfSubsidiariesOrOtherBusinessesClassifiedAsInvestingActivities,,negate_if_outflow,SCC 2024 sheet 5 row 49 (-470073); SCC 2010 sheet งบกระแสเงินสด row 59 — M&A activity is recurring for SCC
+NEW_CONCEPT,cash_received_disposal_subsidiaries,CF,Cash received from disposal of subsidiaries,เงินสดรับจากการขายบริษัทย่อยสุทธิจากเงินสดที่จ่ายไป,,ifrs-full:CashFlowsFromLosingControlOfSubsidiariesOrOtherBusinessesClassifiedAsInvestingActivities,,as_reported,SCC 2024 sheet 5 row 48 (156902)
+NEW_CONCEPT,proceeds_from_long_term_borrowings,CF,Proceeds from long-term borrowings,เงินสดรับจากเงินกู้ยืมระยะยาว,,ifrs-full:ProceedsFromBorrowingsClassifiedAsFinancingActivities,,as_reported,SCC 2024 sheet 5 row 78 (8641856)
+NEW_CONCEPT,repayment_of_long_term_borrowings,CF,Repayment of long-term borrowings,เงินสดจ่ายเพื่อชำระเงินกู้ยืมระยะยาว,,ifrs-full:RepaymentsOfBorrowingsClassifiedAsFinancingActivities,,negate_if_outflow,SCC 2024 sheet 5 row 79 (-54239722)
+NEW_CONCEPT,proceeds_from_debentures,CF,Proceeds from issuance of debentures,เงินสดรับจากการออกหุ้นกู้,,ifrs-full:ProceedsFromIssuingOtherEquityInstruments,industrial,as_reported,SCC 2024 sheet 5 row 81 (69665421)
+NEW_CONCEPT,repayment_of_debentures,CF,Cash paid for debenture redemption,เงินสดจ่ายเพื่อไถ่ถอนหุ้นกู้,,,industrial,negate_if_outflow,SCC 2024 sheet 5 row 82 (-65315455)
+NEW_CONCEPT,interest_received,CF,Interest received,รับดอกเบี้ย,,ifrs-full:InterestReceivedClassifiedAsInvestingActivities,,as_reported,SCC 2024 sheet 5 row 59 (2025334); SCC 2010 sheet งบกระแสเงินสด row 54
+NEW_CONCEPT,dividends_received,CF,Dividends received,รับเงินปันผล,รายได้เงินปันผล,ifrs-full:DividendsReceivedClassifiedAsInvestingActivities,,as_reported,SCC 2024 sheet 5 row 58 (14005202) — material for conglomerate equity-method investments
+NEW_CONCEPT,lease_liabilities,BS,Lease liabilities,หนี้สินตามสัญญาเช่า,,ifrs-full:LeaseLiabilities,,as_reported,SCC 2024 sheet 1 row 51 (12466069) — IFRS 16 line, post-2019 only
+NEW_CONCEPT,deferred_tax_assets,BS,Deferred tax assets,สินทรัพย์ภาษีเงินได้รอการตัดบัญชี,,ifrs-full:DeferredTaxAssets,,as_reported,SCC 2024 sheet 1 row 26 (5544404); SCC 2010 row 25
+NEW_CONCEPT,deferred_tax_liabilities,BS,Deferred tax liabilities,หนี้สินภาษีเงินได้รอการตัดบัญชี,,ifrs-full:DeferredTaxLiabilities,,as_reported,SCC 2024 sheet 1 row 53 (10095209)
+NEW_CONCEPT,employee_benefit_obligations,BS,Long-term employee benefit obligations,ประมาณการหนี้สินไม่หมุนเวียนสำหรับผลประโยชน์พนักงาน,,ifrs-full:NoncurrentLiabilitiesProvisionsForEmployeeBenefits,,as_reported,SCC 2024 sheet 1 row 54 (13899933)
+NEW_CONCEPT,total_current_assets,BS,Total current assets,รวมสินทรัพย์หมุนเวียน,,ifrs-full:CurrentAssets,,as_reported,SCC 2024 sheet 1 row 14 (199167278)
+NEW_CONCEPT,total_non_current_assets,BS,Total non-current assets,รวมสินทรัพย์ไม่หมุนเวียน,,ifrs-full:NoncurrentAssets,,as_reported,SCC 2024 sheet 1 row 28 (662334913)
+NEW_CONCEPT,total_current_liabilities,BS,Total current liabilities,รวมหนี้สินหมุนเวียน,,ifrs-full:CurrentLiabilities,,as_reported,SCC 2024 sheet 1 row 47 (217320476)
+NEW_CONCEPT,total_non_current_liabilities,BS,Total non-current liabilities,รวมหนี้สินไม่หมุนเวียน,,ifrs-full:NoncurrentLiabilities,,as_reported,SCC 2024 sheet 1 row 56 (224401480)
+NEW_CONCEPT,retained_earnings_unappropriated,BS,Unappropriated retained earnings,ยังไม่ได้จัดสรร,,ifrs-full:RetainedEarnings,,as_reported,SCC 2024 sheet 1 row 77 (371818998)
+NEW_CONCEPT,legal_reserve,BS,Legal reserve (statutory),ทุนสำรองตามกฎหมาย,,ifrs-full:OtherReserves,,as_reported,SCC 2024 sheet 1 row 75 (160000) — required by Thai law
+NEW_CONCEPT,general_reserve,BS,General reserve (appropriated),ทุนสำรองทั่วไป,,ifrs-full:OtherReserves,,as_reported,SCC 2024 sheet 1 row 76 (10516000)
+# === (c) NOTES — observations recorded for downstream reviewer ===
+NOTE,,,Sign convention: capex/tax_paid/dividends_paid columns are stored AS POSITIVE in CF tables and explicit "(จ่าย)/(เพิ่มขึ้น)" in row label denotes outflow. Enforces negate_if_outflow.,,,,as_reported,SCC 2010 row 65: ซื้อที่ดิน อาคารและอุปกรณ์ value 13719981 (positive cell, outflow per heading)
+NOTE,,,Pre-2013 conglomerate phrasing for NCI uses "ส่วนของผู้ถือหุ้นส่วนน้อย" / "ผลประโยชน์ของผู้ถือหุ้นส่วนน้อย"; post-2013 standardized to "ส่วนได้เสียที่ไม่มีอำนาจควบคุม". Both must alias to non_controlling_interest.,,,,,,SCC 2010 row 75/84/85; SCC 2024 row 82
+NOTE,,,Pre-2013 IS phrasing for parent profit uses "ส่วนที่เป็นของผู้ถือหุ้นบริษัทใหญ่"; post-2013 standardized to "ส่วนที่เป็นของผู้ถือหุ้นของบริษัท". Same concept (parent_profit).,,,,,,SCC 2010 row 123 vs SCC 2024 row 28
+NOTE,,,1997 ad-hoc t98 filings (pre-XLS era) bundle the entire filing — auditor report + four statements + notes — into ONE TIS-620 plain-text file. No tabular structure; rows separated by tabs/spaces. Likely needs OCR-style heuristic parser; out of scope for v1.,,,,,,SCC 1997 0003-0008.t98 / 0003-0013.t98

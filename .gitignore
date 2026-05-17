@@ -127,3 +127,6 @@ dmypy.json
 playground
 .idea/
 debug/
+
+# fnox local secrets (machine-specific, never committed)
+fnox.local.toml

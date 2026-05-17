@@ -1,0 +1,37 @@
+# thaifin auditor registry — v0
+#
+# Schema (every row must have all 7 columns; trailing columns may be empty):
+#   firm_id        — short stable English ID, snake_case (e.g., pwc, ey, deloitte, sao).
+#                    STABILITY PROMISE: firm_ids are stable join keys for auditor_reports.parquet.
+#                    Renaming a firm_id is a BREAKING CHANGE.
+#   canonical_en   — local Thai legal entity name in English (e.g., "PricewaterhouseCoopers ABAS Limited"),
+#                    NOT the global brand. Verbatim from a real auditor report.
+#   canonical_th   — same legal entity in Thai, verbatim from a real report.
+#   parent_firm    — firm_id of the global brand row (e.g., capen → pwc_global). Nullable for
+#                    standalone firms (SAO, local boutiques).
+#   aliases_en     — pipe-separated (|) alternative English names observed in real reports.
+#                    Includes both old names ("Ernst & Young Office") and brand short forms ("EY").
+#   aliases_th     — pipe-separated alternative Thai names observed in real reports.
+#   is_government  — true for state auditors (SAO/OAG); false for private firms.
+#                    Government auditors use entirely different opinion language and
+#                    do not follow the standard unqualified/qualified/adverse/disclaimer taxonomy.
+#
+# How to add a row:
+#   1. Open a PR against this file with the new row.
+#   2. Every canonical_en, canonical_th, and alias MUST come verbatim from an inspected
+#      auditor report. Cite the source (symbol + period) in the PR description.
+#   3. If a Big-4 firm renamed (e.g., "Ernst & Young Office Limited" → "EY Office Limited"),
+#      keep ONE row per legal entity. List the old name as an alias.
+#   4. For joint audits (two firms sign one report), no special row needed — both firms
+#      get standard rows; the auditor_signatures table will record both per filing.
+#
+# Sources are populated by per-symbol scout agents (see notes/scout-<SYM>.md). Until scouts
+# return findings, this file holds only "global brand" placeholder rows that scouts can use
+# as parent_firm references.
+#
+# Lines below are CSV (header row first). Comment lines starting with # are ignored by readers.
+firm_id,canonical_en,canonical_th,parent_firm,aliases_en,aliases_th,is_government
+pwc_global,PricewaterhouseCoopers International,ไพร้ซวอเตอร์เฮาส์คูเปอร์ส,,PwC|PricewaterhouseCoopers,,false
+ey_global,Ernst & Young Global Limited,เอินส์ท แอนด์ ยัง,,EY|Ernst & Young,,false
+kpmg_global,KPMG International Cooperative,เคพีเอ็มจี,,KPMG,,false
+deloitte_global,Deloitte Touche Tohmatsu Limited,ดีลอยท์ ทู้ช โธมัทสุ,,Deloitte|Deloitte Touche Tohmatsu,,false
